@@ -12,11 +12,25 @@ using Autodesk.DesignScript.Runtime;
 
 namespace Graphical.Geometry
 {
+    
+    /// <summary>
+    /// Static class extending Point functionality
+    /// </summary>
     public static class Point
     {
         //Vector-plane intersection https://math.stackexchange.com/questions/100439/determine-where-a-vector-will-intersect-a-plane
 
-        public static DSPoint ProjectToLine(this DSPoint point, DSVector vector, DSLine line)
+        const int rounding = 10 * 10;
+        const double rounding2 = 10.0 * 10;
+
+        /// <summary>
+        /// Projects a Point to a line by a given vector direction.
+        /// </summary>
+        /// <param name="point">Point to project</param>
+        /// <param name="vector">Vector direction</param>
+        /// <param name="line">Line where the point is projected</param>
+        /// <returns name="projection">Point projected</returns>
+        internal static DSPoint ProjectToLine(this DSPoint point, DSVector vector, DSLine line)
         {
             /*
 			 * Segment MN = M(x1, y1, z1), N(x2, y2, z2);
@@ -62,6 +76,12 @@ namespace Graphical.Geometry
 
 
 
+        /// <summary>
+        /// Order the list of points by the radian angle from a centre point. If angle is equal, closer to centre will be first.
+        /// </summary>
+        /// <param name="centre">Centre point</param>
+        /// <param name="points">Points to order</param>
+        /// <returns name="points">Ordered points</returns>
         public static List<DSPoint> OrderByRadianAndDistance(
             [DefaultArgumentAttribute("Point.ByCoordinates(0, 0, 0);")]DSPoint centre, List<DSPoint> points)
         {
@@ -69,18 +89,28 @@ namespace Graphical.Geometry
             return ordered;
         }
 
+        /// <summary>
+        /// Returns the minimum point from a list of points. Minimum is evaulated by the point with minimum Y, then X and finally Z coordinate.
+        /// </summary>
+        /// <param name="points">List of points</param>
+        /// <returns name="minPoint">Minimum Point</returns>
         public static DSPoint MinimumPoint(List<DSPoint> points)
         {
             //TODO: Implement a better way of selecting the minimum point.
             return points.OrderBy(p => p.Y).ThenBy(p => p.X).ThenBy(p => p.Z).ToList().First();
         }
 
-        public static double RadAngle(DSPoint centre, DSPoint point)
+        /// <summary>
+        /// Radian angle from a centre to another point
+        /// </summary>
+        /// <param name="centre"></param>
+        /// <param name="point"></param>
+        /// <returns name="rad">Radians</returns>
+        internal static double RadAngle(DSPoint centre, DSPoint point)
         {
             //Rad angles http://math.rice.edu/~pcmi/sphere/drg_txt.html
             double dx = point.X - centre.X;
             double dy = point.Y - centre.Y;
-            double rad;
             //TODO: Implement Z angle? that would becom UV coordinates.
             //double dz = vertex.point.Z - centre.point.Z;
 
@@ -90,7 +120,6 @@ namespace Graphical.Geometry
             {
                 if (dy < 0)//vertex below X axis
                 {
-                    rad = (Math.PI * 3 / 2);
                     return (Math.PI * 3 / 2);
                 }
                 else//vertex above X Axis
@@ -114,21 +143,28 @@ namespace Graphical.Geometry
             return Math.Atan(dy / dx);
         }
 
-        public static double RadiansArcStartCentreEnd(DSPoint centre, DSPoint start, DSPoint end)
+        /// <summary>
+        /// Radian angle of an arc
+        /// </summary>
+        /// <param name="centre"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public static double ArcRadAngle(DSPoint centre, DSPoint start, DSPoint end)
         {
-            double a = Math.Pow((end.X - start.X), 2) + Math.Pow((end.Y - start.Y), 2);
-            double b = Math.Pow((end.X - centre.X), 2) + Math.Pow((end.Y - centre.Y), 2);
-            double c = Math.Pow((start.X - centre.X), 2) + Math.Pow((start.Y - centre.Y), 2);
-            return Math.Acos((a + c - b)/(2 * Math.Sqrt(a) * Math.Sqrt(c)));
+            double a = Math.Pow((end.X - centre.X), 2) + Math.Pow((end.Y - centre.Y), 2);
+            double b = Math.Pow((end.X - start.X), 2) + Math.Pow((end.Y - start.Y), 2);
+            double c = Math.Pow((centre.X - start.X), 2) + Math.Pow((centre.Y - start.Y), 2);
+            return Math.Acos((a + c - b) / (2 * Math.Sqrt(a) * Math.Sqrt(c)));
 
         }
 
-        public static bool OnLine(DSPoint point, DSLine line)
+        internal static bool OnLine(DSPoint point, DSLine line)
         {
             return line.DoesIntersect(point);
         }
 
-        public static bool OnLine(DSPoint start, DSPoint middle, DSPoint end)
+        internal static bool OnLine(DSPoint start, DSPoint middle, DSPoint end)
         {
             using(DSLine line = DSLine.ByStartPointEndPoint(start, end))
             {
@@ -136,33 +172,33 @@ namespace Graphical.Geometry
             }
         }
 
+        /// <summary>
+        /// Assuming point is colinear to start and end points, determines if point is in between.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="point"></param>
+        /// <param name="end"></param>
+        /// <param name="plane"></param>
+        /// <returns></returns>
         internal static bool OnLineProjection(DSPoint start, DSPoint point, DSPoint end, string plane = "xy")
         {
-            bool onLine;
             double x = point.X, y = point.Y, z = point.Z;
             double sX = start.X, sY = start.Y, sZ = start.Z;
             double eX = end.X, eY = end.Y, eZ = end.Z;
             switch (plane)
             {
                 case "xy":
-                    onLine = x <= Math.Max(sX, eX) && x >= Math.Min(sX, eX) &&
+                    return x <= Math.Max(sX, eX) && x >= Math.Min(sX, eX) &&
                         y <= Math.Max(sY, eY) && y >= Math.Min(sY, eY);
-                    break;
                 case "xz":
-                    onLine =
-                        x <= Math.Max(sX, eX) && x >= Math.Min(sX, eX) &&
+                    return x <= Math.Max(sX, eX) && x >= Math.Min(sX, eX) &&
                         z <= Math.Max(sZ, eZ) && z >= Math.Min(sZ, eZ);
-                    break;
                 case "yz":
-                    onLine =
-                        y <= Math.Max(sY, eY) && y >= Math.Min(sY, eY) &&
+                    return y <= Math.Max(sY, eY) && y >= Math.Min(sY, eY) &&
                         z <= Math.Max(sZ, eZ) && z >= Math.Min(sZ, eZ);
-                    break;
                 default:
                     throw new Exception("Plane not defined");
             }
-            return onLine;
-
         }
 
         /// <summary>
@@ -175,7 +211,7 @@ namespace Graphical.Geometry
         /// <returns name="orientation">0 if points ar colinear.
         /// 1 if orientation is counter clock wise.
         /// -1 if orientation is clock kwise.</returns>
-        public static int Orientation(DSPoint p1, DSPoint p2, DSPoint p3, string plane = "xy")
+        internal static int Orientation(DSPoint p1, DSPoint p2, DSPoint p3, string plane = "xy")
         {
             // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
             // for details of below formula.
@@ -194,7 +230,8 @@ namespace Graphical.Geometry
                 default:
                     throw new Exception("Plane not defined");
             }
-
+            //Rounding due to floating point error.
+            value = ((int)(value * rounding)) / rounding2;
             if(value == 0) { return 0; } //Points are colinear
             int result = (value > 0) ? 1 : -1;
 

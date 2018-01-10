@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Autodesk.DesignScript.Geometry;
 using Autodesk.DesignScript.Interfaces;
 using Autodesk.DesignScript.Runtime;
+using Graphical.Geometry;
+using DSPoint = Autodesk.DesignScript.Geometry.Point;
 using System.Globalization; 
 #endregion
 
@@ -15,12 +17,12 @@ namespace Graphical.Base
     /// <summary>
     /// Representation of vertex points on a graph.
     /// </summary>
-    public class Vertex : IGraphicItem, IDisposable
+    public class gVertex : IGraphicItem, IDisposable, ICloneable
     {
         #region Variables
-        internal Point point { get; }
+        internal DSPoint point { get { return DSPoint.ByCoordinates(X, Y, Z); } }
         internal int polygonId { get; set; }
-        //public Edge[] AdjacentEdges { get; private set; }
+        //public gEdge[] AdjacentEdges { get; private set; }
 
         internal double X { get; private set; }
         internal double Y { get; private set; }
@@ -29,52 +31,69 @@ namespace Graphical.Base
         #endregion
 
         #region Constructors
-        internal Vertex(double x, double y, double z = 0, int pId = -1)
+        internal gVertex(double x, double y, double z = 0, int pId = -1)
         {
-            point = Point.ByCoordinates(x, y, z);
+            //point = DSPoint.ByCoordinates(x, y, z);
             polygonId = pId;
             X = x; Y = y; Z = z;
         }
 
         /// <summary>
-        /// Edge constructor method by a give point.
+        /// gEdge constructor method by a give point.
         /// </summary>
         /// <param name="point">Input point</param>
         /// <returns></returns>
-        public static Vertex ByPoint(Point point)
+        public static gVertex ByPoint(DSPoint point)
         {
-            return new Vertex(point.X, point.Y, point.Z);
+            return new gVertex(point.X, point.Y, point.Z);
         }
 
         /// <summary>
-        /// Edge constructor method by a given set of XYZ coordinates
+        /// gEdge constructor method by a given set of XYZ coordinates
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <returns></returns>
-        public static Vertex ByCoordinates(double x, double y, double z)
+        public static gVertex ByCoordinates(double x, double y, double z)
         {
-            return new Vertex(x, y, z);
+            return new gVertex(x, y, z);
         }
 
-        public static Vertex MidVertex ( Vertex v1, Vertex v2)
+        /// <summary>
+        /// Returns the vertex in between two vertices.
+        /// </summary>
+        /// <param name="v1"></param>
+        /// <param name="v2"></param>
+        /// <returns name="midVertex"></returns>
+        public static gVertex MidVertex ( gVertex v1, gVertex v2)
         {
             double x = (v1.X + v2.X) / 2, y = (v1.Y + v2.Y) / 2, z = (v1.Z + v2.Z) / 2;
-            return new Vertex(x, y, z);
+            return new gVertex(x, y, z);
         }
         #endregion
 
+        internal static List<gVertex> OrderByRadianAndDistance (List<gVertex> vertices, gVertex centre = null)
+        {
+            if(centre == null) { centre = gVertex.MinimumVertex(vertices); }
+            return vertices.OrderBy(v => Graphical.Geometry.Point.RadAngle(centre.point, v.point)).ThenBy(v => centre.DistanceTo(v)).ToList();
+            
+        }
+
+        internal static gVertex MinimumVertex(List<gVertex> vertices)
+        {
+            return vertices.OrderBy(v => v.Y).ThenBy(v => v.X).ThenBy(v => v.Z).ToList().First();
+        }
 
         internal double DistanceTo(object obj)
         {
             if(GetType() == obj.GetType())
             {
-                Vertex v = (Vertex)obj;
+                gVertex v = (gVertex)obj;
                 return point.DistanceTo(v.point);
-            }else if(obj.GetType() == typeof(Edge))
+            }else if(obj.GetType() == typeof(gEdge))
             {
-                Edge e = (Edge)obj;
+                gEdge e = (gEdge)obj;
                 return DistanceTo(e.LineGeometry);
             }
             else
@@ -83,11 +102,25 @@ namespace Graphical.Base
             }
         }
 
-        internal static int Orientation(Vertex v1, Vertex v2, Vertex v3)
+        internal static int Orientation(gVertex v1, gVertex v2, gVertex v3)
         {
             return Graphical.Geometry.Point.Orientation(v1.point, v2.point, v3.point);
         }
 
+        internal DSPoint GetProjectionOnPlane(string plane = "xy")
+        {
+            switch (plane)
+            {
+                case "xy":
+                    return DSPoint.ByCoordinates(X, Y, 0);
+                case "xz":
+                    return DSPoint.ByCoordinates(X, 0, Z);
+                case "yz":
+                    return DSPoint.ByCoordinates(0, Y, Z);
+                default:
+                    return null;
+            }
+        }
 
 
         #region Override Methods
@@ -102,10 +135,8 @@ namespace Graphical.Base
         {
             if (obj == null || GetType() != obj.GetType()) { return false; }
 
-            Vertex v = (Vertex)obj;
-            bool eq = point.Equals(v.point);
-            bool eq2 = X == v.X && Y == v.Y && Z == v.Z;
-            return point.Equals(v.point);
+            gVertex v = (gVertex)obj;
+            return this.X == v.X && this.Y == v.Y && this.Z == v.Z;
         }
 
         /// <summary>
@@ -127,24 +158,34 @@ namespace Graphical.Base
         {
             NumberFormatInfo inf = new NumberFormatInfo();
             inf.NumberDecimalSeparator = ".";
-            return string.Format("Vertex(X = {0}, Y = {1}, Z = {2})", point.X.ToString("0.000", inf), point.Y.ToString("0.000", inf), point.Z.ToString("0.000", inf));
+            return string.Format("gVertex(X = {0}, Y = {1}, Z = {2})", X.ToString("0.000", inf), Y.ToString("0.000", inf), Z.ToString("0.000", inf));
         }
 
         /// <summary>
-        /// Customizing the render of Vertex
+        /// Customizing the render of gVertex
         /// </summary>
         /// <param name="package"></param>
         /// <param name="parameters"></param>
         [IsVisibleInDynamoLibrary(false)]
         public void Tessellate(IRenderPackage package, TessellationParameters parameters)
         {
-            package.AddPointVertex(point.X, point.Y, point.Z);
+            package.AddPointVertex(X, Y, Z);
             package.AddPointVertexColor(255, 0, 0, 255);
         }
 
+        /// <summary>
+        /// Implementation of Dispose method
+        /// </summary>
         public void Dispose()
         {
             ((IDisposable)point).Dispose();
+        }
+
+        public object Clone()
+        {
+            gVertex newVertex = new gVertex(this.X, this.Y, this.Z, this.polygonId);
+
+            return newVertex;
         }
         #endregion
 

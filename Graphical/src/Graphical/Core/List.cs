@@ -8,9 +8,18 @@ using EdgeKey = Graphical.Graphs.EdgeKey;
 
 namespace Graphical.Core
 {
+    /// <summary>
+    /// Static class extending List funtionality
+    /// </summary>
     public static class List
     {
-        public static List<dynamic> AddItemSorted(List<dynamic> list, dynamic[] item)
+        /// <summary>
+        /// Given a ascending sorted list, add items mantaining list's order.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        internal static List<dynamic> AddItemSorted(List<dynamic> list, dynamic[] item)
         {
             List<dynamic> clone = list.ToList();
             foreach(var it in item)
@@ -55,7 +64,7 @@ namespace Graphical.Core
             return list;
         }
 
-        public static int Bisect(List<EdgeKey> list, EdgeKey item)
+        internal static int Bisect(List<EdgeKey> list, EdgeKey item)
         {
             int lo = 0, hi = list.Count;
             while(lo < hi)

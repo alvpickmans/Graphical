@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSPoint = Autodesk.DesignScript.Geometry.Point;
+using DSLine = Autodesk.DesignScript.Geometry.Line;
 using Autodesk.DesignScript.Geometry;
 using Autodesk.DesignScript.Interfaces;
 using Autodesk.DesignScript.Runtime;
@@ -16,24 +17,30 @@ namespace Graphical.Base
     /// <summary>
     /// Representation of Edges on a graph
     /// </summary>
-    public class Edge : IGraphicItem
+    public class gEdge : IGraphicItem, IDisposable
     {
         #region Variables
         /// <summary>
-        /// Edge StartVertex
+        /// StartVertex
         /// </summary>
-        public Vertex StartVertex { get; private set; }
+        public gVertex StartVertex { get; private set; }
 
         /// <summary>
-        /// Edge EndVertex
+        /// EndVertex
         /// </summary>
-        public Vertex EndVertex { get; private set; }
+        public gVertex EndVertex { get; private set; }
 
+        /// <summary>
+        /// Returns the line associated with the gEdge
+        /// </summary>
         public Line LineGeometry { get; private set; }
+
+        internal double length { get { return LineGeometry.Length; } }
+
         #endregion
 
         #region Constructors
-        internal Edge(Vertex start, Vertex end)
+        internal gEdge(gVertex start, gVertex end)
         {
             StartVertex = start;
             EndVertex = end;
@@ -41,24 +48,24 @@ namespace Graphical.Base
         }
 
         /// <summary>
-        /// Edge constructor by start and end vertices
+        /// gEdge constructor by start and end vertices
         /// </summary>
         /// <param name="start">Start vertex</param>
-        /// <param name="end">End Vertex</param>
+        /// <param name="end">End gVertex</param>
         /// <returns name="edge">edge</returns>
-        public static Edge ByStartVertexEndVertex(Vertex start, Vertex end)
+        public static gEdge ByStartVertexEndVertex(gVertex start, gVertex end)
         {
-            return new Edge(start, end);
+            return new gEdge(start, end);
         }
 
         /// <summary>
-        /// Edge constructor by line
+        /// gEdge constructor by line
         /// </summary>
         /// <param name="line">line</param>
         /// <returns name="edge">edge</returns>
-        public static Edge ByLine(Line line)
+        public static gEdge ByLine(Line line)
         {
-            return new Edge(Vertex.ByPoint(line.StartPoint), Vertex.ByPoint(line.EndPoint));
+            return new gEdge(gVertex.ByPoint(line.StartPoint), gVertex.ByPoint(line.EndPoint));
         } 
         #endregion
 
@@ -67,25 +74,24 @@ namespace Graphical.Base
         /// </summary>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        internal bool Contains(Vertex vertex)
+        internal bool Contains(gVertex vertex)
         {
             return StartVertex.Equals(vertex) || EndVertex.Equals(vertex);
         }
 
         /// <summary>
-        /// Method to return the other end vertex of the Edge
+        /// Method to return the other end vertex of the gEdge
         /// </summary>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        internal Vertex GetVertexPair(Vertex vertex)
+        internal gVertex GetVertexPair(gVertex vertex)
         {
-            if (StartVertex.Equals(vertex))
-            {
-                return EndVertex;
-            }else
-            {
-                return StartVertex;
-            }
+            return (StartVertex.Equals(vertex)) ? EndVertex : StartVertex;
+        }
+
+        internal DSLine GetProjectionOnPlane(string plane = "xy")
+        {
+            return DSLine.ByStartPointEndPoint(StartVertex.GetProjectionOnPlane(plane), EndVertex.GetProjectionOnPlane(plane));
         }
 
         #region override methods
@@ -100,7 +106,7 @@ namespace Graphical.Base
         {
             if (obj == null || GetType() != obj.GetType()) { return false; }
 
-            Edge e= (Edge)obj;
+            gEdge e= (gEdge)obj;
             if (StartVertex.Equals(e.StartVertex) && EndVertex.Equals(e.EndVertex)) { return true; }
             if (StartVertex.Equals(e.EndVertex) && EndVertex.Equals(e.StartVertex)) { return true; }
             return false;
@@ -123,7 +129,7 @@ namespace Graphical.Base
         /// <returns></returns>
         public override string ToString()
         {
-            return String.Format("Edge(StartVertex: {0}, EndVertex: {1})", StartVertex, EndVertex);
+            return String.Format("gEdge(StartVertex: {0}, EndVertex: {1})", StartVertex, EndVertex);
         }
 
         /// <summary>
@@ -136,8 +142,8 @@ namespace Graphical.Base
         {
             //throw new NotImplementedException();
             //package.AddLineStripVertexCount(2);
-            package.AddLineStripVertex(StartVertex.point.X, StartVertex.point.Y, StartVertex.point.Z);
-            package.AddLineStripVertex(EndVertex.point.X, EndVertex.point.Y, EndVertex.point.Z);
+            package.AddLineStripVertex(StartVertex.X, StartVertex.Y, StartVertex.Z);
+            package.AddLineStripVertex(EndVertex.X, EndVertex.Y, EndVertex.Z);
             /*Colour addition can be done iteratively with a for loop,
              * but for just two elements might be better to save the overhead
              * variable declaration and all.
@@ -146,7 +152,17 @@ namespace Graphical.Base
             package.AddLineStripVertexColor(150, 200, 255, 255);
 
 
-        } 
+        }
+
+        /// <summary>
+        /// Implementation of Dispose method
+        /// </summary>
+        public void Dispose()
+        {
+            ((IDisposable)LineGeometry).Dispose();
+            ((IDisposable)StartVertex).Dispose();
+            ((IDisposable)EndVertex).Dispose();
+        }
 
 
         #endregion

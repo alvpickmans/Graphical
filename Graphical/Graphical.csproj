@@ -134,9 +134,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Graphical\Base\Graph.cs" />
-    <Compile Include="src\Graphical\Base\Vertex.cs" />
-    <Compile Include="src\Graphical\Base\Edge.cs" />
+    <Compile Include="src\Graphical\Base\gPolygon.cs" />
+    <Compile Include="src\Graphical\Graphs\Graph.cs" />
+    <Compile Include="src\Graphical\Base\gVertex.cs" />
+    <Compile Include="src\Graphical\Base\gEdge.cs" />
     <Compile Include="src\Graphical\Core\List.cs" />
     <Compile Include="src\Graphical\Graphs\Visibility.cs" />
   </ItemGroup>
@@ -147,6 +148,7 @@
     <Folder Include="packages\Graphical\extra\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".gitignore" />
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="packages\Graphical\pkg.json" />
