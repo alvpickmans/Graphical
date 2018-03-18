@@ -9,6 +9,7 @@ using DSPoint = Autodesk.DesignScript.Geometry.Point;
 using DSLine = Autodesk.DesignScript.Geometry.Line;
 using Autodesk.DesignScript.Geometry;
 using Autodesk.DesignScript.Runtime;
+using Graphical.Base;
 
 namespace Graphical.Geometry
 {
@@ -20,8 +21,56 @@ namespace Graphical.Geometry
     {
         //Vector-plane intersection https://math.stackexchange.com/questions/100439/determine-where-a-vector-will-intersect-a-plane
 
+        #region Constants
         const int rounding = 10 * 10;
-        const double rounding2 = 10.0 * 10;
+        const double rounding2 = 10.0 * 10; 
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Order the list of points by the radian angle from a centre point. If angle is equal, closer to centre will be first.
+        /// </summary>
+        /// <param name="centre">Centre point</param>
+        /// <param name="points">Points to order</param>
+        /// <returns name="points">Ordered points</returns>
+        public static List<DSPoint> OrderByRadianAndDistance(
+            [DefaultArgument("Autodesk.DesignScript.Geometry.Point.ByCoordinates(0,0,0);")]DSPoint centre,
+            List<DSPoint> points)
+        {
+            List<DSPoint> ordered = points.OrderBy(p => RadAngle(centre, p)).ThenBy(p => centre.DistanceTo(p)).ToList();
+            return ordered;
+        }
+
+        /// <summary>
+        /// Returns the minimum point from a list of points. Minimum is evaulated by the point with minimum Y, then X and finally Z coordinate.
+        /// </summary>
+        /// <param name="points">List of points</param>
+        /// <returns name="minPoint">Minimum Point</returns>
+        public static DSPoint MinimumPoint(List<DSPoint> points)
+        {
+            //TODO: Implement a better way of selecting the minimum point.
+            return points.OrderBy(p => p.Y).ThenBy(p => p.X).ThenBy(p => p.Z).ToList().First();
+        }
+
+
+        /// <summary>
+        /// Radian angle of an arc
+        /// </summary>
+        /// <param name="centre"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public static double ArcRadAngle(DSPoint centre, DSPoint start, DSPoint end)
+        {
+            double a = Math.Pow((end.X - centre.X), 2) + Math.Pow((end.Y - centre.Y), 2);
+            double b = Math.Pow((end.X - start.X), 2) + Math.Pow((end.Y - start.Y), 2);
+            double c = Math.Pow((centre.X - start.X), 2) + Math.Pow((centre.Y - start.Y), 2);
+            return Math.Acos((a + c - b) / (2 * Math.Sqrt(a) * Math.Sqrt(c)));
+
+        } 
+        #endregion
+
+        #region Internal Methods
 
         /// <summary>
         /// Projects a Point to a line by a given vector direction.
@@ -41,7 +90,7 @@ namespace Graphical.Geometry
 
             //if parallel, dot product equals to 1, so no intersection)
             double dot = d.Dot(lineVector);
-			if(Math.Abs(dot) == 1) { return null; };
+            if (Math.Abs(dot) == 1) { return null; };
 
             /*
 			 *As they are not parallel, first let´s solve the problem in 2D as if their projections
@@ -50,11 +99,11 @@ namespace Graphical.Geometry
             DSPoint O = point; ;//Origin of vector
             DSPoint M = line.StartPoint;
             DSPoint N = line.EndPoint;
-            double x,  y,  z;
+            double x, y, z;
             double t;
             //y = slope*x + b
-			// if line is perp to X axis, y = y
-            
+            // if line is perp to X axis, y = y
+
             double slope = (N.Y - M.Y) / (N.X - M.X);
             // b = y1 + slope*x1
             //line equation: y = slope*x + y1 - slope * x1
@@ -63,41 +112,16 @@ namespace Graphical.Geometry
             if (Double.IsInfinity(slope))
             {
                 t = (M.X - O.X) / d.X;
-            }else
+            }
+            else
             {
                 t = (slope * O.X - O.Y + M.Y - slope * M.X) / (d.Y - slope * d.X);
             }
-            
+
             x = O.X + d.X * t;
             y = O.Y + d.Y * t;
             z = O.Y + d.Z * t;
-            return DSPoint.ByCoordinates(x,y, z);
-        }
-
-
-
-        /// <summary>
-        /// Order the list of points by the radian angle from a centre point. If angle is equal, closer to centre will be first.
-        /// </summary>
-        /// <param name="centre">Centre point</param>
-        /// <param name="points">Points to order</param>
-        /// <returns name="points">Ordered points</returns>
-        public static List<DSPoint> OrderByRadianAndDistance(
-            [DefaultArgumentAttribute("Point.ByCoordinates(0, 0, 0);")]DSPoint centre, List<DSPoint> points)
-        {
-            List<DSPoint> ordered = points.OrderBy(p => RadAngle(centre, p)).ThenBy(p => centre.DistanceTo(p)).ToList();
-            return ordered;
-        }
-
-        /// <summary>
-        /// Returns the minimum point from a list of points. Minimum is evaulated by the point with minimum Y, then X and finally Z coordinate.
-        /// </summary>
-        /// <param name="points">List of points</param>
-        /// <returns name="minPoint">Minimum Point</returns>
-        public static DSPoint MinimumPoint(List<DSPoint> points)
-        {
-            //TODO: Implement a better way of selecting the minimum point.
-            return points.OrderBy(p => p.Y).ThenBy(p => p.X).ThenBy(p => p.Z).ToList().First();
+            return DSPoint.ByCoordinates(x, y, z);
         }
 
         /// <summary>
@@ -114,7 +138,7 @@ namespace Graphical.Geometry
             //TODO: Implement Z angle? that would becom UV coordinates.
             //double dz = vertex.point.Z - centre.point.Z;
 
-            if(dx == 0 && dy == 0) { return 0; }
+            if (dx == 0 && dy == 0) { return 0; }
 
             if (dx == 0)// both vertices on Y axis
             {
@@ -143,21 +167,6 @@ namespace Graphical.Geometry
             return Math.Atan(dy / dx);
         }
 
-        /// <summary>
-        /// Radian angle of an arc
-        /// </summary>
-        /// <param name="centre"></param>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        public static double ArcRadAngle(DSPoint centre, DSPoint start, DSPoint end)
-        {
-            double a = Math.Pow((end.X - centre.X), 2) + Math.Pow((end.Y - centre.Y), 2);
-            double b = Math.Pow((end.X - start.X), 2) + Math.Pow((end.Y - start.Y), 2);
-            double c = Math.Pow((centre.X - start.X), 2) + Math.Pow((centre.Y - start.Y), 2);
-            return Math.Acos((a + c - b) / (2 * Math.Sqrt(a) * Math.Sqrt(c)));
-
-        }
 
         internal static bool OnLine(DSPoint point, DSLine line)
         {
@@ -166,7 +175,7 @@ namespace Graphical.Geometry
 
         internal static bool OnLine(DSPoint start, DSPoint middle, DSPoint end)
         {
-            using(DSLine line = DSLine.ByStartPointEndPoint(start, end))
+            using (DSLine line = DSLine.ByStartPointEndPoint(start, end))
             {
                 return line.DoesIntersect(middle);
             }
@@ -210,8 +219,8 @@ namespace Graphical.Geometry
         /// <param name="plane">plane of orientation</param>
         /// <returns name="orientation">0 if points ar colinear.
         /// 1 if orientation is counter clock wise.
-        /// -1 if orientation is clock kwise.</returns>
-        internal static int Orientation(DSPoint p1, DSPoint p2, DSPoint p3, string plane = "xy")
+        /// -1 if orientation is clock wise.</returns>
+         public static int Orientation(DSPoint p1, DSPoint p2, DSPoint p3, string plane = "xy")
         {
             // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
             // for details of below formula.
@@ -225,19 +234,20 @@ namespace Graphical.Geometry
                     value = (p2.X - p1.X) * (p3.Z - p2.Z) - (p2.Z - p1.Z) * (p3.X - p2.X);
                     break;
                 case "yz":
-                    value = (p2.Y - p1.Y) * (p3.Z - p2.Z) -(p2.Z - p1.Z) * (p3.Y - p2.Y);
+                    value = (p2.Y - p1.Y) * (p3.Z - p2.Z) - (p2.Z - p1.Z) * (p3.Y - p2.Y);
                     break;
                 default:
                     throw new Exception("Plane not defined");
             }
             //Rounding due to floating point error.
             value = ((int)(value * rounding)) / rounding2;
-            if(value == 0) { return 0; } //Points are colinear
+            if (value == 0) { return 0; } //Points are colinear
             int result = (value > 0) ? 1 : -1;
 
             return (value > 0) ? 1 : -1; //Counter clock or clock wise
 
-        }
+        } 
+        #endregion
 
     }
 }

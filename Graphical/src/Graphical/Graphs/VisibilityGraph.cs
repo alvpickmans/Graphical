@@ -12,24 +12,27 @@ using DSLine = Autodesk.DesignScript.Geometry.Line;
 using DSPolygon = Autodesk.DesignScript.Geometry.Polygon;
 using System.Diagnostics;
 using Autodesk.DesignScript.Runtime;
+using Dynamo.Graph.Nodes;
 #endregion
 
 namespace Graphical.Graphs
 {
     /// <summary>
-    /// Construction of Visibility Graph
+    /// Construction of VisibilityGraph Graph
     /// </summary>
-    public class Visibility : Graph, ICloneable
+    public class VisibilityGraph : Graph, ICloneable
     {
         #region Variables
-        public Graph baseGraph { get; set; }
-        //internal Graph visGraph { get; set; }
+
+        internal Graph baseGraph { get; set; }
 
         #endregion
-        [IsVisibleInDynamoLibrary(false)]
-        protected Visibility() : base(){}
 
-        internal Visibility(Graph _baseGraph) : base()
+        #region Internal Constructors
+        [IsVisibleInDynamoLibrary(false)]
+        internal VisibilityGraph() : base() { }
+
+        internal VisibilityGraph(Graph _baseGraph) : base()
         {
             baseGraph = _baseGraph;
 
@@ -39,29 +42,46 @@ namespace Graphical.Graphs
             {
                 this.AddEdge(edge);
             }
+        } 
+        #endregion
+
+        /// <summary>
+        /// Creates a visibility graph by a set of polygons.
+        /// </summary>
+        /// <param name="polygons">Set of internal polygons</param>
+        /// <returns name="visibilityGraph">VisibilityGraph graph</returns>
+        public static VisibilityGraph ByPolygons(DSPolygon[] polygons)
+        {
+            List<gPolygon> gPolygons = FromPolygons(polygons, false);
+            Graph baseGraph = new Graph(gPolygons);
+            return new VisibilityGraph(baseGraph);
         }
 
         /// <summary>
-        /// Creates a visibility graph by a set of polygons. If no boundary polygons are set, all will be computed as internal
-        /// constraints and any edge from vertices of the same polygon will be discarded.
+        /// Creates a visibility graph by a set of polygons and boundaries.
         /// </summary>
         /// <param name="polygons">Set of internal polygons</param>
         /// <param name="boundaries">Set of boundary polygons. These must not be present on the internal polygons list.</param>
-        /// <returns name="graph">Visibility graph</returns>
-        public static Visibility ByPolygons(DSPolygon[] polygons,[DefaultArgument("null;")] DSPolygon[] boundaries = null)
+        /// <returns name="visibilityGraph">VisibilityGraph graph</returns>
+        public static VisibilityGraph ByPolygonsAndBoundaries(DSPolygon[] polygons, DSPolygon[] boundaries)
         {
             List<gPolygon> gPolygons = FromPolygons(polygons, false);
-            if(boundaries != null) { gPolygons.AddRange(FromPolygons(boundaries, true)); }
+            gPolygons.AddRange(FromPolygons(boundaries, true));
             Graph baseGraph = new Graph(gPolygons);
-            return new Visibility(baseGraph);
+            return new VisibilityGraph(baseGraph);
         }
 
-        public static Visibility AddEdges(Visibility visGraph, List<DSLine> lines)
+        /// <summary>
+        /// Adds specific lines as gEdges to the visibility graph
+        /// </summary>
+        /// <param name="visibilityGraph">VisibilityGraph Graph</param>
+        /// <param name="lines">Lines to add as new gEdges</param>
+        /// <returns></returns>
+        [NodeCategory("Action")]
+        public static VisibilityGraph AddEdges(VisibilityGraph visibilityGraph, List<DSLine> lines)
         {
-            //TODO: improve cloning of existing visGraph with IClonable
             //TODO: implement Dynamo' Trace 
             if(lines == null) { throw new NullReferenceException("lines"); }
-            //Visibility updatedGraph = (Visibility)visGraph.Clone();
             List<DSPoint> singleVertices = new List<DSPoint>();
             List<gEdge> singleEdges = lines.Select(l => gEdge.ByLine(l)).ToList();
 
@@ -69,21 +89,26 @@ namespace Graphical.Graphs
             {
                 if (!singleVertices.Contains(e.StartVertex.point)) { singleVertices.Add(e.StartVertex.point); }
                 if (!singleVertices.Contains(e.EndVertex.point)) { singleVertices.Add(e.EndVertex.point); }
-                //updatedGraph.AddEdge(e);
             }
-            Visibility updatedGraph = AddVertices(visGraph, singleVertices);
+            VisibilityGraph updatedGraph = AddVertices(visibilityGraph, singleVertices);
 
             foreach(gEdge e in singleEdges) { updatedGraph.AddEdge(e); }
 
             return updatedGraph;
         }
 
-        public static Visibility AddVertices(Visibility visGraph, List<DSPoint> points)
+        /// <summary>
+        /// Adds specific points as gVertices to the VisibilityGraph Graph
+        /// </summary>
+        /// <param name="visibilityGraph">VisibilityGraph Graph</param>
+        /// <param name="points">Points to add as gVertices</param>
+        /// <returns></returns>
+        [NodeCategory("Action")]
+        public static VisibilityGraph AddVertices(VisibilityGraph visibilityGraph, List<DSPoint> points)
         {
-            //TODO: improve cloning of existing visGraph with IClonable
             //TODO: implement Dynamo' Trace 
             if (points == null) { throw new NullReferenceException("points"); }
-            Visibility newVisGraph = (Visibility)visGraph.Clone();
+            VisibilityGraph newVisGraph = (VisibilityGraph)visibilityGraph.Clone();
             Graph baseGraph = newVisGraph.baseGraph;
             Dictionary<int,gPolygon> polygons = new Dictionary<int, gPolygon>(baseGraph.polygons);
             List<gVertex> singleVertices = new List<gVertex>();
@@ -91,9 +116,10 @@ namespace Graphical.Graphs
             foreach(DSPoint p in points)
             {
                 gVertex newVertex = gVertex.ByPoint(p);
-                foreach (gEdge e in baseGraph.edges.OrderBy(e => p.DistanceTo(e.LineGeometry)))
+                if (newVisGraph.vertices.Contains(newVertex)) { continue; }
+                foreach (gEdge e in baseGraph.edges.OrderBy(e => e.DistanceTo(p)))
                 {
-                    if (p.DistanceTo(e.LineGeometry) > 0)
+                    if (e.DistanceTo(p) > 0)
                     {
                         singleVertices.Add(newVertex);
                         break;
@@ -146,6 +172,7 @@ namespace Graphical.Graphs
         /// <param name="baseGraph"></param>
         /// <param name="origin"></param>
         /// <param name="destination"></param>
+        /// <param name="singleVertices"></param>
         /// <param name="scan"></param>
         /// <returns name="visibleVertices">List of vertices visible from the analysed vertex</returns>
         internal List<gVertex> VisibleVertices(
@@ -168,7 +195,8 @@ namespace Graphical.Graphs
 
             gVertex maxVertex = vertices.OrderByDescending(v => v.DistanceTo(centre)).First();
             double maxDistance = centre.DistanceTo(maxVertex) * 1.5;
-            vertices = vertices.OrderBy(v => Point.RadAngle(centre.point, v.point)).ThenBy(v => centre.DistanceTo(v)).ToList();
+            //vertices = vertices.OrderBy(v => Point.RadAngle(centre.point, v.point)).ThenBy(v => centre.DistanceTo(v)).ToList();
+            vertices = gVertex.OrderByRadianAndDistance(vertices, centre);
 
             #endregion
 
@@ -184,8 +212,8 @@ namespace Graphical.Graphs
                     if (e.Contains(centre)) { continue; }
                     if (EdgeIntersect(halfLine, e))
                     {
-                        if (Point.OnLine(e.StartVertex.point, halfLine)) { continue; }
-                        if (Point.OnLine(e.EndVertex.point, halfLine)) { continue; }
+                        if (gVertex.OnLine(e.StartVertex, halfLine)) { continue; }
+                        if (gVertex.OnLine(e.EndVertex, halfLine)) { continue; }
                         EdgeKey k = new EdgeKey(halfLine, e);
                         Core.List.AddItemSorted(openEdges, k);
                     }
@@ -200,13 +228,13 @@ namespace Graphical.Graphs
             {
                 if (vertex.Equals(centre) ||vertex.Equals(prev)) { continue; }// v == to centre or to previous when updating graph
                 //Check only half of vertices as eventually they will become 'v'
-                if (scan == "half" && Point.RadAngle(centre.point, vertex.point) > Math.PI) { break; }
+                if (scan == "half" && gVertex.RadAngle(centre, vertex) > Math.PI) { break; }
                 //Removing clock wise edges incident on v
                 if(openEdges.Count > 0 && baseGraph.graph.ContainsKey(vertex))
                 {
                     foreach(gEdge edge in baseGraph.graph[vertex])
                     {
-                        int orientation = Point.Orientation(centre.point, vertex.point, edge.GetVertexPair(vertex).point);
+                        int orientation = gVertex.Orientation(centre, vertex, edge.GetVertexPair(vertex));
                         
                         if (orientation == -1 )
                         {
@@ -225,7 +253,7 @@ namespace Graphical.Graphs
                 bool isVisible = false;
 
                 //No collinear vertices
-                if (prev == null || Point.Orientation(centre.point, prev.point, vertex.point) != 0 || !Point.OnLine(centre.point, prev.point, vertex.point))
+                if (prev == null || gVertex.Orientation(centre, prev, vertex) != 0 || !gVertex.OnLine(centre, prev, vertex))
                 {
                     if (openEdges.Count == 0)
                     {
@@ -421,9 +449,10 @@ namespace Graphical.Graphs
             }
         }
 
+        [IsVisibleInDynamoLibrary(false)]
         public new object Clone()
         {
-            Visibility newGraph = new Visibility()
+            VisibilityGraph newGraph = new VisibilityGraph()
             {
                 graph = new Dictionary<gVertex, List<gEdge>>(this.graph),
                 edges = new List<gEdge>(this.edges),
@@ -432,12 +461,11 @@ namespace Graphical.Graphs
             };
             return newGraph;
         }
-
-
+        
     }
 
     /// <summary>
-    /// Visibility graph's EdgeKey class to create a tree data structure.
+    /// VisibilityGraph graph's EdgeKey class to create a tree data structure.
     /// </summary>
     [IsVisibleInDynamoLibrary(false)]
     public class EdgeKey : IComparable<EdgeKey>
@@ -523,7 +551,7 @@ namespace Graphical.Graphs
         {
             if (other == null) { return 1; }
             if (edge.Equals(other.edge)) { return 1; }
-            if (!Visibility.EdgeIntersect(LineGeometry, other.edge)){ return -1; }
+            if (!VisibilityGraph.EdgeIntersect(LineGeometry, other.edge)){ return -1; }
 
             double selfDist = DistanceToInteserction(centre, vertex, edge);
             double otherDist = DistanceToInteserction(centre, vertex, other.edge);

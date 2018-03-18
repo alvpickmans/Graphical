@@ -17,25 +17,22 @@ namespace Graphical.Base
     /// <summary>
     /// Representation of Edges on a graph
     /// </summary>
+    [IsVisibleInDynamoLibrary(false)]
     public class gEdge : IGraphicItem, IDisposable
     {
         #region Variables
         /// <summary>
         /// StartVertex
         /// </summary>
-        public gVertex StartVertex { get; private set; }
+        internal gVertex StartVertex { get; private set; }
 
         /// <summary>
         /// EndVertex
         /// </summary>
-        public gVertex EndVertex { get; private set; }
+        internal gVertex EndVertex { get; private set; }
+        
 
-        /// <summary>
-        /// Returns the line associated with the gEdge
-        /// </summary>
-        public Line LineGeometry { get; private set; }
-
-        internal double length { get { return LineGeometry.Length; } }
+        internal double length { get { return LineGeometry().Length; } }
 
         #endregion
 
@@ -44,7 +41,7 @@ namespace Graphical.Base
         {
             StartVertex = start;
             EndVertex = end;
-            LineGeometry = Line.ByStartPointEndPoint(start.point, end.point);
+            //LineGeometry = Line.ByStartPointEndPoint(start.point, end.point);
         }
 
         /// <summary>
@@ -66,8 +63,16 @@ namespace Graphical.Base
         public static gEdge ByLine(Line line)
         {
             return new gEdge(gVertex.ByPoint(line.StartPoint), gVertex.ByPoint(line.EndPoint));
-        } 
+        }
         #endregion
+
+        /// <summary>
+        /// Returns the line associated with the gEdge
+        /// </summary>
+        public Line LineGeometry()
+        {
+            return Line.ByStartPointEndPoint(StartVertex.point, EndVertex.point);
+        }
 
         /// <summary>
         /// Method to check if vertex belongs to edge
@@ -92,6 +97,35 @@ namespace Graphical.Base
         internal DSLine GetProjectionOnPlane(string plane = "xy")
         {
             return DSLine.ByStartPointEndPoint(StartVertex.GetProjectionOnPlane(plane), EndVertex.GetProjectionOnPlane(plane));
+        }
+
+        internal double DistanceTo(object obj)
+        {
+            if (GetType() == obj.GetType())
+            {
+                gEdge e = (gEdge)obj;
+                using (DSLine line1 = this.LineGeometry())
+                using (DSLine line2 = e.LineGeometry())
+                {
+                    return line1.DistanceTo(line2);
+                }
+            }
+            else if (obj.GetType() == typeof(gVertex))
+            {
+                gVertex v = (gVertex)obj;
+                using (DSPoint p = v.point)
+                using (Line line = this.LineGeometry())
+                {
+                    return line.DistanceTo(p);
+                }
+            }
+            else
+            {
+                using (Line line = this.LineGeometry())
+                {
+                    return line.DistanceTo(obj as Autodesk.DesignScript.Geometry.Geometry);
+                }
+            }
         }
 
         #region override methods
@@ -159,7 +193,7 @@ namespace Graphical.Base
         /// </summary>
         public void Dispose()
         {
-            ((IDisposable)LineGeometry).Dispose();
+            //((IDisposable)LineGeometry).Dispose();
             ((IDisposable)StartVertex).Dispose();
             ((IDisposable)EndVertex).Dispose();
         }

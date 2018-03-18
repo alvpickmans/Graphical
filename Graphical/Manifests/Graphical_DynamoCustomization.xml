@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<doc>
+  <assembly>
+    <name>Graphical</name>
+  </assembly>
+  <namespaces>
+    <namespace name="Graphical.Geometry">
+      <category>Graphical.Geometry</category>
+    </namespace>
+    <namespace name="Graphical.Graphs">
+      <category>Graphical.Graphs</category>
+    </namespace>
+    <namespace name="Graphical.Algorithms">
+      <category>Graphical.Algorithms</category>
+    </namespace>
+  </namespaces>
+</doc>

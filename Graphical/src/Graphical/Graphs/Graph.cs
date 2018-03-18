@@ -28,16 +28,17 @@ namespace Graphical.Graphs
         /// <summary>
         /// Graph's vertices
         /// </summary>
-        public List<gVertex> vertices { get { return graph.Keys.ToList(); } }
+
+        internal List<gVertex> vertices { get { return graph.Keys.ToList(); } }
 
         /// <summary>
         /// Graph's edges
         /// </summary>
-        public List<gEdge> edges { get; set; }
+        internal List<gEdge> edges { get; set; }
 
         #endregion
 
-        #region Constructors
+        #region Internal Constructors
         internal Graph()
         {
             edges = new List<gEdge>();
@@ -121,13 +122,10 @@ namespace Graphical.Graphs
             return input;
         }
 
-        internal void AddVertices (List<gVertex> vertices)
-        {
 
-        }
         #endregion
 
-        #region Methods
+        #region Internal Methods
 
         /// <summary>
         /// Contains mathod for vertex in graph
@@ -196,13 +194,15 @@ namespace Graphical.Graphs
         }
 
         /// <summary>
-        /// Get vertices boundaries on graph
+        /// Get graph edges as lines
         /// </summary>
-        /// <returns name="polygons[]"></returns>
-        public List<gEdge>[] GetBoundaryPolygons()
+        /// <returns name="lines"></returns>
+        public List<Line> GetAsLines()
         {
-            return polygons.Values.ToList().Select(p => p.edges).ToArray();
+            return edges.Select(e => e.LineGeometry()).ToList();
         }
+
+
 
 
         #endregion
@@ -217,7 +217,7 @@ namespace Graphical.Graphs
         /// <returns></returns>
         public override string ToString()
         {
-            return String.Format("VisibilityGraph:(gVertices: {0}, gEdges: {1})", vertices.Count.ToString(), edges.Count.ToString());
+            return String.Format("Graph:(gVertices: {0}, gEdges: {1})", vertices.Count.ToString(), edges.Count.ToString());
         }
 
         /// <summary>
@@ -238,6 +238,11 @@ namespace Graphical.Graphs
             }
         }
 
+        /// <summary>
+        /// Implementation of IClonable interface
+        /// </summary>
+        /// <returns></returns>
+        [IsVisibleInDynamoLibrary(false)]
         public virtual object Clone()
         {
             Graph newGraph = new Graph()

@@ -17,8 +17,17 @@ namespace Graphical.Base
     /// <summary>
     /// Representation of vertex points on a graph.
     /// </summary>
+    [IsVisibleInDynamoLibrary(false)]
     public class gVertex : IGraphicItem, IDisposable, ICloneable
     {
+
+        #region Constants
+        const int rounding = 10 * 10;
+        const double rounding2 = 10.0 * 10;
+        #endregion
+
+        //HACK: Avoid using point as this creates unhandled geometry and consumes memory.
+        //TODO: Reorganize methods 
         #region Variables
         internal DSPoint point { get { return DSPoint.ByCoordinates(X, Y, Z); } }
         internal int polygonId { get; set; }
@@ -35,7 +44,9 @@ namespace Graphical.Base
         {
             //point = DSPoint.ByCoordinates(x, y, z);
             polygonId = pId;
-            X = x; Y = y; Z = z;
+            X = ((int)(x * rounding)) / rounding2;
+            Y = ((int)(y * rounding)) / rounding2;
+            Z = ((int)(z * rounding)) / rounding2;
         }
 
         /// <summary>
@@ -55,7 +66,7 @@ namespace Graphical.Base
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <returns></returns>
-        public static gVertex ByCoordinates(double x, double y, double z)
+        internal static gVertex ByCoordinates(double x, double y, double z)
         {
             return new gVertex(x, y, z);
         }
@@ -66,7 +77,7 @@ namespace Graphical.Base
         /// <param name="v1"></param>
         /// <param name="v2"></param>
         /// <returns name="midVertex"></returns>
-        public static gVertex MidVertex ( gVertex v1, gVertex v2)
+        internal static gVertex MidVertex ( gVertex v1, gVertex v2)
         {
             double x = (v1.X + v2.X) / 2, y = (v1.Y + v2.Y) / 2, z = (v1.Z + v2.Z) / 2;
             return new gVertex(x, y, z);
@@ -76,8 +87,27 @@ namespace Graphical.Base
         internal static List<gVertex> OrderByRadianAndDistance (List<gVertex> vertices, gVertex centre = null)
         {
             if(centre == null) { centre = gVertex.MinimumVertex(vertices); }
-            return vertices.OrderBy(v => Graphical.Geometry.Point.RadAngle(centre.point, v.point)).ThenBy(v => centre.DistanceTo(v)).ToList();
+            return vertices.OrderBy(v => RadAngle(centre, v)).ThenBy(v => centre.DistanceTo(v)).ToList();
             
+        }
+
+        internal static int Orientation(gVertex v1, gVertex v2, gVertex v3, string plane = "xy")
+        {
+            using (DSPoint p1 = v1.point)
+            using (DSPoint p2 = v2.point)
+            using (DSPoint p3 = v3.point)
+            {
+                return Graphical.Geometry.Point.Orientation(p1, p2, p3, plane);
+            }
+        }
+
+        internal static double RadAngle(gVertex centre, gVertex vertex)
+        {
+            using (DSPoint p1 = centre.point)
+            using(DSPoint p2 = vertex.point)
+            {
+                return Graphical.Geometry.Point.RadAngle(p1, p2);
+            }
         }
 
         internal static gVertex MinimumVertex(List<gVertex> vertices)
@@ -85,26 +115,43 @@ namespace Graphical.Base
             return vertices.OrderBy(v => v.Y).ThenBy(v => v.X).ThenBy(v => v.Z).ToList().First();
         }
 
+        
         internal double DistanceTo(object obj)
         {
             if(GetType() == obj.GetType())
             {
                 gVertex v = (gVertex)obj;
-                return point.DistanceTo(v.point);
+                using (DSPoint p1 = this.point)
+                using (DSPoint p2 = v.point)
+                {
+                    return p1.DistanceTo(p2);
+                }
             }else if(obj.GetType() == typeof(gEdge))
             {
                 gEdge e = (gEdge)obj;
-                return DistanceTo(e.LineGeometry);
+                using (DSPoint p = this.point)
+                using (Line line = e.LineGeometry())
+                {
+                    return p.DistanceTo(line);
+                }
             }
             else
             {
-                return point.DistanceTo(obj as Autodesk.DesignScript.Geometry.Geometry);
+                using (DSPoint p = this.point)
+                {
+                    return p.DistanceTo(obj as Autodesk.DesignScript.Geometry.Geometry); 
+                }
             }
         }
 
         internal static int Orientation(gVertex v1, gVertex v2, gVertex v3)
         {
-            return Graphical.Geometry.Point.Orientation(v1.point, v2.point, v3.point);
+            using (DSPoint p1 = v1.point)
+            using (DSPoint p2 = v2.point)
+            using (DSPoint p3 = v3.point)
+            {
+                return Graphical.Geometry.Point.Orientation(p1, p2, p3);
+            }
         }
 
         internal DSPoint GetProjectionOnPlane(string plane = "xy")
@@ -119,6 +166,25 @@ namespace Graphical.Base
                     return DSPoint.ByCoordinates(0, Y, Z);
                 default:
                     return null;
+            }
+        }
+
+        internal static bool OnLine(gVertex vertex, Line line)
+        {
+            using (DSPoint p = vertex.point)
+            {
+                return p.DoesIntersect(line);
+            }
+        }
+
+        internal static bool OnLine(gVertex start, gVertex vertex, gVertex end)
+        {
+            using (DSPoint startPt = start.point)
+            using (DSPoint p = vertex.point)
+            using (DSPoint endPt = end.point)
+            using (Line line = Line.ByStartPointEndPoint(startPt, endPt))
+            {
+                return p.DoesIntersect(line);
             }
         }
 
@@ -181,6 +247,10 @@ namespace Graphical.Base
             ((IDisposable)point).Dispose();
         }
 
+        /// <summary>
+        /// Implementation of Clone method
+        /// </summary>
+        [IsVisibleInDynamoLibrary(false)]
         public object Clone()
         {
             gVertex newVertex = new gVertex(this.X, this.Y, this.Z, this.polygonId);
