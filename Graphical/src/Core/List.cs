@@ -80,5 +80,14 @@ namespace Graphical.Core
             }
             return lo;
         }
+
+        public static List<List<T>> Chop<T>(List<T> list, int length)
+        {
+            return list
+                .Select((x, i) => new { Index = i, Value = x })
+                .GroupBy(x => x.Index / length)
+                .Select(x => x.Select(v => v.Value).ToList())
+                .ToList();
+        }
     }
 }
