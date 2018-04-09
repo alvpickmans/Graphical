@@ -25,10 +25,10 @@ namespace Graphical.Graphs
         internal Dictionary<int, gPolygon> polygons = new Dictionary<int, gPolygon>();
         internal int pId = 0;
         internal Dictionary<gVertex, List<gEdge>> graph = new Dictionary<gVertex, List<gEdge>>();
+
         /// <summary>
         /// Graph's vertices
         /// </summary>
-
         internal List<gVertex> vertices { get { return graph.Keys.ToList(); } }
 
         /// <summary>
@@ -50,9 +50,9 @@ namespace Graphical.Graphs
             edges = new List<gEdge>();
             graphID = Guid.NewGuid();
             //Setting up Graph instance by adding vertices, edges and polygons
-            for (var i = 0; i < input.Count(); i++)
+            foreach(gPolygon gPolygon in input)
             {
-                gPolygon gPolygon = input[i];
+                //gPolygon gPolygon = input[i];
                 List<gVertex> vertices = gPolygon.vertices;
                 gPolygon.edges.Clear();
                 //If there is only one polygon, treat is as boundary
