@@ -110,6 +110,16 @@ namespace Graphical.Base
             }
         }
 
+        internal static double ArcRadAngle (gVertex centre, gVertex start, gVertex end)
+        {
+            using (DSPoint c = centre.point)
+            using (DSPoint s = start.point)
+            using (DSPoint e = end.point)
+            {
+                return Graphical.Geometry.Point.ArcRadAngle(c, s, e);
+            }
+        }
+
         internal static gVertex MinimumVertex(List<gVertex> vertices)
         {
             return vertices.OrderBy(v => v.Y).ThenBy(v => v.X).ThenBy(v => v.Z).ToList().First();

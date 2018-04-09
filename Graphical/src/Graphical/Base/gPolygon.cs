@@ -10,15 +10,31 @@ namespace Graphical.Base
 {
     /// <summary>
     /// gPolygon class to hold graph´s polygon information in relation to its function on the graph
-    /// like is internal or limit boundary.
+    /// like if it is internal or limit boundary.
     /// </summary>
     [IsVisibleInDynamoLibrary(false)]
     public class gPolygon :IDisposable, ICloneable
     {
         #region Variables
+
+        /// <summary>
+        /// Polygon's id
+        /// </summary>
         internal int id { get; set; }
+
+        /// <summary>
+        /// Flag to check polygons role: Internal or Boundary
+        /// </summary>
         internal bool isBoundary { get; set; }
+
+        /// <summary>
+        /// Polygon's edges
+        /// </summary>
         internal List<gEdge> edges = new List<gEdge>();
+
+        /// <summary>
+        /// Polygon's Vertices
+        /// </summary>
         internal List<gVertex> vertices = new List<gVertex>();
         #endregion
 
@@ -36,10 +52,16 @@ namespace Graphical.Base
         {
             //Assumes that vertex v intersects one of polygons edges.
             gPolygon newPolygon = (gPolygon)this.Clone();
+
+            // Assign the polygon Id to the new vertex.
             v.polygonId = this.id;
+
+            // Getting the index of the intersecting edge's start vertex and
+            // inserting the new vertex at the following index.
             int index = newPolygon.vertices.IndexOf(intersectingEdge.StartVertex);
             newPolygon.vertices.Insert(index + 1, v);
-            //newPolygon.vertices = gVertex.OrderByRadianAndDistance(newPolygon.vertices);
+
+            // Rebuilding edges.
             newPolygon.edges.Clear();
             int verticesCount = newPolygon.vertices.Count;
             for (var i = 0; i < verticesCount; i++)
