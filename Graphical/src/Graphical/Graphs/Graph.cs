@@ -182,8 +182,8 @@ namespace Graphical.Graphs
                 return edgesList;
             }else
             {
-                graph.Add(vertex, new List<gEdge>());
-                return graph[vertex];
+                //graph.Add(vertex, new List<gEdge>());
+                return new List<gEdge>();
             }
         }
 
@@ -229,7 +229,10 @@ namespace Graphical.Graphs
             return edges.Select(e => e.LineGeometry()).ToList();
         }
 
-
+        public List<int> GraphNumberOfEdges()
+        {
+            return graph.Values.ToList().Select(vertex => vertex.Count).ToList();
+        }
 
 
         #endregion
