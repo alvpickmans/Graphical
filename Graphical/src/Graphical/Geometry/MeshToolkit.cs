@@ -5,8 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using DS = Autodesk.DesignScript.Geometry;
 using MT = Autodesk.Dynamo.MeshToolkit;
-using Rhino.Geometry;
-using Rhino.Geometry.Intersect;
 
 namespace Graphical.Geometry
 {

@@ -18,7 +18,7 @@ namespace Graphical.Base
     /// Representation of vertex points on a graph.
     /// </summary>
     [IsVisibleInDynamoLibrary(false)]
-    public class gVertex : IGraphicItem, IDisposable, ICloneable
+    public class gVertex : IGraphicItem, IDisposable, ICloneable, IEquatable<gVertex>
     {
 
         #region Constants
@@ -207,12 +207,11 @@ namespace Graphical.Base
         /// </summary>
         /// <param name="obj"></param>
         /// <returns>Boolean</returns>
-        public override bool Equals(object obj)
+        public bool Equals(gVertex obj)
         {
-            if (obj == null || GetType() != obj.GetType()) { return false; }
-
-            gVertex v = (gVertex)obj;
-            return this.X == v.X && this.Y == v.Y && this.Z == v.Z;
+            if (obj == null) { return false; }
+            
+            return this.X == obj.X && this.Y == obj.Y && this.Z == obj.Z;
         }
 
         /// <summary>
@@ -221,7 +220,7 @@ namespace Graphical.Base
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return point.GetHashCode();
+            return X.GetHashCode() ^ Y.GetHashCode() ^ Z.GetHashCode();
         }
 
        
@@ -267,6 +266,8 @@ namespace Graphical.Base
 
             return newVertex;
         }
+
+        
         #endregion
 
     }

@@ -447,10 +447,12 @@ namespace Graphical.Graphs
         [NodeCategory("Action")]
         public static VisibilityGraph AddVertices(VisibilityGraph visibilityGraph, List<DSPoint> points, bool reducedGraph = true)
         {
-            //TODO: implement Dynamo' Trace 
+            //TODO: Seems that original graph gets updated as well
             if (points == null) { throw new NullReferenceException("points"); }
+
             VisibilityGraph newVisGraph = (VisibilityGraph)visibilityGraph.Clone();
             List<gVertex> singleVertices = new List<gVertex>();
+
             foreach (DSPoint p in points)
             {
                 gVertex newVertex = gVertex.ByPoint(p);

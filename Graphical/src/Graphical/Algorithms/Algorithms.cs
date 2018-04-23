@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Graphical.Graphs;
 using Graphical.Base;
+using DataStructures.PriorityQueues;
 
 namespace Graphical
 {
@@ -13,30 +14,30 @@ namespace Graphical
         
         internal static Graph Dijkstra(Graph graph, gVertex origin, gVertex destination, Graph tempGraph = null)
         {
-            // TODO: Implement Heap queue
-            Dictionary<gVertex, double> dist = new Dictionary<gVertex, double>();
-            graph.vertices.Where(v => !v.Equals(origin)).ToList().ForEach(v => dist.Add(v, Double.PositiveInfinity));
+            MinPriorityQ<gVertex, double> Q = new MinPriorityQ<gVertex, double>();
+            graph.vertices.Where(v => !v.Equals(origin)).ToList().ForEach(v => Q.Add(v, Double.PositiveInfinity));
 
             //If tempGraph is not null, means graph doesn't contain origin and/or destination vertices.
             if (graph.Contains(origin))
             {
-                dist[origin] = 0;
+                Q.UpdateValue(origin, 0);
             }else
             {
-                dist.Add(origin, 0);
+                Q.Add(origin, 0);
             }
 
-            if (!graph.Contains(destination)) { dist.Add(destination, Double.PositiveInfinity); }
+            if (!graph.Contains(destination)) { Q.Add(destination, Double.PositiveInfinity); }
 
             Dictionary<gVertex, gVertex> ParentVertices = new Dictionary<gVertex, gVertex>();
-            List<gVertex> Q = new List<gVertex>(dist.Keys.ToList());
+            //List<gVertex> Q = new List<gVertex>(dist.Keys.ToList());
             List<gVertex> S = new List<gVertex>();
 
-            while (Q.Any())
+            while (Q.Size > 0)
             {
-                Q = Q.OrderBy(v => dist[v]).ToList();
-                gVertex vertex = Q.First();
-                Q.RemoveAt(0);
+                //Q = Q.OrderBy(v => dist[v]).ToList();
+                double minDistance = Q.MinValue();
+                gVertex vertex = Q.Take();
+                //Q.RemoveAt(0);
                 S.Add(vertex);
 
                 if (vertex.Equals(destination)) { break; }
@@ -51,11 +52,12 @@ namespace Graphical
                 foreach(gEdge e in edges)
                 {
                     gVertex w = e.GetVertexPair(vertex);
-                    double newLength = dist[vertex] + e.length;
+                    double newLength = minDistance + e.length;
                     
-                    if(newLength < dist[w])
+                    if(!S.Contains(w) && newLength < Q.GetValue(w))
                     {
-                        dist[w] = newLength;
+                        Q.UpdateValue(w, newLength);
+                        //dist[w] = newLength;
                         ParentVertices[w] = vertex;
                     }
                 }
