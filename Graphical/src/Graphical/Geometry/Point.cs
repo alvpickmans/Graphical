@@ -224,7 +224,7 @@ namespace Graphical.Geometry
         {
             // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
             // for details of below formula.
-            double value;
+            double value = 0;
             switch (plane)
             {
                 case "xy":
@@ -240,7 +240,7 @@ namespace Graphical.Geometry
                     throw new Exception("Plane not defined");
             }
             //Rounding due to floating point error.
-            value = ((int)(value * rounding)) / rounding2;
+            value = Math.Round(value, 6);
             if (value == 0) { return 0; } //Points are colinear
             int result = (value > 0) ? 1 : -1;
 
