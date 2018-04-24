@@ -220,6 +220,8 @@ namespace Graphical.Graphs
             if (!edges.Contains(edge)) { edges.Add(edge); }
         }
 
+        #endregion
+
         /// <summary>
         /// Get graph edges as lines
         /// </summary>
@@ -228,14 +230,6 @@ namespace Graphical.Graphs
         {
             return edges.Select(e => e.LineGeometry()).ToList();
         }
-
-        public List<int> GraphNumberOfEdges()
-        {
-            return graph.Values.ToList().Select(vertex => vertex.Count).ToList();
-        }
-
-
-        #endregion
 
         #region Override Methods
         //TODO: Improve overriding equality methods as per http://www.loganfranken.com/blog/687/overriding-equals-in-c-part-1/

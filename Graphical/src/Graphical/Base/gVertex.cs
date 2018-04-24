@@ -25,13 +25,11 @@ namespace Graphical.Base
         const int rounding = 10 * 10;
         const double rounding2 = 10.0 * 10;
         #endregion
-
-        //HACK: Avoid using point as this creates unhandled geometry and consumes memory.
+        
         //TODO: Reorganize methods 
         #region Variables
         internal DSPoint point { get { return DSPoint.ByCoordinates(X, Y, Z); } }
         internal int polygonId { get; set; }
-        //public gEdge[] AdjacentEdges { get; private set; }
 
         internal double X { get; private set; }
         internal double Y { get; private set; }
@@ -42,11 +40,10 @@ namespace Graphical.Base
         #region Constructors
         internal gVertex(double x, double y, double z = 0, int pId = -1)
         {
-            //point = DSPoint.ByCoordinates(x, y, z);
             polygonId = pId;
-            X = ((int)(x * rounding)) / rounding2;
-            Y = ((int)(y * rounding)) / rounding2;
-            Z = ((int)(z * rounding)) / rounding2;
+            X = Math.Round(x, 6);
+            Y = Math.Round(y, 6);
+            Z = Math.Round(z, 6);
         }
 
         /// <summary>
@@ -91,14 +88,30 @@ namespace Graphical.Base
             
         }
 
-        internal static int Orientation(gVertex v1, gVertex v2, gVertex v3, string plane = "xy")
+        internal static int Orientation(gVertex v1, gVertex p2, gVertex p3, string plane = "xy")
         {
-            using (DSPoint p1 = v1.point)
-            using (DSPoint p2 = v2.point)
-            using (DSPoint p3 = v3.point)
+            // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
+            // for details of below formula.
+            double value = 0;
+            switch (plane)
             {
-                return Graphical.Geometry.Point.Orientation(p1, p2, p3, plane);
+                case "xy":
+                    value = (p2.X - v1.X) * (p3.Y - p2.Y) - (p2.Y - v1.Y) * (p3.X - p2.X);
+                    break;
+                case "xz":
+                    value = (p2.X - v1.X) * (p3.Z - p2.Z) - (p2.Z - v1.Z) * (p3.X - p2.X);
+                    break;
+                case "yz":
+                    value = (p2.Y - v1.Y) * (p3.Z - p2.Z) - (p2.Z - v1.Z) * (p3.Y - p2.Y);
+                    break;
+                default:
+                    throw new Exception("Plane not defined");
             }
+            //Rounding due to floating point error.
+            value = Math.Round(value, 6);
+            if (value == 0) { return 0; } //Points are colinear
+
+            return (value > 0) ? 1 : -1; //Counter clock or clock wise
         }
 
         internal static double RadAngle(gVertex centre, gVertex vertex)
@@ -125,42 +138,25 @@ namespace Graphical.Base
             return vertices.OrderBy(v => v.Y).ThenBy(v => v.X).ThenBy(v => v.Z).ToList().First();
         }
 
-        
-        internal double DistanceTo(object obj)
+        internal double DistanceTo(gVertex vertex)
         {
-            if(GetType() == obj.GetType())
+            return Math.Sqrt(Math.Pow(vertex.X - X, 2) + Math.Pow(vertex.Y - Y, 2) + Math.Pow(vertex.Z - Z, 2));
+        }
+
+        internal double DistanceTo(gEdge edge)
+        {
+            using (DSPoint p = this.point)
+            using (Line line = edge.LineGeometry())
             {
-                gVertex v = (gVertex)obj;
-                using (DSPoint p1 = this.point)
-                using (DSPoint p2 = v.point)
-                {
-                    return p1.DistanceTo(p2);
-                }
-            }else if(obj.GetType() == typeof(gEdge))
-            {
-                gEdge e = (gEdge)obj;
-                using (DSPoint p = this.point)
-                using (Line line = e.LineGeometry())
-                {
-                    return p.DistanceTo(line);
-                }
-            }
-            else
-            {
-                using (DSPoint p = this.point)
-                {
-                    return p.DistanceTo(obj as Autodesk.DesignScript.Geometry.Geometry); 
-                }
+                return p.DistanceTo(line);
             }
         }
 
-        internal static int Orientation(gVertex v1, gVertex v2, gVertex v3)
+        internal double DistanceTo(Autodesk.DesignScript.Geometry.Geometry obj)
         {
-            using (DSPoint p1 = v1.point)
-            using (DSPoint p2 = v2.point)
-            using (DSPoint p3 = v3.point)
+            using (DSPoint p = this.point)
             {
-                return Graphical.Geometry.Point.Orientation(p1, p2, p3);
+                return p.DistanceTo(obj); 
             }
         }
 

@@ -511,8 +511,13 @@ namespace Graphical.Graphs
             return newVisGraph;
         }
 
-        public static Graph ShortestPath(VisibilityGraph visibilityGraph, DSPoint origin, DSPoint destination)
+        [MultiReturn(new[] { "graph", "totalLength", "miliseconds" })]
+        public static Dictionary<string, object> ShortestPath(VisibilityGraph visibilityGraph, DSPoint origin, DSPoint destination)
         {
+            Graph shortest;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
             if (visibilityGraph == null) { throw new ArgumentNullException("visibilityGraph"); }
             if (origin == null) { throw new ArgumentNullException("origin"); }
             if (destination == null) { throw new ArgumentNullException("destination"); }
@@ -525,29 +530,40 @@ namespace Graphical.Graphs
             
             if(containsOrigin && containsDestination)
             {
-                return Algorithms.Dijkstra(visibilityGraph, gOrigin, gDestination);
+                shortest = Algorithms.Dijkstra(visibilityGraph, gOrigin, gDestination);
             }
-
-            gVertex gO = (!containsOrigin) ? gOrigin : null;
-            gVertex gD = (!containsDestination) ? gDestination : null;
-            Graph tempGraph = new Graph();
-
-            if (!containsOrigin)
+            else
             {
-                foreach(gVertex v in VisibleVertices(gOrigin, visibilityGraph.baseGraph, null, gD, null, "full", true))
+                gVertex gO = (!containsOrigin) ? gOrigin : null;
+                gVertex gD = (!containsDestination) ? gDestination : null;
+                Graph tempGraph = new Graph();
+
+                if (!containsOrigin)
                 {
-                    tempGraph.AddEdge(new gEdge(gOrigin, v));
+                    foreach (gVertex v in VisibleVertices(gOrigin, visibilityGraph.baseGraph, null, gD, null, "full", true))
+                    {
+                        tempGraph.AddEdge(new gEdge(gOrigin, v));
+                    }
                 }
-            }
-            if (!containsDestination)
-            {
-                foreach(gVertex v in VisibleVertices(gDestination, visibilityGraph.baseGraph, gO, null, null, "full", true))
+                if (!containsDestination)
                 {
-                    tempGraph.AddEdge(new gEdge(gDestination, v));
+                    foreach (gVertex v in VisibleVertices(gDestination, visibilityGraph.baseGraph, gO, null, null, "full", true))
+                    {
+                        tempGraph.AddEdge(new gEdge(gDestination, v));
+                    }
                 }
+                shortest =  Algorithms.Dijkstra(visibilityGraph, gOrigin, gDestination, tempGraph);
             }
 
-            return Algorithms.Dijkstra(visibilityGraph, gOrigin, gDestination, tempGraph);
+            sw.Stop();
+
+            return new Dictionary<string, object>()
+            {
+                {"graph", shortest },
+                {"totalLength", shortest.edges.Select(e => e.length).Sum() },
+                {"miliseconds", sw.ElapsedMilliseconds}
+            };
+
 
         }
 

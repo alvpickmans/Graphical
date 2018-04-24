@@ -222,29 +222,12 @@ namespace Graphical.Geometry
         /// -1 if orientation is clock wise.</returns>
          public static int Orientation(DSPoint p1, DSPoint p2, DSPoint p3, string plane = "xy")
         {
-            // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
-            // for details of below formula.
-            double value = 0;
-            switch (plane)
+            using (gVertex v1 = gVertex.ByPoint(p1))
+            using (gVertex v2 = gVertex.ByPoint(p2))
+            using (gVertex v3 = gVertex.ByPoint(p3))
             {
-                case "xy":
-                    value = (p2.X - p1.X) * (p3.Y - p2.Y) - (p2.Y - p1.Y) * (p3.X - p2.X);
-                    break;
-                case "xz":
-                    value = (p2.X - p1.X) * (p3.Z - p2.Z) - (p2.Z - p1.Z) * (p3.X - p2.X);
-                    break;
-                case "yz":
-                    value = (p2.Y - p1.Y) * (p3.Z - p2.Z) - (p2.Z - p1.Z) * (p3.Y - p2.Y);
-                    break;
-                default:
-                    throw new Exception("Plane not defined");
+                return gVertex.Orientation(v1, v2, v3, plane);
             }
-            //Rounding due to floating point error.
-            value = Math.Round(value, 6);
-            if (value == 0) { return 0; } //Points are colinear
-            int result = (value > 0) ? 1 : -1;
-
-            return (value > 0) ? 1 : -1; //Counter clock or clock wise
 
         } 
         #endregion

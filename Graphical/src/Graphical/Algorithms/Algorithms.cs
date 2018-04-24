@@ -29,15 +29,12 @@ namespace Graphical
             if (!graph.Contains(destination)) { Q.Add(destination, Double.PositiveInfinity); }
 
             Dictionary<gVertex, gVertex> ParentVertices = new Dictionary<gVertex, gVertex>();
-            //List<gVertex> Q = new List<gVertex>(dist.Keys.ToList());
             List<gVertex> S = new List<gVertex>();
 
             while (Q.Size > 0)
             {
-                //Q = Q.OrderBy(v => dist[v]).ToList();
-                double minDistance = Q.MinValue();
+                double minDistance = Q.PeekValue();
                 gVertex vertex = Q.Take();
-                //Q.RemoveAt(0);
                 S.Add(vertex);
 
                 if (vertex.Equals(destination)) { break; }
@@ -76,5 +73,6 @@ namespace Graphical
             return path;
             
         }
+        
     }
 }
