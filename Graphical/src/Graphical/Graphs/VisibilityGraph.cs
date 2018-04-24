@@ -30,7 +30,10 @@ namespace Graphical.Graphs
 
         #region Internal Constructors
         [IsVisibleInDynamoLibrary(false)]
-        internal VisibilityGraph() : base() { }
+        internal VisibilityGraph() : base()
+        {
+            baseGraph = new Graph();
+        }
 
         internal VisibilityGraph(Graph _baseGraph, bool reducedGraph) : base()
         {
@@ -65,14 +68,39 @@ namespace Graphical.Graphs
         /// <param name="polygons">Set of internal polygons</param>
         /// <param name="boundaries">Set of boundary polygons. These must not be present on the internal polygons list.</param>
         /// <returns name="visibilityGraph">VisibilityGraph graph</returns>
-        public static VisibilityGraph ByPolygonsAndBoundaries(DSPolygon[] polygons, DSPolygon[] boundaries, bool reducedGraph = true)
+        public static VisibilityGraph ByPolygonsAndBoundaries(DSPolygon[] boundaries, [DefaultArgument("{}")]DSPolygon[] polygons = null, bool reducedGraph = true)
         {
-            List<gPolygon> gPolygons = FromPolygons(polygons, false);
-            gPolygons.AddRange(FromPolygons(boundaries, true));
+            List<gPolygon> gPolygons = FromPolygons(boundaries, true);
+            if(polygons.Any())
+            {
+                gPolygons.AddRange(FromPolygons(polygons, false));
+            }
             Graph baseGraph = new Graph(gPolygons);
             return new VisibilityGraph(baseGraph, reducedGraph);
         }
 
+
+        public static VisibilityGraph Merge(List<VisibilityGraph> graphs)
+        {
+            VisibilityGraph newGraph = new VisibilityGraph();
+
+            foreach (VisibilityGraph g in graphs)
+            {
+                foreach (gPolygon p in g.baseGraph.polygons.Values)
+                {
+                    p.id = newGraph.baseGraph.pId;
+                    newGraph.baseGraph.polygons.Add(p.id, p);
+                    newGraph.baseGraph.pId++;
+                }               
+
+                foreach (gEdge e in g.edges)
+                {
+                    newGraph.AddEdge(e);
+                }
+            }
+            newGraph.baseGraph = new Graph(newGraph.baseGraph.polygons.Values.ToList());
+            return newGraph;
+        }
         #endregion
 
         #region Internal Methods
@@ -205,7 +233,8 @@ namespace Graphical.Graphs
                     isVisible = true;
                     foreach (EdgeKey k in openEdges)
                     {
-                        if (!k.edge.Contains(prev) && EdgeIntersect(prev, vertex, k.edge))
+                        //if (!k.edge.Contains(prev) && EdgeIntersect(prev, vertex, k.edge))
+                        if (EdgeIntersect(prev, vertex, k.edge))
                         {
                             isVisible = false;
                             break;
@@ -268,7 +297,7 @@ namespace Graphical.Graphs
                     }
                 }
 
-                if (baseGraph.graph.ContainsKey(vertex))
+                if (baseGraph.Contains(vertex))
                 {
                     foreach (gEdge e in baseGraph.graph[vertex])
                     {
@@ -351,7 +380,7 @@ namespace Graphical.Graphs
         {
             //Not on the same polygon
             if (v1.polygonId != v2.polygonId) { return false; }
-            //At least one doesn´t belong to any polygon
+            //At least one doesn't belong to any polygon
             if (v1.polygonId == -1 || v2.polygonId == -1) { return false; }
             gVertex midVertex = gVertex.MidVertex(v1, v2);
             return VertexInPolygon(midVertex, graph.polygons[v1.polygonId].edges, maxDistance);
