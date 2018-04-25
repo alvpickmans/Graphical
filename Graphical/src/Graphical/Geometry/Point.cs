@@ -62,11 +62,10 @@ namespace Graphical.Geometry
         /// <returns></returns>
         public static double ArcRadAngle(DSPoint centre, DSPoint start, DSPoint end)
         {
-            double a = Math.Pow((end.X - centre.X), 2) + Math.Pow((end.Y - centre.Y), 2);
-            double b = Math.Pow((end.X - start.X), 2) + Math.Pow((end.Y - start.Y), 2);
-            double c = Math.Pow((centre.X - start.X), 2) + Math.Pow((centre.Y - start.Y), 2);
-            return Math.Acos((a + c - b) / (2 * Math.Sqrt(a) * Math.Sqrt(c)));
-
+            gVertex c = gVertex.ByPoint(centre);
+            gVertex s = gVertex.ByPoint(start);
+            gVertex e = gVertex.ByPoint(end);
+            return gVertex.ArcRadAngle(c, s, e);
         } 
         #endregion
 
@@ -132,39 +131,9 @@ namespace Graphical.Geometry
         /// <returns name="rad">Radians</returns>
         internal static double RadAngle(DSPoint centre, DSPoint point)
         {
-            //Rad angles http://math.rice.edu/~pcmi/sphere/drg_txt.html
-            double dx = point.X - centre.X;
-            double dy = point.Y - centre.Y;
-            //TODO: Implement Z angle? that would becom UV coordinates.
-            //double dz = vertex.point.Z - centre.point.Z;
-
-            if (dx == 0 && dy == 0) { return 0; }
-
-            if (dx == 0)// both vertices on Y axis
-            {
-                if (dy < 0)//vertex below X axis
-                {
-                    return (Math.PI * 3 / 2);
-                }
-                else//vertex above X Axis
-                {
-                    return Math.PI / 2;
-                }
-            }
-            if (dy == 0)// both vertices on X Axis
-            {
-                if (dx < 0)// vertex on the left of Y axis
-                {
-                    return Math.PI;
-                }
-                else//vertex on the right of Y axis
-                {
-                    return 0;
-                }
-            }
-            if (dx < 0) { return Math.PI + Math.Atan(dy / dx); }
-            if (dy < 0) { return 2 * Math.PI + Math.Atan(dy / dx); }
-            return Math.Atan(dy / dx);
+            gVertex v1 = gVertex.ByPoint(centre);
+            gVertex v2 = gVertex.ByPoint(point);
+            return gVertex.RadAngle(v1, v2);
         }
 
 
@@ -222,13 +191,10 @@ namespace Graphical.Geometry
         /// -1 if orientation is clock wise.</returns>
          public static int Orientation(DSPoint p1, DSPoint p2, DSPoint p3, string plane = "xy")
         {
-            using (gVertex v1 = gVertex.ByPoint(p1))
-            using (gVertex v2 = gVertex.ByPoint(p2))
-            using (gVertex v3 = gVertex.ByPoint(p3))
-            {
-                return gVertex.Orientation(v1, v2, v3, plane);
-            }
-
+            gVertex v1 = gVertex.ByPoint(p1);
+            gVertex v2 = gVertex.ByPoint(p2);
+            gVertex v3 = gVertex.ByPoint(p3);
+            return gVertex.Orientation(v1, v2, v3, plane);
         } 
         #endregion
 

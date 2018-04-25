@@ -18,7 +18,7 @@ namespace Graphical.Base
     /// Representation of vertex points on a graph.
     /// </summary>
     [IsVisibleInDynamoLibrary(false)]
-    public class gVertex : IGraphicItem, IDisposable, ICloneable, IEquatable<gVertex>
+    public class gVertex : IGraphicItem, ICloneable, IEquatable<gVertex>
     {
 
         #region Constants
@@ -116,21 +116,48 @@ namespace Graphical.Base
 
         internal static double RadAngle(gVertex centre, gVertex vertex)
         {
-            using (DSPoint p1 = centre.point)
-            using(DSPoint p2 = vertex.point)
+            //Rad angles http://math.rice.edu/~pcmi/sphere/drg_txt.html
+            double dx = vertex.X - centre.X;
+            double dy = vertex.Y - centre.Y;
+            //TODO: Implement Z angle? that would becom UV coordinates.
+            //double dz = vertex.point.Z - centre.point.Z;
+
+            if (dx == 0 && dy == 0) { return 0; }
+
+            if (dx == 0)// both vertices on Y axis
             {
-                return Graphical.Geometry.Point.RadAngle(p1, p2);
+                if (dy < 0)//vertex below X axis
+                {
+                    return (Math.PI * 3 / 2);
+                }
+                else//vertex above X Axis
+                {
+                    return Math.PI / 2;
+                }
             }
+            if (dy == 0)// both vertices on X Axis
+            {
+                if (dx < 0)// vertex on the left of Y axis
+                {
+                    return Math.PI;
+                }
+                else//vertex on the right of Y axis
+                {
+                    return 0;
+                }
+            }
+            if (dx < 0) { return Math.PI + Math.Atan(dy / dx); }
+            if (dy < 0) { return 2 * Math.PI + Math.Atan(dy / dx); }
+            return Math.Atan(dy / dx);
         }
 
         internal static double ArcRadAngle (gVertex centre, gVertex start, gVertex end)
         {
-            using (DSPoint c = centre.point)
-            using (DSPoint s = start.point)
-            using (DSPoint e = end.point)
-            {
-                return Graphical.Geometry.Point.ArcRadAngle(c, s, e);
-            }
+            double a = Math.Pow((end.X - centre.X), 2) + Math.Pow((end.Y - centre.Y), 2);
+            double b = Math.Pow((end.X - start.X), 2) + Math.Pow((end.Y - start.Y), 2);
+            double c = Math.Pow((centre.X - start.X), 2) + Math.Pow((centre.Y - start.Y), 2);
+            return Math.Acos((a + c - b) / (2 * Math.Sqrt(a) * Math.Sqrt(c)));
+            
         }
 
         internal static gVertex MinimumVertex(List<gVertex> vertices)
@@ -242,14 +269,6 @@ namespace Graphical.Base
         {
             package.AddPointVertex(X, Y, Z);
             package.AddPointVertexColor(255, 0, 0, 255);
-        }
-
-        /// <summary>
-        /// Implementation of Dispose method
-        /// </summary>
-        public void Dispose()
-        {
-            ((IDisposable)point).Dispose();
         }
 
         /// <summary>
