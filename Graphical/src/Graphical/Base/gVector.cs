@@ -16,12 +16,17 @@ namespace Graphical.Base
     [IsVisibleInDynamoLibrary(false)]
     public class gVector
     {
+        #region Public Properties
         public double X { get; private set; }
         public double Y { get; private set; }
         public double Z { get; private set; }
-        public double Length { get; private set; }
+        public double Length { get; private set; } 
+        #endregion
 
-        public gVector(double x, double y, double z, double length = Double.PositiveInfinity)
+
+        #region Constructors
+
+        private gVector(double x, double y, double z, double length = Double.PositiveInfinity)
         {
             X = x;
             Y = y;
@@ -30,7 +35,12 @@ namespace Graphical.Base
             Length = Math.Round(Length, 6, MidpointRounding.AwayFromZero);
         }
 
-        public static gVector ByVertices(gVertex start, gVertex end)
+        public static gVector ByCoordinates(double x, double y, double z)
+        {
+            return new gVector(x, y, z);
+        }
+
+        public static gVector ByTwoVertices(gVertex start, gVertex end)
         {
             var x = end.X - start.X;
             var y = end.Y - start.Y;
@@ -39,12 +49,29 @@ namespace Graphical.Base
             return new gVector(x, y, z, length);
         }
 
+        public static gVector XAxis()
+        {
+            return new gVector(1, 0, 0, 1);
+        }
+
+        public static gVector YAxis()
+        {
+            return new gVector(0, 1, 0, 1);
+        }
+
+        public static gVector ZAxis()
+        {
+            return new gVector(0, 0, 1, 1);
+        }
+        #endregion
+
+        #region Public Methods
         public double Dot(gVector vector)
         {
             return (this.X * vector.X) + (this.Y * vector.Y) + (this.Z * vector.Z);
         }
 
-        public double Angle (gVector vector)
+        public double Angle(gVector vector)
         {
             double dot = this.Dot(vector);
             double cos = dot / (this.Length * vector.Length);
@@ -57,9 +84,12 @@ namespace Graphical.Base
             double y = (this.Z * vector.X) - (this.X * vector.Z);
             double z = (this.X * vector.Y) - (this.Y * vector.X);
             double angle = ToRadians(this.Angle(vector));
-            double length = this.Length * vector.Length *Math.Sin(angle);
+            double length = this.Length * vector.Length * Math.Sin(angle);
             return new gVector(x, y, z, length);
         }
+        #endregion
+
+        #region Internal Methods
 
         internal static double ToDegrees(double radians)
         {
@@ -69,7 +99,8 @@ namespace Graphical.Base
         internal static double ToRadians(double degrees)
         {
             return degrees * (Math.PI / 180);
-        }
+        } 
+        #endregion
 
     }
 }

@@ -14,7 +14,7 @@ namespace Graphical.Base.Tests
         [Test]
         public void ByCoordinatesTest()
         {
-            gVector v = new gVector(0, 4, 3);
+            gVector v = gVector.ByCoordinates(0, 4, 3);
             Assert.AreEqual(0, v.X);
             Assert.AreEqual(4, v.Y);
             Assert.AreEqual(3, v.Z);
@@ -26,7 +26,7 @@ namespace Graphical.Base.Tests
         {
             gVertex vertex1 = gVertex.ByCoordinates(10, 10, 10);
             gVertex vertex2 = gVertex.ByCoordinates(10, 14, 13);
-            gVector v = gVector.ByVertices(vertex1, vertex2);
+            gVector v = gVector.ByTwoVertices(vertex1, vertex2);
             Assert.AreEqual(0, v.X);
             Assert.AreEqual(4, v.Y);
             Assert.AreEqual(3, v.Z);
@@ -62,7 +62,7 @@ namespace Graphical.Base.Tests
             var vectors = TestVectorPair();
             var v1 = vectors[0];
             var v2 = vectors[1];
-            var v3 = new gVector(34, 100, 43.2);
+            var v3 = gVector.ByCoordinates(34, 100, 43.2);
             var cross12 = v1.Cross(v2);
             var cross13 = v1.Cross(v3);
 
@@ -78,9 +78,9 @@ namespace Graphical.Base.Tests
 
         public gVector[] TestVectorPair()
         {
-            var a = new gVector(0, 10, 10);
-            var b = new gVector(0, 10, 0);
-            var c = new gVector(0, 10, -10);
+            var a = gVector.ByCoordinates(0, 10, 10);
+            var b = gVector.ByCoordinates(0, 10, 0);
+            var c = gVector.ByCoordinates(0, 10, -10);
             return new gVector[] { a, b, c };
         }
 
