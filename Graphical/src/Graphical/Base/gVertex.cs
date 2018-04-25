@@ -38,7 +38,7 @@ namespace Graphical.Base
         #endregion
 
         #region Constructors
-        internal gVertex(double x, double y, double z = 0, int pId = -1)
+        private gVertex(double x, double y, double z = 0, int pId = -1)
         {
             polygonId = pId;
             X = Math.Round(x, 6);
@@ -63,7 +63,7 @@ namespace Graphical.Base
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <returns></returns>
-        internal static gVertex ByCoordinates(double x, double y, double z)
+        public static gVertex ByCoordinates(double x, double y, double z)
         {
             return new gVertex(x, y, z);
         }

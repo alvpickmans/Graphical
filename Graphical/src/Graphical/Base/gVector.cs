@@ -27,14 +27,16 @@ namespace Graphical.Base
             Y = y;
             Z = z;
             Length = (Double.IsPositiveInfinity(length)) ? Math.Sqrt(Math.Pow(X, 2) + Math.Pow(Y, 2) + Math.Pow(Z, 2)) : length;
+            Length = Math.Round(Length, 6, MidpointRounding.AwayFromZero);
         }
 
-        public gVector(gVertex start, gVertex end)
+        public static gVector ByVertices(gVertex start, gVertex end)
         {
-            X = end.X - start.X;
-            Y = end.Y - start.Y;
-            Z = end.Z - start.Z;
-            Length = Math.Sqrt(Math.Pow(X, 2) + Math.Pow(Y, 2) + Math.Pow(Z, 2));
+            var x = end.X - start.X;
+            var y = end.Y - start.Y;
+            var z = end.Z - start.Z;
+            var length = Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2) + Math.Pow(z, 2));
+            return new gVector(x, y, z, length);
         }
 
         public double Dot(gVector vector)
@@ -45,7 +47,8 @@ namespace Graphical.Base
         public double Angle (gVector vector)
         {
             double dot = this.Dot(vector);
-            return Math.Acos(dot / (this.Length * vector.Length));
+            double cos = dot / (this.Length * vector.Length);
+            return ToDegrees(Math.Acos(cos));
         }
 
         public gVector Cross(gVector vector)
@@ -53,9 +56,19 @@ namespace Graphical.Base
             double x = (this.Y * vector.Z) - (this.Z * vector.Y);
             double y = (this.Z * vector.X) - (this.X * vector.Z);
             double z = (this.X * vector.Y) - (this.Y * vector.X);
-            double angle = this.Angle(vector);
-            double length = this.Length * vector.Length * Math.Sin(angle);
+            double angle = ToRadians(this.Angle(vector));
+            double length = this.Length * vector.Length *Math.Sin(angle);
             return new gVector(x, y, z, length);
+        }
+
+        internal static double ToDegrees(double radians)
+        {
+            return radians * (180 / Math.PI);
+        }
+
+        internal static double ToRadians(double degrees)
+        {
+            return degrees * (Math.PI / 180);
         }
 
     }
