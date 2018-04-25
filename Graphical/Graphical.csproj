@@ -154,6 +154,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Graphical\Algorithms\Algorithms.cs" />
     <Compile Include="src\Graphical\Base\gPolygon.cs" />
+    <Compile Include="src\Graphical\Base\gVector.cs" />
     <Compile Include="src\Graphical\Geometry\Mesh.cs" />
     <Compile Include="src\Graphical\Geometry\MeshToolkit.cs" />
     <Compile Include="src\Graphical\Geometry\Visibility.cs" />
