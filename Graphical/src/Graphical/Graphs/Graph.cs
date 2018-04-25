@@ -231,6 +231,11 @@ namespace Graphical.Graphs
             return edges.Select(e => e.LineGeometry()).ToList();
         }
 
+        public List<int> EdgesPerVertex()
+        {
+            return graph.Values.Select(v => v.Count).ToList();
+        }
+
         #region Override Methods
         //TODO: Improve overriding equality methods as per http://www.loganfranken.com/blog/687/overriding-equals-in-c-part-1/
 
@@ -271,10 +276,16 @@ namespace Graphical.Graphs
         {
             Graph newGraph = new Graph()
             {
-                graph = new Dictionary<gVertex, List<gEdge>>(this.graph),
+                graph = new Dictionary<gVertex, List<gEdge>>(),
                 edges = new List<gEdge>(this.edges),
                 polygons = new Dictionary<int, gPolygon>(this.polygons)
             };
+
+            foreach(var item in this.graph)
+            {
+                newGraph.graph.Add(item.Key, new List<gEdge>(item.Value));
+            }
+
             return newGraph;
         }
         #endregion

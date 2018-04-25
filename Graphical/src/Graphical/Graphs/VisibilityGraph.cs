@@ -575,11 +575,17 @@ namespace Graphical.Graphs
         {
             VisibilityGraph newGraph = new VisibilityGraph()
             {
-                graph = new Dictionary<gVertex, List<gEdge>>(this.graph),
+                graph = new Dictionary<gVertex, List<gEdge>>(),
                 edges = new List<gEdge>(this.edges),
                 polygons = new Dictionary<int, gPolygon>(this.polygons),
                 baseGraph = (Graph)this.baseGraph.Clone()
             };
+
+            foreach (var item in this.graph)
+            {
+                newGraph.graph.Add(item.Key, new List<gEdge>(item.Value));
+            }
+
             return newGraph;
         }
         
