@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Graphical.Base;
 using Graphical.Geometry;
-using DSVector = Autodesk.DesignScript.Geometry.Vector;
 using DSPoint = Autodesk.DesignScript.Geometry.Point;
 using DSLine = Autodesk.DesignScript.Geometry.Line;
 using DSPolygon = Autodesk.DesignScript.Geometry.Polygon;
@@ -68,15 +67,57 @@ namespace Graphical.Graphs
         /// <param name="polygons">Set of internal polygons</param>
         /// <param name="boundaries">Set of boundary polygons. These must not be present on the internal polygons list.</param>
         /// <returns name="visibilityGraph">VisibilityGraph graph</returns>
-        public static VisibilityGraph ByPolygonsAndBoundaries(DSPolygon[] boundaries, [DefaultArgument("{}")]DSPolygon[] polygons = null, bool reducedGraph = true)
+        [MultiReturn(new[] { "visibilityGraph", "miliseconds" })]
+        public static Dictionary<string, object> ByPolygonsAndBoundaries(DSPolygon[] boundaries, [DefaultArgument("{}")]DSPolygon[] polygons = null, bool reducedGraph = true)
         {
+            var sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
             List<gPolygon> gPolygons = FromPolygons(boundaries, true);
             if(polygons.Any())
             {
                 gPolygons.AddRange(FromPolygons(polygons, false));
             }
             Graph baseGraph = new Graph(gPolygons);
-            return new VisibilityGraph(baseGraph, reducedGraph);
+
+            var g = new VisibilityGraph(baseGraph, reducedGraph);
+
+            sw.Stop();
+
+            return new Dictionary<string, object>()
+            {
+                {"visibilityGraph", g },
+                {"miliseconds", sw.ElapsedMilliseconds }
+            };
+        }
+
+        [MultiReturn(new[] { "visibilityGraph", "miliseconds" })]
+        public static Dictionary<string, object> ByPolygonsAndBoundariesFromPoint(DSPoint point,  DSPolygon[] boundaries, [DefaultArgument("{}")]DSPolygon[] polygons = null, bool reducedGraph = true)
+        {
+            var sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            List<gPolygon> gPolygons = FromPolygons(boundaries, true);
+            if (polygons.Any())
+            {
+                gPolygons.AddRange(FromPolygons(polygons, false));
+            }
+            Graph _baseGraph = new Graph(gPolygons);
+
+            var g = new VisibilityGraph()
+            {
+                baseGraph = _baseGraph
+            };
+
+            gVertex origin = gVertex.ByCoordinates(point.X, point.Y, point.Z);
+            if (g.baseGraph.Contains(origin)) { origin = g.baseGraph.vertices[g.baseGraph.vertices.IndexOf(origin)]; }
+            g.edges = g.VisibilityAnalysis(g.baseGraph, new List<gVertex>() { origin }, reducedGraph, "full");
+
+            sw.Stop();
+
+            return new Dictionary<string, object>()
+            {
+                {"visibilityGraph", g },
+                {"miliseconds", sw.ElapsedMilliseconds }
+            };
         }
 
 
@@ -105,13 +146,13 @@ namespace Graphical.Graphs
 
         #region Internal Methods
 
-        internal List<gEdge> VisibilityAnalysis(Graph baseGraph, List<gVertex> vertices, bool reducedGraph)
+        internal List<gEdge> VisibilityAnalysis(Graph baseGraph, List<gVertex> vertices, bool reducedGraph, string scan = "full")
         {
             List<gEdge> visibleEdges = new List<gEdge>();
 
             foreach (gVertex v in vertices)
             {
-                foreach (gVertex v2 in VisibleVertices(v, baseGraph, null, null, null, "half", reducedGraph))
+                foreach (gVertex v2 in VisibleVertices(v, baseGraph, null, null, null, scan, reducedGraph))
                 {
                     gEdge newEdge = new gEdge(v, v2);
                     if (!visibleEdges.Contains(newEdge)) { visibleEdges.Add(newEdge); }
@@ -162,20 +203,20 @@ namespace Graphical.Graphs
             //Initialize openEdges with any intersection edges on the half line 
             //from centre to maxDistance on the XAxis
             List<EdgeKey> openEdges = new List<EdgeKey>();
-            using (DSLine halfLine = DSLine.ByStartPointDirectionLength(centre.point, DSVector.XAxis(), maxDistance))
+            double xMax = Math.Abs(centre.X) * maxDistance;
+            gEdge halfEdge = gEdge.ByStartVertexEndVertex(centre, gVertex.ByCoordinates(xMax, centre.Y, centre.Z));
+            foreach (gEdge e in edges)
             {
-                foreach (gEdge e in edges)
+                if (e.Contains(centre)) { continue; }
+                if (EdgeIntersect(halfEdge, e))
                 {
-                    if (e.Contains(centre)) { continue; }
-                    if (EdgeIntersect(halfLine, e))
-                    {
-                        if (gVertex.OnLine(e.StartVertex, halfLine)) { continue; }
-                        if (gVertex.OnLine(e.EndVertex, halfLine)) { continue; }
-                        EdgeKey k = new EdgeKey(halfLine, e);
-                        Core.List.AddItemSorted(openEdges, k);
-                    }
+                    if (e.StartVertex.OnEdge(halfEdge)) { continue; }
+                    if (e.EndVertex.OnEdge(halfEdge)) { continue; }
+                    EdgeKey k = new EdgeKey(halfEdge, e);
+                    Core.List.AddItemSorted(openEdges, k);
                 }
-            } //
+            }
+           
             #endregion
 
             List<gVertex> visibleVertices = new List<gVertex>();
@@ -210,13 +251,13 @@ namespace Graphical.Graphs
                 bool isVisible = false;
 
                 //No collinear vertices
-                if (prev == null || gVertex.Orientation(centre, prev, vertex) != 0 || !gVertex.OnLine(centre, prev, vertex))
+                if (prev == null || gVertex.Orientation(centre, prev, vertex) != 0 || !prev.OnEdge(centre, vertex))
                 {
                     if (openEdges.Count == 0)
                     {
                         isVisible = true;
                     }
-                    else if (!EdgeIntersect(centre, vertex, openEdges[0].edge))
+                    else if (!EdgeIntersect(centre, vertex, openEdges[0].Edge))
                     {
                         isVisible = true;
                     }
@@ -234,7 +275,7 @@ namespace Graphical.Graphs
                     foreach (EdgeKey k in openEdges)
                     {
                         //if (!k.edge.Contains(prev) && EdgeIntersect(prev, vertex, k.edge))
-                        if (EdgeIntersect(prev, vertex, k.edge))
+                        if (EdgeIntersect(prev, vertex, k.Edge))
                         {
                             isVisible = false;
                             break;
@@ -313,15 +354,15 @@ namespace Graphical.Graphs
             return visibleVertices;
         }
 
-        internal static bool EdgeIntersect(DSLine halfLine, gEdge edge)
+        internal static bool EdgeIntersect(gEdge halfEdge, gEdge edge)
         {
             //For simplicity, it only takes into acount the 2d projection to the xy plane,
             //so the result will be based on a porjection even if points have z values.
             bool intersects = EdgeIntersectProjection(
-                halfLine.StartPoint,
-                halfLine.EndPoint,
-                edge.StartVertex.point,
-                edge.EndVertex.point,
+                halfEdge.StartVertex,
+                halfEdge.EndVertex,
+                edge.StartVertex,
+                edge.EndVertex,
                 "xy");
 
             return intersects;
@@ -332,44 +373,44 @@ namespace Graphical.Graphs
             //For simplicity, it only takes into acount the 2d projection to the xy plane,
             //so the result will be based on a porjection even if points have z values.
             bool intersects = EdgeIntersectProjection(
-                start.point,
-                end.point,
-                edge.StartVertex.point,
-                edge.EndVertex.point,
+                start,
+                end,
+                edge.StartVertex,
+                edge.EndVertex,
                 "xy");
 
             return intersects;
         }
 
         internal static bool EdgeIntersectProjection(
-            DSPoint p1,
-            DSPoint q1,
-            DSPoint p2,
-            DSPoint q2,
+            gVertex p1,
+            gVertex q1,
+            gVertex p2,
+            gVertex q2,
             string plane = "xy")
         {
             //For more details https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 
-            int o1 = Point.Orientation(p1, q1, p2, plane);
-            int o2 = Point.Orientation(p1, q1, q2, plane);
-            int o3 = Point.Orientation(p2, q2, p1, plane);
-            int o4 = Point.Orientation(p2, q2, q1, plane);
+            int o1 = gVertex.Orientation(p1, q1, p2, plane);
+            int o2 = gVertex.Orientation(p1, q1, q2, plane);
+            int o3 = gVertex.Orientation(p2, q2, p1, plane);
+            int o4 = gVertex.Orientation(p2, q2, q1, plane);
 
             //General case
             if (o1 != o2 && o3 != o4) { return true; }
 
             //Special Cases
             // p1, q1 and p2 are colinear and p2 lies on segment p1q1
-            if (o1 == 0 && Point.OnLineProjection(p1, p2, q1, plane)) { return true; }
+            if (o1 == 0 && gVertex.OnEdgeProjection(p1, p2, q1, plane)) { return true; }
 
             // p1, q1 and p2 are colinear and q2 lies on segment p1q1
-            if (o2 == 0 && Point.OnLineProjection(p1, q2, q1, plane)) { return true; }
+            if (o2 == 0 && gVertex.OnEdgeProjection(p1, q2, q1, plane)) { return true; }
 
             // p2, q2 and p1 are colinear and p1 lies on segment p2q2
-            if (o3 == 0 && Point.OnLineProjection(p2, p1, q2, plane)) { return true; }
+            if (o3 == 0 && gVertex.OnEdgeProjection(p2, p1, q2, plane)) { return true; }
 
             // p2, q2 and q1 are colinear and q1 lies on segment p2q2
-            if (o4 == 0 && Point.OnLineProjection(p2, q1, q2, plane)) { return true; }
+            if (o4 == 0 && gVertex.OnEdgeProjection(p2, q1, q2, plane)) { return true; }
 
             return false; //Doesn't fall on any of the above cases
 
@@ -430,14 +471,7 @@ namespace Graphical.Graphs
             //If intersections is odd, returns true, false otherwise
             return (intersections % 2 == 0) ? false : true;
         }
-
-        internal static bool DSVertexInPolygon(gVertex v1, List<gVertex> polygonVertices)
-        {
-            using (DSPolygon polygon = DSPolygon.ByPoints(polygonVertices.Select(v => v.point)))
-            {
-                return polygon.ContainmentTest(v1.point);
-            }
-        } 
+        
         #endregion
 
         #region Public Methods
@@ -484,11 +518,11 @@ namespace Graphical.Graphs
 
             foreach (DSPoint p in points)
             {
-                gVertex newVertex = gVertex.ByPoint(p);
+                gVertex newVertex = gVertex.ByCoordinates(p.X, p.Y, p.Z);
                 if (newVisGraph.Contains(newVertex)) { continue; }
-                gEdge closestEdge = newVisGraph.baseGraph.edges.OrderBy(e => e.DistanceTo(p)).First();
+                gEdge closestEdge = newVisGraph.baseGraph.edges.OrderBy(e => e.DistanceTo(newVertex)).First();
 
-                if (closestEdge.DistanceTo(p) > 0)
+                if (closestEdge.DistanceTo(newVertex) > 0)
                 {
                     singleVertices.Add(newVertex);
                 }
@@ -522,8 +556,8 @@ namespace Graphical.Graphs
             if (origin == null) { throw new ArgumentNullException("origin"); }
             if (destination == null) { throw new ArgumentNullException("destination"); }
 
-            gVertex gOrigin = gVertex.ByPoint(origin);
-            gVertex gDestination = gVertex.ByPoint(destination);
+            gVertex gOrigin = gVertex.ByCoordinates(origin.X, origin.Y, origin.Z);
+            gVertex gDestination = gVertex.ByCoordinates(destination.X, destination.Y, destination.Z);
 
             bool containsOrigin = visibilityGraph.Contains(gOrigin);
             bool containsDestination = visibilityGraph.Contains(gDestination);
@@ -560,7 +594,7 @@ namespace Graphical.Graphs
             return new Dictionary<string, object>()
             {
                 {"graph", shortest },
-                {"totalLength", shortest.edges.Select(e => e.length).Sum() },
+                {"totalLength", shortest.edges.Select(e => e.Length).Sum() },
                 {"miliseconds", sw.ElapsedMilliseconds}
             };
 
@@ -597,51 +631,43 @@ namespace Graphical.Graphs
     [IsVisibleInDynamoLibrary(false)]
     public class EdgeKey : IComparable<EdgeKey>
     {
-        internal gVertex centre { get; private set; }
-        internal gVertex vertex { get; private set; }
-        internal gEdge edge { get; private set; }
-        internal DSLine LineGeometry { get; private set; }
+        internal gVertex Centre { get; private set; }
+        internal gVertex Vertex { get; private set; }
+        internal gEdge Edge { get; private set; }
+        internal gEdge RayEdge { get; private set; }
 
-        internal EdgeKey(DSLine line, gEdge e)
+        internal EdgeKey(gEdge rayEdge, gEdge e)
         {
-            LineGeometry = line;
-            edge = e;
-            centre = gVertex.ByPoint(line.StartPoint);
-            vertex = gVertex.ByPoint(line.EndPoint);
+            RayEdge = rayEdge;
+            Edge = e;
+            Centre = RayEdge.StartVertex;
+            Vertex = RayEdge.EndVertex;
         }
         
-        internal EdgeKey(gVertex _centre, gVertex end, gEdge e)
+        internal EdgeKey(gVertex centre, gVertex end, gEdge e)
         {
-            centre = _centre;
-            vertex = end;
-            edge = e;
-            LineGeometry = DSLine.ByStartPointEndPoint(_centre.point, end.point);
+            Centre = centre;
+            Vertex = end;
+            Edge = e;
+            RayEdge = gEdge.ByStartVertexEndVertex(centre, end);
         }
 
-        internal static double DistanceToInteserction(gVertex centre, gVertex end, gEdge e)
+        internal static double DistanceToIntersection(gVertex centre, gVertex maxVertex, gEdge e)
         {
-            //This intersetion is using the 2d representation of the vertices and edge,
-            //as using the 3D geometry might cause wrong results.
-
-            using (DSPoint p1 = centre.GetProjectionOnPlane())
-            using (DSPoint p2 = end.GetProjectionOnPlane())
-            using (DSLine line = DSLine.ByStartPointEndPoint(p1, p2))
-            using (DSLine edgeLine = e.GetProjectionOnPlane())
+            var centreProj = gVertex.ByCoordinates(centre.X, centre.Y, 0);
+            var maxProj = gVertex.ByCoordinates(maxVertex.X, maxVertex.Y, 0);
+            var startProj = gVertex.ByCoordinates(e.StartVertex.X, e.StartVertex.Y, 0);
+            var endProj = gVertex.ByCoordinates(e.EndVertex.X, e.EndVertex.Y, 0);
+            gEdge rayEdge = gEdge.ByStartVertexEndVertex(centreProj, maxProj);
+            gEdge edgeProj = gEdge.ByStartVertexEndVertex(startProj, endProj);
+            gVertex intersection = rayEdge.Intersection(edgeProj);
+            if(intersection != null)
             {
-                bool doesIntersect = line.DoesIntersect(edgeLine);
-                double dot = Math.Abs(line.Direction.Normalized().Dot(edgeLine.Direction.Normalized()));
-                //If they intersect or not coincident(parallel)
-                if (doesIntersect && dot != 1)
-                {
-                    using (DSPoint intersection = line.Intersect(edgeLine).First() as DSPoint)
-                    {
-                        return centre.DistanceTo(intersection);
-                    }
-                }
-                else
-                {
-                    return 0;
-                }
+                return centre.DistanceTo(intersection);
+            }
+            else
+            {
+                return 0;
             }
         }
 
@@ -656,7 +682,7 @@ namespace Graphical.Graphs
             if (obj == null || GetType() != obj.GetType()) { return false; }
 
             EdgeKey k = (EdgeKey)obj;
-            return edge.Equals(k.edge);
+            return Edge.Equals(k.Edge);
         }
 
         /// <summary>
@@ -665,7 +691,7 @@ namespace Graphical.Graphs
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return centre.GetHashCode() ^ vertex.GetHashCode();
+            return Centre.GetHashCode() ^ Vertex.GetHashCode();
         }
 
 
@@ -677,21 +703,21 @@ namespace Graphical.Graphs
         public int CompareTo(EdgeKey other)
         {
             if (other == null) { return 1; }
-            if (edge.Equals(other.edge)) { return 1; }
-            if (!VisibilityGraph.EdgeIntersect(LineGeometry, other.edge)){ return -1; }
+            if (Edge.Equals(other.Edge)) { return 1; }
+            if (!VisibilityGraph.EdgeIntersect(RayEdge, other.Edge)){ return -1; }
 
-            double selfDist = DistanceToInteserction(centre, vertex, edge);
-            double otherDist = DistanceToInteserction(centre, vertex, other.edge);
+            double selfDist = DistanceToIntersection(Centre, Vertex, Edge);
+            double otherDist = DistanceToIntersection(Centre, Vertex, other.Edge);
 
             if(selfDist > otherDist) { return 1; }
             else if(selfDist < otherDist) { return -1; }
             else
             {
                 gVertex sameVertex = null;
-                if (other.edge.Contains(edge.StartVertex)) { sameVertex = edge.StartVertex; }
-                else if (other.edge.Contains(edge.EndVertex)) { sameVertex = edge.EndVertex; }
-                double aslf = Point.ArcRadAngle( vertex.point, centre.point, edge.GetVertexPair(sameVertex).point);
-                double aot = Point.ArcRadAngle( vertex.point, centre.point, other.edge.GetVertexPair(sameVertex).point);
+                if (other.Edge.Contains(Edge.StartVertex)) { sameVertex = Edge.StartVertex; }
+                else if (other.Edge.Contains(Edge.EndVertex)) { sameVertex = Edge.EndVertex; }
+                double aslf = Point.ArcRadAngle( Vertex.point, Centre.point, Edge.GetVertexPair(sameVertex).point);
+                double aot = Point.ArcRadAngle( Vertex.point, Centre.point, other.Edge.GetVertexPair(sameVertex).point);
 
                 if(aslf < aot) { return -1; }
                 else { return 1; }
@@ -727,7 +753,7 @@ namespace Graphical.Graphs
         /// <returns></returns>
         public override string ToString()
         {
-            return String.Format("EdgeKey: (gEdge={0}, centre={1}, vertex={2})", edge.ToString(), centre.ToString(), vertex.ToString());
+            return String.Format("EdgeKey: (gEdge={0}, centre={1}, vertex={2})", Edge.ToString(), Centre.ToString(), Vertex.ToString());
         }
     }
 }

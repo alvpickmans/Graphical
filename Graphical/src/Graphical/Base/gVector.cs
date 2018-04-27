@@ -28,9 +28,9 @@ namespace Graphical.Base
 
         private gVector(double x, double y, double z, double length = Double.PositiveInfinity)
         {
-            X = x;
-            Y = y;
-            Z = z;
+            X = Math.Round(x, 6);
+            Y = Math.Round(y, 6);
+            Z = Math.Round(z, 6);
             Length = (Double.IsPositiveInfinity(length)) ? Math.Sqrt(Math.Pow(X, 2) + Math.Pow(Y, 2) + Math.Pow(Z, 2)) : length;
             Length = Math.Round(Length, 6, MidpointRounding.AwayFromZero);
         }
@@ -75,7 +75,8 @@ namespace Graphical.Base
         {
             double dot = this.Dot(vector);
             double cos = dot / (this.Length * vector.Length);
-            return ToDegrees(Math.Acos(cos));
+            double rad = (cos >= -1 && cos <= 1) ? Math.Acos(cos) : Math.Acos(Math.Round(cos)) ;
+            return ToDegrees(rad);
         }
 
         public gVector Cross(gVector vector)
@@ -86,6 +87,27 @@ namespace Graphical.Base
             double angle = ToRadians(this.Angle(vector));
             double length = this.Length * vector.Length * Math.Sin(angle);
             return new gVector(x, y, z, length);
+        }
+
+        public gVector Scale(double factor)
+        {
+            return new gVector(this.X * factor, this.Y * factor, this.Z * factor);
+        }
+
+        public gVector Normalized()
+        {
+            return new gVector(this.X / this.Length, this.Y / this.Length, this.Z / this.Length, this.Length / this.Length);
+        }
+
+        public bool IsParallelTo(gVector vector)
+        {
+            var dot = this.Normalized().Dot(vector.Normalized());
+            return Math.Round(dot, 4) == 1;
+        }
+
+        public gVertex AsVertex()
+        {
+            return gVertex.ByCoordinates(this.X, this.Y, this.Z);
         }
         #endregion
 
@@ -99,8 +121,19 @@ namespace Graphical.Base
         internal static double ToRadians(double degrees)
         {
             return degrees * (Math.PI / 180);
-        } 
+        }
         #endregion
+
+        /// <summary>
+        /// Override of ToStringMethod
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            System.Globalization.NumberFormatInfo inf = new System.Globalization.NumberFormatInfo();
+            inf.NumberDecimalSeparator = ".";
+            return string.Format("gVector(X = {0}, Y = {1}, Z = {2}, Length = {3}", X.ToString("0.000", inf), Y.ToString("0.000", inf), Z.ToString("0.000", inf), Length.ToString("0.000", inf));
+        }
 
     }
 }

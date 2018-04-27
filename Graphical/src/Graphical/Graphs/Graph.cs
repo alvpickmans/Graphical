@@ -89,11 +89,8 @@ namespace Graphical.Graphs
                 //to the polygons Dictionary
                 int vertexCount = vertices.Count();
 
-                // If not valid polygon, dispose it
-                if (vertexCount < 3) {
-                    gPolygon.Dispose();
-                }
-                else
+                // If valid polygon
+                if (vertexCount >= 3)
                 {
                     for (var j = 0; j < vertexCount; j++)
                     {
@@ -142,7 +139,7 @@ namespace Graphical.Graphs
             foreach(Polygon pol in polygons)
             {
                 gPolygon gPol = new gPolygon(-1, isExternal);
-                gPol.vertices = pol.Points.Select(pt => gVertex.ByPoint(pt)).ToList();
+                gPol.vertices = pol.Points.Select(pt => gVertex.ByCoordinates(pt.X, pt.Y, pt.Z)).ToList();
                 input.Add(gPol);
             }
 
@@ -228,7 +225,7 @@ namespace Graphical.Graphs
         /// <returns name="lines"></returns>
         public List<Line> GetAsLines()
         {
-            return edges.Select(e => e.LineGeometry()).ToList();
+            return edges.Select(e => e.AsLine()).ToList();
         }
 
         public List<int> EdgesPerVertex()

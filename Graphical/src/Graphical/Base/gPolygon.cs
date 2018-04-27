@@ -13,7 +13,7 @@ namespace Graphical.Base
     /// like if it is internal or limit boundary.
     /// </summary>
     [IsVisibleInDynamoLibrary(false)]
-    public class gPolygon :IDisposable, ICloneable
+    public class gPolygon : ICloneable
     {
         #region Variables
 
@@ -72,22 +72,7 @@ namespace Graphical.Base
 
             return newPolygon;
         }
-
-        /// <summary>
-        /// Implementation of Dispose() method
-        /// </summary>
-        public void Dispose()
-        {
-            foreach(gEdge e in edges)
-            {
-                ((IDisposable)e).Dispose();
-            }
-            foreach(gVertex v in vertices)
-            {
-                ((IDisposable)v).Dispose();
-            }
-        }
-
+        
         public object Clone()
         {
             gPolygon newPolygon = new gPolygon(this.id, this.isBoundary);

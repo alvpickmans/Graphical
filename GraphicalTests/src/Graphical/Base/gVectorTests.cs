@@ -76,6 +76,16 @@ namespace Graphical.Base.Tests
             
         }
 
+        [Test]
+        public void IsParallelToTest()
+        {
+            var a = gVector.ByTwoVertices(gVertex.ByCoordinates(0, 0, 0), gVertex.ByCoordinates(0, 10, 10));
+            var b = gVector.ByTwoVertices(gVertex.ByCoordinates(10, 0, 0), gVertex.ByCoordinates(10, 10, 10));
+            var c = gVector.ByCoordinates(5, 15, 10);
+            Assert.IsTrue(a.IsParallelTo(b));
+            Assert.IsFalse(a.IsParallelTo(c));
+        }
+
         public gVector[] TestVectorPair()
         {
             var a = gVector.ByCoordinates(0, 10, 10);

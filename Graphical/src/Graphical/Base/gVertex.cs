@@ -9,7 +9,6 @@ using Autodesk.DesignScript.Interfaces;
 using Autodesk.DesignScript.Runtime;
 using Graphical.Geometry;
 using DSPoint = Autodesk.DesignScript.Geometry.Point;
-using System.Globalization; 
 #endregion
 
 namespace Graphical.Base
@@ -31,9 +30,9 @@ namespace Graphical.Base
         internal DSPoint point { get { return DSPoint.ByCoordinates(X, Y, Z); } }
         internal int polygonId { get; set; }
 
-        internal double X { get; private set; }
-        internal double Y { get; private set; }
-        internal double Z { get; private set; }
+        public double X { get; private set; }
+        public double Y { get; private set; }
+        public double Z { get; private set; }
 
         #endregion
 
@@ -44,16 +43,6 @@ namespace Graphical.Base
             X = Math.Round(x, 6);
             Y = Math.Round(y, 6);
             Z = Math.Round(z, 6);
-        }
-
-        /// <summary>
-        /// gEdge constructor method by a give point.
-        /// </summary>
-        /// <param name="point">Input point</param>
-        /// <returns></returns>
-        public static gVertex ByPoint(DSPoint point)
-        {
-            return new gVertex(point.X, point.Y, point.Z);
         }
 
         /// <summary>
@@ -80,6 +69,11 @@ namespace Graphical.Base
             return new gVertex(x, y, z);
         }
         #endregion
+
+        internal static double Round (double value)
+        {
+            return ((int)(value * rounding)) / rounding2;
+        }
 
         internal static List<gVertex> OrderByRadianAndDistance (List<gVertex> vertices, gVertex centre = null)
         {
@@ -172,56 +166,62 @@ namespace Graphical.Base
 
         internal double DistanceTo(gEdge edge)
         {
-            using (DSPoint p = this.point)
-            using (Line line = edge.LineGeometry())
-            {
-                return p.DistanceTo(line);
-            }
+            // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
+            gVector v1 = gVector.ByTwoVertices(this, edge.StartVertex);
+            gVector v2 = gVector.ByTwoVertices(this, edge.EndVertex);
+            gVector numerator = v1.Cross(v2);
+            gVector denominator = gVector.ByTwoVertices(edge.EndVertex, edge.StartVertex);
+            return numerator.Length / denominator.Length;
+        }
+        
+        internal gVertex Translate(gVector vector)
+        {
+            return gVertex.ByCoordinates(this.X + vector.X, this.Y + vector.Y, this.Z + vector.Z);
         }
 
-        internal double DistanceTo(Autodesk.DesignScript.Geometry.Geometry obj)
+        internal bool OnEdge(gEdge edge)
         {
-            using (DSPoint p = this.point)
-            {
-                return p.DistanceTo(obj); 
-            }
+            return this.OnEdge(edge.StartVertex, edge.EndVertex);
         }
 
-        internal DSPoint GetProjectionOnPlane(string plane = "xy")
+        public bool OnEdge(gVertex start, gVertex end)
         {
+            if(this.Equals(start) || this.Equals(end)) { return true; }
+            // https://www.lucidarme.me/check-if-a-point-belongs-on-a-line-segment/
+            gVector startEnd = gVector.ByTwoVertices(start, end);
+            gVector startMid = gVector.ByTwoVertices(start, this);
+            gVector endMid = gVector.ByTwoVertices(this, end);
+            if (!startMid.IsParallelTo(endMid)){ return false; } // Not aligned
+            double dotAC = Math.Round(startEnd.Dot(startMid),6);
+            double dotAB = Math.Round(startEnd.Dot(startEnd),6);
+            return 0 <= dotAC && dotAC <= dotAB;
+        }
+
+        internal static bool OnEdgeProjection(gVertex start, gVertex point, gVertex end, string plane = "xy")
+        {
+            double x = point.X, y = point.Y, z = point.Z;
+            double sX = start.X, sY = start.Y, sZ = start.Z;
+            double eX = end.X, eY = end.Y, eZ = end.Z;
             switch (plane)
             {
                 case "xy":
-                    return DSPoint.ByCoordinates(X, Y, 0);
+                    return x <= Math.Max(sX, eX) && x >= Math.Min(sX, eX) &&
+                        y <= Math.Max(sY, eY) && y >= Math.Min(sY, eY);
                 case "xz":
-                    return DSPoint.ByCoordinates(X, 0, Z);
+                    return x <= Math.Max(sX, eX) && x >= Math.Min(sX, eX) &&
+                        z <= Math.Max(sZ, eZ) && z >= Math.Min(sZ, eZ);
                 case "yz":
-                    return DSPoint.ByCoordinates(0, Y, Z);
+                    return y <= Math.Max(sY, eY) && y >= Math.Min(sY, eY) &&
+                        z <= Math.Max(sZ, eZ) && z >= Math.Min(sZ, eZ);
                 default:
-                    return null;
+                    throw new Exception("Plane not defined");
             }
         }
 
-        internal static bool OnLine(gVertex vertex, Line line)
+        public DSPoint AsPoint()
         {
-            using (DSPoint p = vertex.point)
-            {
-                return p.DoesIntersect(line);
-            }
+            return DSPoint.ByCoordinates(this.X, this.Y, this.Z);
         }
-
-        internal static bool OnLine(gVertex start, gVertex vertex, gVertex end)
-        {
-            using (DSPoint startPt = start.point)
-            using (DSPoint p = vertex.point)
-            using (DSPoint endPt = end.point)
-            using (Line line = Line.ByStartPointEndPoint(startPt, endPt))
-            {
-                return p.DoesIntersect(line);
-            }
-        }
-
-
         #region Override Methods
         //TODO: Improve overriding equality methods as per http://www.loganfranken.com/blog/687/overriding-equals-in-c-part-1/
 
@@ -247,14 +247,13 @@ namespace Graphical.Base
         }
 
        
-
         /// <summary>
         /// Override of ToStringMethod
         /// </summary>
         /// <returns></returns>
         public override string ToString()
         {
-            NumberFormatInfo inf = new NumberFormatInfo();
+            System.Globalization.NumberFormatInfo inf = new System.Globalization.NumberFormatInfo();
             inf.NumberDecimalSeparator = ".";
             return string.Format("gVertex(X = {0}, Y = {1}, Z = {2})", X.ToString("0.000", inf), Y.ToString("0.000", inf), Z.ToString("0.000", inf));
         }

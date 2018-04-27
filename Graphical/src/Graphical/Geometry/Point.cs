@@ -62,11 +62,11 @@ namespace Graphical.Geometry
         /// <returns></returns>
         public static double ArcRadAngle(DSPoint centre, DSPoint start, DSPoint end)
         {
-            gVertex c = gVertex.ByPoint(centre);
-            gVertex s = gVertex.ByPoint(start);
-            gVertex e = gVertex.ByPoint(end);
+            gVertex c = gVertex.ByCoordinates(centre.X, centre.Y, centre.Z);
+            gVertex s = gVertex.ByCoordinates(start.X, start.Y, start.Z);
+            gVertex e = gVertex.ByCoordinates(end.X, end.Y, end.Z);
             return gVertex.ArcRadAngle(c, s, e);
-        } 
+        }
         #endregion
 
         #region Internal Methods
@@ -131,8 +131,8 @@ namespace Graphical.Geometry
         /// <returns name="rad">Radians</returns>
         internal static double RadAngle(DSPoint centre, DSPoint point)
         {
-            gVertex v1 = gVertex.ByPoint(centre);
-            gVertex v2 = gVertex.ByPoint(point);
+            gVertex v1 = gVertex.ByCoordinates(centre.X, centre.Y, centre.Z);
+            gVertex v2 = gVertex.ByCoordinates(point.X, point.Y, point.Z);
             return gVertex.RadAngle(v1, v2);
         }
 
@@ -191,9 +191,9 @@ namespace Graphical.Geometry
         /// -1 if orientation is clock wise.</returns>
          public static int Orientation(DSPoint p1, DSPoint p2, DSPoint p3, string plane = "xy")
         {
-            gVertex v1 = gVertex.ByPoint(p1);
-            gVertex v2 = gVertex.ByPoint(p2);
-            gVertex v3 = gVertex.ByPoint(p3);
+            gVertex v1 = gVertex.ByCoordinates(p1.X, p1.Y, p1.Z);
+            gVertex v2 = gVertex.ByCoordinates(p2.X, p2.Y, p2.Z);
+            gVertex v3 = gVertex.ByCoordinates(p3.X, p3.Y, p3.Z);
             return gVertex.Orientation(v1, v2, v3, plane);
         } 
         #endregion

@@ -136,7 +136,9 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Graphical\Base\gEdgeTests.cs" />
     <Compile Include="src\Graphical\Base\gVectorTests.cs" />
+    <Compile Include="src\Graphical\Base\gVertexTests.cs" />
     <Compile Include="src\Graphical\Graphs\VisibilityGraphTests.cs" />
     <Compile Include="Test.cs" />
   </ItemGroup>

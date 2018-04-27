@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSPoint = Autodesk.DesignScript.Geometry.Point;
-using DSLine = Autodesk.DesignScript.Geometry.Line;
+//using DSLine = Autodesk.DesignScript.Geometry.Line;
 using Autodesk.DesignScript.Geometry;
 using Autodesk.DesignScript.Interfaces;
 using Autodesk.DesignScript.Runtime;
@@ -18,21 +18,23 @@ namespace Graphical.Base
     /// Representation of Edges on a graph
     /// </summary>
     [IsVisibleInDynamoLibrary(false)]
-    public class gEdge : IGraphicItem, IDisposable
+    public class gEdge : IGraphicItem
     {
         #region Variables
         /// <summary>
         /// StartVertex
         /// </summary>
-        internal gVertex StartVertex { get; private set; }
+        public gVertex StartVertex { get; private set; }
 
         /// <summary>
         /// EndVertex
         /// </summary>
-        internal gVertex EndVertex { get; private set; }
-        
+        public gVertex EndVertex { get; private set; }
 
-        internal double length { get { return LineGeometry().Length; } }
+
+        public double Length { get; private set; }
+
+        public gVector Direction { get; private set; }
 
         #endregion
 
@@ -41,7 +43,8 @@ namespace Graphical.Base
         {
             StartVertex = start;
             EndVertex = end;
-            //LineGeometry = Line.ByStartPointEndPoint(start.point, end.point);
+            Length = StartVertex.DistanceTo(EndVertex);
+            Direction = gVector.ByTwoVertices(StartVertex, EndVertex);
         }
 
         /// <summary>
@@ -62,24 +65,18 @@ namespace Graphical.Base
         /// <returns name="edge">edge</returns>
         public static gEdge ByLine(Line line)
         {
-            return new gEdge(gVertex.ByPoint(line.StartPoint), gVertex.ByPoint(line.EndPoint));
+            gVertex start = gVertex.ByCoordinates(line.StartPoint.X, line.StartPoint.Y, line.StartPoint.Z);
+            gVertex end = gVertex.ByCoordinates(line.EndPoint.X, line.EndPoint.Y, line.EndPoint.Z);
+            return new gEdge(start, end);
         }
         #endregion
-
-        /// <summary>
-        /// Returns the line associated with the gEdge
-        /// </summary>
-        public Line LineGeometry()
-        {
-            return Line.ByStartPointEndPoint(StartVertex.point, EndVertex.point);
-        }
 
         /// <summary>
         /// Method to check if vertex belongs to edge
         /// </summary>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        internal bool Contains(gVertex vertex)
+        public bool Contains(gVertex vertex)
         {
             return StartVertex.Equals(vertex) || EndVertex.Equals(vertex);
         }
@@ -89,43 +86,87 @@ namespace Graphical.Base
         /// </summary>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        internal gVertex GetVertexPair(gVertex vertex)
+        public gVertex GetVertexPair(gVertex vertex)
         {
             return (StartVertex.Equals(vertex)) ? EndVertex : StartVertex;
         }
 
-        internal DSLine GetProjectionOnPlane(string plane = "xy")
+        public bool IsCoplanarTo(gEdge edge)
         {
-            return DSLine.ByStartPointEndPoint(StartVertex.GetProjectionOnPlane(plane), EndVertex.GetProjectionOnPlane(plane));
+            // http://mathworld.wolfram.com/Coplanar.html
+            gVector a = this.Direction;
+            gVector b = edge.Direction;
+            gVector c = gVector.ByTwoVertices(this.StartVertex, edge.StartVertex);
+
+            return c.Dot(a.Cross(b)) == 0;
         }
 
-        internal double DistanceTo(object obj)
+        public gVertex Intersection(gEdge edge)
         {
-            if (GetType() == obj.GetType())
+            // http://mathworld.wolfram.com/Line-LineIntersection.html
+            if (!this.IsCoplanarTo(edge)) { return null; }
+            if (edge.Contains(this.StartVertex)) { return StartVertex; }
+            if (edge.Contains(this.EndVertex)) { return EndVertex; }
+            
+            var a = this.Direction;
+            var b = edge.Direction;
+            var c = gVector.ByTwoVertices(this.StartVertex, edge.StartVertex);
+            var cxb = c.Cross(b);
+            var axb = a.Cross(b);
+            
+            double s = (cxb.Dot(axb)) / Math.Pow(axb.Length, 2);
+            
+            // s > 1, means that "intersection" vertex is not on either edge
+            // s == NaN means they are parallels so never intersect
+            if(s < 0 || s > 1 || Double.IsNaN(s)) { return null; }
+
+            gVertex intersection = this.StartVertex.Translate(a.Scale(s));
+
+            
+            if (!intersection.OnEdge(edge)) { return null; }
+            
+            return intersection;
+        }
+
+        public bool Intersects(gEdge edge)
+        {
+            return this.Intersection(edge) != null;
+        }
+
+        public double DistanceTo(gVertex vertex)
+        {
+            return vertex.DistanceTo(this);
+        }
+
+        public double DistanceTo(gEdge edge)
+        {
+            // http://mathworld.wolfram.com/Line-LineDistance.html
+            if (this.IsCoplanarTo(edge))
             {
-                gEdge e = (gEdge)obj;
-                using (DSLine line1 = this.LineGeometry())
-                using (DSLine line2 = e.LineGeometry())
-                {
-                    return line1.DistanceTo(line2);
-                }
-            }
-            else if (obj.GetType() == typeof(gVertex))
+                var distances = new double[4]{
+                    StartVertex.DistanceTo(edge),
+                    EndVertex.DistanceTo(edge),
+                    edge.StartVertex.DistanceTo(this),
+                    edge.EndVertex.DistanceTo(this)
+                };
+                return distances.Min();
+            }else
             {
-                gVertex v = (gVertex)obj;
-                using (DSPoint p = v.point)
-                using (Line line = this.LineGeometry())
-                {
-                    return line.DistanceTo(p);
-                }
+                var a = this.Direction;
+                var b = edge.Direction;
+                var c = gVector.ByTwoVertices(this.StartVertex, edge.StartVertex);
+                gVector cross = a.Cross(b);
+                double numerator = c.Dot(cross);
+                double denominator = cross.Length;
+                return Math.Abs(numerator) / Math.Abs(denominator);
+
             }
-            else
-            {
-                using (Line line = this.LineGeometry())
-                {
-                    return line.DistanceTo(obj as Autodesk.DesignScript.Geometry.Geometry);
-                }
-            }
+            
+        }
+
+        public Line AsLine()
+        {
+            return Line.ByStartPointEndPoint(StartVertex.AsPoint(), EndVertex.AsPoint());
         }
 
         #region override methods
@@ -187,17 +228,6 @@ namespace Graphical.Base
 
 
         }
-
-        /// <summary>
-        /// Implementation of Dispose method
-        /// </summary>
-        public void Dispose()
-        {
-            //((IDisposable)LineGeometry).Dispose();
-            ((IDisposable)StartVertex).Dispose();
-            ((IDisposable)EndVertex).Dispose();
-        }
-
 
         #endregion
 

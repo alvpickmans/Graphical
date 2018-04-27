@@ -49,7 +49,7 @@ namespace Graphical
                 foreach(gEdge e in edges)
                 {
                     gVertex w = e.GetVertexPair(vertex);
-                    double newLength = minDistance + e.length;
+                    double newLength = minDistance + e.Length;
                     
                     if(!S.Contains(w) && newLength < Q.GetValue(w))
                     {
