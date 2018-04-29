@@ -34,11 +34,11 @@ namespace Graphical.Graphs
             baseGraph = new Graph();
         }
 
-        internal VisibilityGraph(Graph _baseGraph, bool reducedGraph) : base()
+        internal VisibilityGraph(Graph _baseGraph, bool reducedGraph, bool halfScan = true) : base()
         {
             baseGraph = _baseGraph;
 
-            List<gEdge> resultEdges = VisibilityAnalysis(baseGraph, baseGraph.vertices, reducedGraph);
+            List<gEdge> resultEdges = VisibilityAnalysis(baseGraph, baseGraph.vertices, reducedGraph, halfScan);
 
             foreach (gEdge edge in resultEdges)
             {
@@ -57,7 +57,7 @@ namespace Graphical.Graphs
         {
             List<gPolygon> gPolygons = FromPolygons(polygons, false);
             Graph baseGraph = new Graph(gPolygons);
-            VisibilityGraph g = new VisibilityGraph(baseGraph, reducedGraph);
+            VisibilityGraph g = new VisibilityGraph(baseGraph, reducedGraph, true);
             return g;
         }
 
@@ -109,7 +109,7 @@ namespace Graphical.Graphs
 
             gVertex origin = gVertex.ByCoordinates(point.X, point.Y, point.Z);
             if (g.baseGraph.Contains(origin)) { origin = g.baseGraph.vertices[g.baseGraph.vertices.IndexOf(origin)]; }
-            g.edges = g.VisibilityAnalysis(g.baseGraph, new List<gVertex>() { origin }, reducedGraph, "full");
+            g.edges = g.VisibilityAnalysis(g.baseGraph, new List<gVertex>() { origin }, reducedGraph, false);
 
             sw.Stop();
 
@@ -146,13 +146,13 @@ namespace Graphical.Graphs
 
         #region Internal Methods
 
-        internal List<gEdge> VisibilityAnalysis(Graph baseGraph, List<gVertex> vertices, bool reducedGraph, string scan = "full")
+        internal List<gEdge> VisibilityAnalysis(Graph baseGraph, List<gVertex> vertices, bool reducedGraph, bool halfScan)
         {
             List<gEdge> visibleEdges = new List<gEdge>();
 
             foreach (gVertex v in vertices)
             {
-                foreach (gVertex v2 in VisibleVertices(v, baseGraph, null, null, null, scan, reducedGraph))
+                foreach (gVertex v2 in VisibleVertices(v, baseGraph, null, null, null, halfScan, reducedGraph))
                 {
                     gEdge newEdge = new gEdge(v, v2);
                     if (!visibleEdges.Contains(newEdge)) { visibleEdges.Add(newEdge); }
@@ -179,7 +179,7 @@ namespace Graphical.Graphs
             gVertex origin = null,
             gVertex destination = null,
             List<gVertex> singleVertices = null,
-            string scan = "full",
+            bool halfScan = true,
             bool reducedGraph = true)
         {
             #region Initialize variables and sort vertices
@@ -226,7 +226,7 @@ namespace Graphical.Graphs
             {
                 if (vertex.Equals(centre) || vertex.Equals(prev)) { continue; }// v == to centre or to previous when updating graph
                 //Check only half of vertices as eventually they will become 'v'
-                if (scan == "half" && gVertex.RadAngle(centre, vertex) > Math.PI) { break; }
+                if (halfScan && gVertex.RadAngle(centre, vertex) > Math.PI) { break; }
                 //Removing clock wise edges incident on v
                 if (openEdges.Count > 0 && baseGraph.graph.ContainsKey(vertex))
                 {
@@ -539,7 +539,7 @@ namespace Graphical.Graphs
             //newVisGraph.baseGraph = new Graph(newVisGraph.polygons.Values.ToList());
             foreach (gVertex centre in singleVertices)
             {
-                foreach (gVertex v in VisibleVertices(centre, newVisGraph.baseGraph, null, null, singleVertices, "full", reducedGraph))
+                foreach (gVertex v in VisibleVertices(centre, newVisGraph.baseGraph, null, null, singleVertices, false, reducedGraph))
                 {
                     newVisGraph.AddEdge(new gEdge(centre, v));
                 }
@@ -577,14 +577,14 @@ namespace Graphical.Graphs
 
                 if (!containsOrigin)
                 {
-                    foreach (gVertex v in VisibleVertices(gOrigin, visibilityGraph.baseGraph, null, gD, null, "full", true))
+                    foreach (gVertex v in VisibleVertices(gOrigin, visibilityGraph.baseGraph, null, gD, null, false, true))
                     {
                         tempGraph.AddEdge(new gEdge(gOrigin, v));
                     }
                 }
                 if (!containsDestination)
                 {
-                    foreach (gVertex v in VisibleVertices(gDestination, visibilityGraph.baseGraph, gO, null, null, "full", true))
+                    foreach (gVertex v in VisibleVertices(gDestination, visibilityGraph.baseGraph, gO, null, null, false, true))
                     {
                         tempGraph.AddEdge(new gEdge(gDestination, v));
                     }
