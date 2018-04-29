@@ -69,6 +69,8 @@ namespace Graphical.Base.Tests
             var f = gEdge.ByStartVertexEndVertex(f1, f2);
             var g = gEdge.ByStartVertexEndVertex(a1, e1);
             var h = gEdge.ByStartVertexEndVertex(b1, gVertex.ByCoordinates(2.5, 5, 0));
+            var xaligned = gEdge.ByStartVertexEndVertex(a1, gVertex.ByCoordinates(114.750, 0, 0));
+            var xCoincident = gEdge.ByStartVertexEndVertex(e1, b1);
 
             var side = gEdge.ByStartVertexEndVertex(
                     gVertex.ByCoordinates(-17.950, 31.090, 0) , gVertex.ByCoordinates(-7.650, 48.930,0)
@@ -90,7 +92,8 @@ namespace Graphical.Base.Tests
             //Assert.IsNull(ad);
             //Assert.IsNull(ef);
             //Assert.IsNull(gh);
-            Assert.NotNull(rayEdge.Intersection(side));
+            //Assert.NotNull(rayEdge.Intersection(side));
+            Assert.NotNull(xaligned.Intersection(xCoincident));
         }
 
         //[Test]

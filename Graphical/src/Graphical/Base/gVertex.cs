@@ -22,7 +22,6 @@ namespace Graphical.Base
 
         #region Constants
         const int rounding = 10 * 10;
-        const double rounding2 = 10.0 * 10;
         #endregion
         
         //TODO: Reorganize methods 
@@ -70,11 +69,11 @@ namespace Graphical.Base
         }
         #endregion
 
-        internal static double Round (double value)
+        internal static bool Threshold (double value1, double value2)
         {
-            return ((int)(value * rounding)) / rounding2;
+            return Math.Abs(value1 - value2) <= 0.0001;
         }
-
+        
         internal static List<gVertex> OrderByRadianAndDistance (List<gVertex> vertices, gVertex centre = null)
         {
             if(centre == null) { centre = gVertex.MinimumVertex(vertices); }
@@ -234,7 +233,7 @@ namespace Graphical.Base
         {
             if (obj == null) { return false; }
             
-            return this.X == obj.X && this.Y == obj.Y && this.Z == obj.Z;
+            return Threshold(this.X, obj.X) && Threshold(this.Y, obj.Y) && Threshold(this.Z, obj.Z);
         }
 
         /// <summary>

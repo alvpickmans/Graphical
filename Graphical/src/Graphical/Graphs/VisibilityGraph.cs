@@ -268,7 +268,7 @@ namespace Graphical.Graphs
                     isVisible = false;
                 }
                 //For collinear vertices, if prev was visible need to check that
-                //the edge from prev to p does not intersect with any open edge
+                //the edge from prev to vertex does not intersect with any open edge
                 else
                 {
                     isVisible = true;
@@ -282,6 +282,11 @@ namespace Graphical.Graphs
                         }
                     }
                     if (isVisible && EdgeInPolygon(prev, vertex, baseGraph, maxDistance))
+                    {
+                        isVisible = false;
+                    }
+
+                    if(isVisible && !vertex.OnEdge(centre, prev))
                     {
                         isVisible = false;
                     }
@@ -433,9 +438,11 @@ namespace Graphical.Graphs
             return (vertex.polygonId < 0) ? false : graph.polygons[vertex.polygonId].isBoundary;
         }
 
-        internal static bool VertexInPolygon(gVertex v1, List<gEdge> polygonEdges, double maxDistance)
+        public static bool VertexInPolygon(gVertex v1, List<gEdge> polygonEdges, double maxDistance)
         {
             gVertex v2 = gVertex.ByCoordinates(v1.X + maxDistance, v1.Y, v1.Z);
+            gEdge ray = gEdge.ByStartVertexEndVertex(v1, v2);
+            gVertex coincident = null;
             int intersections = 0;
             bool co_flag = false;
             int co_dir = 0;
@@ -445,26 +452,22 @@ namespace Graphical.Graphs
                 if (v1.Y < edge.StartVertex.Y && v1.Y < edge.EndVertex.Y) { continue; }
                 if (v1.Y > edge.StartVertex.Y && v1.Y > edge.EndVertex.Y) { continue; }
                 //Vertices colinear to v1
-                bool co0 = gVertex.Orientation(v1, edge.StartVertex, v2) == 0 && (edge.StartVertex.X > v1.X);
-                bool co1 = gVertex.Orientation(v1, edge.EndVertex, v2) == 0 && (edge.EndVertex.X > v1.X);
-                gVertex co_vertex = (co0) ? edge.StartVertex : edge.EndVertex;
-                if (co0 || co1)
+                gVertex intersection = ray.Intersection(edge);
+                if (intersection != null)
                 {
-                    co_dir += (edge.GetVertexPair(co_vertex).Y > v1.Y) ? 1 : -1;
-                    if (co_flag)
+                    if (ray.Direction.IsParallelTo(edge.Direction))
                     {
-                        intersections += (co_dir == 0) ? 1 : 0;
-                        co_flag = false;
-                        co_dir = 0;
+                        return v1.OnEdge(edge);
                     }
-                    else
+                    if (edge.Contains(intersection))
                     {
-                        co_flag = true;
+                        intersections += intersection.Equals(coincident) ? 0 : 1;
+                        coincident = intersection;
+                    }else
+                    {
+                        intersections += 1;
                     }
-                }
-                else if (EdgeIntersect(v1, v2, edge))
-                {
-                    intersections += 1;
+
                 }
             }
 

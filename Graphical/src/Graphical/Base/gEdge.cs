@@ -107,24 +107,28 @@ namespace Graphical.Base
             if (!this.IsCoplanarTo(edge)) { return null; }
             if (edge.Contains(this.StartVertex)) { return StartVertex; }
             if (edge.Contains(this.EndVertex)) { return EndVertex; }
-            
+
             var a = this.Direction;
             var b = edge.Direction;
             var c = gVector.ByTwoVertices(this.StartVertex, edge.StartVertex);
             var cxb = c.Cross(b);
             var axb = a.Cross(b);
-            
+
             double s = (cxb.Dot(axb)) / Math.Pow(axb.Length, 2);
-            
+
             // s > 1, means that "intersection" vertex is not on either edge
             // s == NaN means they are parallels so never intersect
-            if(s < 0 || s > 1 || Double.IsNaN(s)) { return null; }
+            if (s < 0 || s > 1 || Double.IsNaN(s)) { return null; }
 
             gVertex intersection = this.StartVertex.Translate(a.Scale(s));
 
-            
-            if (!intersection.OnEdge(edge)) { return null; }
-            
+            if (intersection.Equals(edge.StartVertex)){ return edge.StartVertex; }
+            if (intersection.Equals(edge.EndVertex)) { return edge.EndVertex; }
+            if (!intersection.OnEdge(edge))
+            {
+                return null;
+            }
+
             return intersection;
         }
 

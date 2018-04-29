@@ -102,7 +102,7 @@ namespace Graphical.Base
         public bool IsParallelTo(gVector vector)
         {
             var dot = this.Normalized().Dot(vector.Normalized());
-            return Math.Round(dot, 4) == 1;
+            return gVertex.Threshold(dot, 1);
         }
 
         public gVertex AsVertex()
