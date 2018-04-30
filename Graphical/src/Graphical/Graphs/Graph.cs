@@ -55,13 +55,13 @@ namespace Graphical.Graphs
         #endregion
 
         #region Internal Constructors
-        internal Graph()
+        public Graph()
         {
             edges = new List<gEdge>();
             graphID = Guid.NewGuid();
         }
 
-        internal Graph(List<gPolygon> gPolygonsSet)
+        public Graph(List<gPolygon> gPolygonsSet)
         {
             edges = new List<gEdge>();
             graphID = Guid.NewGuid();

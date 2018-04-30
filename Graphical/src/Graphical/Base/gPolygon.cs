@@ -13,7 +13,7 @@ namespace Graphical.Base
     /// like if it is internal or limit boundary.
     /// </summary>
     [IsVisibleInDynamoLibrary(false)]
-    public class gPolygon : ICloneable
+    public class gPolygon : gBase, ICloneable
     {
         #region Variables
 
@@ -47,6 +47,13 @@ namespace Graphical.Base
             isBoundary = _isExternal;
         } 
         #endregion
+
+        public static gPolygon ByVertices(List<gVertex> vertices, bool isExternal)
+        {
+            gPolygon polygon = new gPolygon(-1, isExternal);
+            polygon.vertices = vertices;
+            return polygon;
+        }
 
         internal gPolygon AddVertex(gVertex v, gEdge intersectingEdge)
         {

@@ -90,6 +90,28 @@ namespace Graphical.Graphs
             };
         }
 
+        public static Graph VertexVisibility(gVertex origin, List<gPolygon> boundaries, List<gPolygon> internals = null, bool reducedGraph = true, bool halfScan = true)
+        {
+            List<gPolygon> polygons = new List<gPolygon>(boundaries);
+            if (internals != null && internals.Any())
+            {
+                polygons.AddRange(internals);
+            }
+
+            VisibilityGraph visGraph = new VisibilityGraph()
+            {
+                baseGraph = new Graph(polygons)
+            };
+
+            gVertex o = origin;
+            if(visGraph.baseGraph.Contains(origin)) { o = visGraph.baseGraph.vertices[visGraph.baseGraph.vertices.IndexOf(origin)]; }
+
+            visGraph.edges = visGraph.VisibilityAnalysis(visGraph.baseGraph, new List<gVertex>() { o }, reducedGraph, halfScan);
+
+            return visGraph;
+
+        }
+
         [MultiReturn(new[] { "visibilityGraph", "miliseconds" })]
         public static Dictionary<string, object> ByPolygonsAndBoundariesFromPoint(DSPoint point,  DSPolygon[] boundaries, [DefaultArgument("{}")]DSPolygon[] polygons = null, bool reducedGraph = true)
         {
@@ -281,15 +303,19 @@ namespace Graphical.Graphs
                             break;
                         }
                     }
+                    // If visible (doesn't intersect any open edge) and edge 'prev-vertex'
+                    // is in any polygon, vertex is visible if it belongs to a external boundary
                     if (isVisible && EdgeInPolygon(prev, vertex, baseGraph, maxDistance))
                     {
                         isVisible = IsBoundaryVertex(vertex, baseGraph);
                     }
 
-                    //if(isVisible && !vertex.OnEdge(centre, prev))
-                    //{
-                    //    isVisible = false;
-                    //}
+                    // If still visible (not inside polygon or is boundary vertex),
+                    // if not on 'centre-prev' edge means there is a gap between prev and vertex
+                    if (isVisible && !vertex.OnEdge(centre, prev))
+                    {
+                        isVisible = !IsBoundaryVertex(vertex, baseGraph);
+                    }
                 }
 
                 //If vertex is visible and centre belongs to any polygon, checks
@@ -452,21 +478,28 @@ namespace Graphical.Graphs
                 if (v1.Y < edge.StartVertex.Y && v1.Y < edge.EndVertex.Y) { continue; }
                 if (v1.Y > edge.StartVertex.Y && v1.Y > edge.EndVertex.Y) { continue; }
                 //Vertices colinear to v1
-                gVertex intersection = ray.Intersection(edge);
+                gBase intersection = ray.Intersection(edge);
                 if (intersection != null)
                 {
-                    if (ray.Direction.IsParallelTo(edge.Direction))
+                    if (intersection.GetType() == typeof(gEdge))
                     {
-                        return v1.OnEdge(edge);
+                        gEdge edgeIntesection = (gEdge)intersection;
+                        return edgeIntesection.StartVertex.OnEdge(edge) || edgeIntesection.EndVertex.OnEdge(edge);
                     }
-                    if (edge.Contains(intersection))
+                    else
                     {
-                        intersections += intersection.Equals(coincident) ? 0 : 1;
-                        coincident = intersection;
-                    }else
-                    {
-                        intersections += 1;
+                        gVertex vertexIntersection = (gVertex)intersection;
+                        if (edge.Contains(vertexIntersection))
+                        {
+                            intersections += intersection.Equals(coincident) ? 0 : 1;
+                            coincident = vertexIntersection;
+                        }
+                        else
+                        {
+                            intersections += 1;
+                        }
                     }
+                    
 
                 }
             }
@@ -663,10 +696,10 @@ namespace Graphical.Graphs
             var endProj = gVertex.ByCoordinates(e.EndVertex.X, e.EndVertex.Y, 0);
             gEdge rayEdge = gEdge.ByStartVertexEndVertex(centreProj, maxProj);
             gEdge edgeProj = gEdge.ByStartVertexEndVertex(startProj, endProj);
-            gVertex intersection = rayEdge.Intersection(edgeProj);
-            if(intersection != null)
+            gBase intersection = rayEdge.Intersection(edgeProj);
+            if(intersection != null && intersection.GetType() == typeof(gVertex))
             {
-                return centre.DistanceTo(intersection);
+                return centre.DistanceTo((gVertex)intersection);
             }
             else
             {
@@ -719,8 +752,8 @@ namespace Graphical.Graphs
                 gVertex sameVertex = null;
                 if (other.Edge.Contains(Edge.StartVertex)) { sameVertex = Edge.StartVertex; }
                 else if (other.Edge.Contains(Edge.EndVertex)) { sameVertex = Edge.EndVertex; }
-                double aslf = Point.ArcRadAngle( Vertex.point, Centre.point, Edge.GetVertexPair(sameVertex).point);
-                double aot = Point.ArcRadAngle( Vertex.point, Centre.point, other.Edge.GetVertexPair(sameVertex).point);
+                double aslf = gVertex.ArcRadAngle( Vertex, Centre, Edge.GetVertexPair(sameVertex));
+                double aot = gVertex.ArcRadAngle( Vertex, Centre, other.Edge.GetVertexPair(sameVertex));
 
                 if(aslf < aot) { return -1; }
                 else { return 1; }

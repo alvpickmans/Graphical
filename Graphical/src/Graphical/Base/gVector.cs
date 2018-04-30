@@ -14,7 +14,7 @@ namespace Graphical.Base
     // http://mathworld.wolfram.com/CrossProduct.html
 
     [IsVisibleInDynamoLibrary(false)]
-    public class gVector
+    public class gVector : gBase
     {
         #region Public Properties
         public double X { get; private set; }
@@ -76,15 +76,15 @@ namespace Graphical.Base
             double cos = dot / (this.Length * vector.Length);
             if(cos > 1)
             {
-                return Utils.ToDegrees(Math.Acos(1));
+                return ToDegrees(Math.Acos(1));
             }
             else if(cos < -1)
             {
-                return Utils.ToDegrees(Math.Acos(-1));
+                return ToDegrees(Math.Acos(-1));
             }
             else
             {
-                return Utils.ToDegrees(Math.Acos(cos));
+                return ToDegrees(Math.Acos(cos));
             }
         }
 
@@ -93,7 +93,7 @@ namespace Graphical.Base
             double x = (this.Y * vector.Z) - (this.Z * vector.Y);
             double y = (this.Z * vector.X) - (this.X * vector.Z);
             double z = (this.X * vector.Y) - (this.Y * vector.X);
-            double angle = Utils.ToRadians(this.Angle(vector));
+            double angle = ToRadians(this.Angle(vector));
             double length = this.Length * vector.Length * Math.Sin(angle);
             return new gVector(x, y, z, length);
         }
@@ -111,7 +111,7 @@ namespace Graphical.Base
         public bool IsParallelTo(gVector vector)
         {
             var dot = this.Normalized().Dot(vector.Normalized());
-            return Utils.Threshold(dot, 1);
+            return Threshold(dot, 1);
         }
 
         public gVertex AsVertex()

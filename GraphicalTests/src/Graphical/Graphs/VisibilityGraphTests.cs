@@ -32,5 +32,44 @@ namespace Graphical.Graphs.Tests
 
             Assert.IsTrue(inside);
         }
+
+        [Test]
+        public void VisibilityFromPointColinearVerticesXAxis()
+        {
+            var a = gVertex.ByCoordinates(-20, -20);
+            var b = gVertex.ByCoordinates(a.X, a.Y - 5);
+            var c = gVertex.ByCoordinates(b.X, b.X - 10);
+            var d = gVertex.ByCoordinates(c.X + 10, c.Y);
+            var e = gVertex.ByCoordinates(d.X, b.Y);
+            var f = gVertex.ByCoordinates(e.X + 5, e.Y);
+            var g = gVertex.ByCoordinates(f.X, d.Y);
+            var h = gVertex.ByCoordinates(g.X + 10, g.Y);
+            var i = gVertex.ByCoordinates(h.X, f.Y);
+            var j = gVertex.ByCoordinates(i.X, a.Y);
+
+            gPolygon polygon = gPolygon.ByVertices(new List<gVertex>() { a, b, c, d, e, f, g, h, i, j }, true);
+            Graph visGraph = VisibilityGraph.VertexVisibility(i, new List<gPolygon>() { polygon }, null, true, true);
+
+            Assert.NotNull(visGraph);
+        }
+
+        [Test]
+        public void VisibilityFromPointColinearVerticesYAxis()
+        {
+            var a = gVertex.ByCoordinates(0, 0);
+            var b = gVertex.ByCoordinates(a.X + 20, a.Y);
+            var c = gVertex.ByCoordinates(b.X, b.Y + 10);
+            var d = gVertex.ByCoordinates(c.X - 10, c.Y);
+            var e = gVertex.ByCoordinates(d.X, d.Y + 10);
+            var f = gVertex.ByCoordinates(c.X, e.Y);
+            var g = gVertex.ByCoordinates(f.X, d.Y + 10);
+            var h = gVertex.ByCoordinates(a.X, g.Y);
+
+            gPolygon polygon = gPolygon.ByVertices(new List<gVertex>() { a, b, c, d, e, f, g, h}, true);
+            Graph visGraph = VisibilityGraph.VertexVisibility(b, new List<gPolygon>() { polygon }, null, true, true);
+
+            Assert.NotNull(visGraph);
+        }
+
     }
 }

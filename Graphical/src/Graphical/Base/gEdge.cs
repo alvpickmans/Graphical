@@ -18,7 +18,7 @@ namespace Graphical.Base
     /// Representation of Edges on a graph
     /// </summary>
     [IsVisibleInDynamoLibrary(false)]
-    public class gEdge : IGraphicItem
+    public class gEdge : gBase, IGraphicItem
     {
         #region Variables
         /// <summary>
@@ -101,7 +101,7 @@ namespace Graphical.Base
             return c.Dot(a.Cross(b)) == 0;
         }
 
-        public gVertex Intersection(gEdge edge)
+        public gBase Intersection(gEdge edge)
         {
             // http://mathworld.wolfram.com/Line-LineIntersection.html
             if (!this.IsCoplanarTo(edge)) { return null; }
@@ -113,8 +113,31 @@ namespace Graphical.Base
             var c = gVector.ByTwoVertices(this.StartVertex, edge.StartVertex);
             var cxb = c.Cross(b);
             var axb = a.Cross(b);
+            var dot = cxb.Dot(axb);
 
-            double s = (cxb.Dot(axb)) / Math.Pow(axb.Length, 2);
+            // if dot == 0 it means that they are parallels
+
+            if(Threshold(dot, 0))
+            {
+                if(this.StartVertex.OnEdge(edge) || this.EndVertex.OnEdge(edge))
+                {
+                    gVertex[] vertices = new gVertex[4]
+                    {
+                        this.StartVertex,
+                        this.EndVertex,
+                        edge.StartVertex,
+                        edge.EndVertex
+                    };
+                    var sorted = vertices.OrderBy(v => v.Y).ThenBy(v => v.X).ThenBy(v => v.Z).ToList();
+                    return gEdge.ByStartVertexEndVertex(sorted[1], sorted[2]);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            double s = (dot) / Math.Pow(axb.Length, 2);
 
             // s > 1, means that "intersection" vertex is not on either edge
             // s == NaN means they are parallels so never intersect
@@ -134,6 +157,13 @@ namespace Graphical.Base
 
         public bool Intersects(gEdge edge)
         {
+            if(this.StartVertex.OnEdge(edge) || this.EndVertex.OnEdge(edge))
+            {
+                if (this.Direction.IsParallelTo(edge.Direction))
+                {
+                    return true;
+                }
+            }
             return this.Intersection(edge) != null;
         }
 

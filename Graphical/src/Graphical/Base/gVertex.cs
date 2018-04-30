@@ -16,7 +16,7 @@ namespace Graphical.Base
     /// Representation of vertex points on a graph.
     /// </summary>
     [IsVisibleInDynamoLibrary(false)]
-    public class gVertex : IGraphicItem, ICloneable, IEquatable<gVertex>
+    public class gVertex : gBase, IGraphicItem, ICloneable, IEquatable<gVertex>
     {
         //TODO: Reorganize methods 
         #region Variables
@@ -45,7 +45,7 @@ namespace Graphical.Base
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <returns></returns>
-        public static gVertex ByCoordinates(double x, double y, double z)
+        public static gVertex ByCoordinates(double x, double y, double z = 0)
         {
             return new gVertex(x, y, z);
         }
@@ -90,7 +90,7 @@ namespace Graphical.Base
                     throw new Exception("Plane not defined");
             }
             //Rounding due to floating point error.
-            if (Utils.Threshold(value,0)) { return 0; } //Points are colinear
+            if (Threshold(value,0)) { return 0; } //Points are colinear
 
             return (value > 0) ? 1 : -1; //Counter clock or clock wise
         }
@@ -221,7 +221,7 @@ namespace Graphical.Base
         {
             if (obj == null) { return false; }
             
-            return Utils.Threshold(this.X, obj.X) && Utils.Threshold(this.Y, obj.Y) && Utils.Threshold(this.Z, obj.Z);
+            return Threshold(this.X, obj.X) && Threshold(this.Y, obj.Y) && Threshold(this.Z, obj.Z);
         }
 
         /// <summary>

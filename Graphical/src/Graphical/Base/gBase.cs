@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Graphical
+namespace Graphical.Base
 {
-    public static class Utils
+    public abstract class gBase
     {
         #region Constants
-        const double threshold = 0.0001;
+        const double threshold = 0.000001;
         #endregion
 
         public static bool Threshold(double value1, double value2)

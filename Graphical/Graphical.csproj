@@ -164,7 +164,7 @@
     <Compile Include="src\Graphical\Base\gEdge.cs" />
     <Compile Include="src\Graphical\Core\List.cs" />
     <Compile Include="src\Graphical\Graphs\VisibilityGraph.cs" />
-    <Compile Include="src\Graphical\Utils\Utils.cs" />
+    <Compile Include="src\Graphical\Base\gBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="extern\" />
