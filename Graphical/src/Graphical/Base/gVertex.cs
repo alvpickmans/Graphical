@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Autodesk.DesignScript.Geometry;
 using Autodesk.DesignScript.Interfaces;
 using Autodesk.DesignScript.Runtime;
-using Graphical.Geometry;
 using DSPoint = Autodesk.DesignScript.Geometry.Point;
 #endregion
 
@@ -19,11 +18,6 @@ namespace Graphical.Base
     [IsVisibleInDynamoLibrary(false)]
     public class gVertex : IGraphicItem, ICloneable, IEquatable<gVertex>
     {
-
-        #region Constants
-        const int rounding = 10 * 10;
-        #endregion
-        
         //TODO: Reorganize methods 
         #region Variables
         internal DSPoint point { get { return DSPoint.ByCoordinates(X, Y, Z); } }
@@ -39,9 +33,9 @@ namespace Graphical.Base
         private gVertex(double x, double y, double z = 0, int pId = -1)
         {
             polygonId = pId;
-            X = Math.Round(x, 6);
-            Y = Math.Round(y, 6);
-            Z = Math.Round(z, 6);
+            X = x;
+            Y = y;
+            Z = z;
         }
 
         /// <summary>
@@ -68,12 +62,7 @@ namespace Graphical.Base
             return new gVertex(x, y, z);
         }
         #endregion
-
-        internal static bool Threshold (double value1, double value2)
-        {
-            return Math.Abs(value1 - value2) <= 0.0001;
-        }
-        
+                
         internal static List<gVertex> OrderByRadianAndDistance (List<gVertex> vertices, gVertex centre = null)
         {
             if(centre == null) { centre = gVertex.MinimumVertex(vertices); }
@@ -101,8 +90,7 @@ namespace Graphical.Base
                     throw new Exception("Plane not defined");
             }
             //Rounding due to floating point error.
-            value = Math.Round(value, 6);
-            if (value == 0) { return 0; } //Points are colinear
+            if (Utils.Threshold(value,0)) { return 0; } //Points are colinear
 
             return (value > 0) ? 1 : -1; //Counter clock or clock wise
         }
@@ -191,8 +179,8 @@ namespace Graphical.Base
             gVector startMid = gVector.ByTwoVertices(start, this);
             gVector endMid = gVector.ByTwoVertices(this, end);
             if (!startMid.IsParallelTo(endMid)){ return false; } // Not aligned
-            double dotAC = Math.Round(startEnd.Dot(startMid),6);
-            double dotAB = Math.Round(startEnd.Dot(startEnd),6);
+            double dotAC = startEnd.Dot(startMid);
+            double dotAB = startEnd.Dot(startEnd);
             return 0 <= dotAC && dotAC <= dotAB;
         }
 
@@ -233,7 +221,7 @@ namespace Graphical.Base
         {
             if (obj == null) { return false; }
             
-            return Threshold(this.X, obj.X) && Threshold(this.Y, obj.Y) && Threshold(this.Z, obj.Z);
+            return Utils.Threshold(this.X, obj.X) && Utils.Threshold(this.Y, obj.Y) && Utils.Threshold(this.Z, obj.Z);
         }
 
         /// <summary>

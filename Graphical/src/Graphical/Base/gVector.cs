@@ -28,11 +28,10 @@ namespace Graphical.Base
 
         private gVector(double x, double y, double z, double length = Double.PositiveInfinity)
         {
-            X = Math.Round(x, 6);
-            Y = Math.Round(y, 6);
-            Z = Math.Round(z, 6);
+            X = x;
+            Y = y;
+            Z = z;
             Length = (Double.IsPositiveInfinity(length)) ? Math.Sqrt(Math.Pow(X, 2) + Math.Pow(Y, 2) + Math.Pow(Z, 2)) : length;
-            Length = Math.Round(Length, 6, MidpointRounding.AwayFromZero);
         }
 
         public static gVector ByCoordinates(double x, double y, double z)
@@ -75,8 +74,18 @@ namespace Graphical.Base
         {
             double dot = this.Dot(vector);
             double cos = dot / (this.Length * vector.Length);
-            double rad = (cos >= -1 && cos <= 1) ? Math.Acos(cos) : Math.Acos(Math.Round(cos)) ;
-            return ToDegrees(rad);
+            if(cos > 1)
+            {
+                return Utils.ToDegrees(Math.Acos(1));
+            }
+            else if(cos < -1)
+            {
+                return Utils.ToDegrees(Math.Acos(-1));
+            }
+            else
+            {
+                return Utils.ToDegrees(Math.Acos(cos));
+            }
         }
 
         public gVector Cross(gVector vector)
@@ -84,7 +93,7 @@ namespace Graphical.Base
             double x = (this.Y * vector.Z) - (this.Z * vector.Y);
             double y = (this.Z * vector.X) - (this.X * vector.Z);
             double z = (this.X * vector.Y) - (this.Y * vector.X);
-            double angle = ToRadians(this.Angle(vector));
+            double angle = Utils.ToRadians(this.Angle(vector));
             double length = this.Length * vector.Length * Math.Sin(angle);
             return new gVector(x, y, z, length);
         }
@@ -102,7 +111,7 @@ namespace Graphical.Base
         public bool IsParallelTo(gVector vector)
         {
             var dot = this.Normalized().Dot(vector.Normalized());
-            return gVertex.Threshold(dot, 1);
+            return Utils.Threshold(dot, 1);
         }
 
         public gVertex AsVertex()
@@ -113,15 +122,7 @@ namespace Graphical.Base
 
         #region Internal Methods
 
-        internal static double ToDegrees(double radians)
-        {
-            return radians * (180 / Math.PI);
-        }
 
-        internal static double ToRadians(double degrees)
-        {
-            return degrees * (Math.PI / 180);
-        }
         #endregion
 
         /// <summary>

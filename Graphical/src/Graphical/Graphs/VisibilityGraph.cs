@@ -275,7 +275,7 @@ namespace Graphical.Graphs
                     foreach (EdgeKey k in openEdges)
                     {
                         //if (!k.edge.Contains(prev) && EdgeIntersect(prev, vertex, k.edge))
-                        if (EdgeIntersect(prev, vertex, k.Edge))
+                        if (EdgeIntersect(prev, vertex, k.Edge) && !k.Edge.Contains(prev))
                         {
                             isVisible = false;
                             break;
@@ -283,13 +283,13 @@ namespace Graphical.Graphs
                     }
                     if (isVisible && EdgeInPolygon(prev, vertex, baseGraph, maxDistance))
                     {
-                        isVisible = false;
+                        isVisible = IsBoundaryVertex(vertex, baseGraph);
                     }
 
-                    if(isVisible && !vertex.OnEdge(centre, prev))
-                    {
-                        isVisible = false;
-                    }
+                    //if(isVisible && !vertex.OnEdge(centre, prev))
+                    //{
+                    //    isVisible = false;
+                    //}
                 }
 
                 //If vertex is visible and centre belongs to any polygon, checks

@@ -51,8 +51,13 @@ namespace Graphical.Base.Tests
             var v1 = vectors[0];
             var v2 = vectors[1];
             var v3 = vectors[2];
-            Assert.AreEqual(45.0, Math.Round(v1.Angle(v2), 3));
-            Assert.AreEqual(90.0, Math.Round(v1.Angle(v3), 3));
+            var v4 = gVector.ByCoordinates(-10, 0, 0);
+            var v5 = gVector.ByCoordinates(10, 0.0001, 0);
+            var v6 = gVector.ByCoordinates(10, 0.00001, 0);
+            Assert.IsTrue(Utils.Threshold(v1.Angle(v2), 45.0));
+            Assert.IsTrue(Utils.Threshold(v1.Angle(v3), 90.0));
+            Assert.IsFalse(Utils.Threshold(v4.Angle(v5), 180.0)); // Floating point threshold
+            Assert.IsTrue(Utils.Threshold(v4.Angle(v6), 180.0)); // Floating point threshold
         }
 
         [Test]
