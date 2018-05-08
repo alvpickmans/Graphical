@@ -89,7 +89,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="MeshToolkit">
-      <HintPath>..\..\..\..\..\AppData\Roaming\Dynamo\Dynamo Revit\1.3\packages\MeshToolkit\bin\MeshToolkit.dll</HintPath>
+      <HintPath>..\..\MeshToolkit\bin\MeshToolkit.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -152,19 +152,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Graphical\Algorithms\Algorithms.cs" />
-    <Compile Include="src\Graphical\Base\gPolygon.cs" />
-    <Compile Include="src\Graphical\Base\gVector.cs" />
-    <Compile Include="src\Graphical\Geometry\Mesh.cs" />
-    <Compile Include="src\Graphical\Geometry\MeshToolkit.cs" />
-    <Compile Include="src\Graphical\Geometry\Visibility.cs" />
-    <Compile Include="src\Graphical\Geometry\Voxelate.cs" />
-    <Compile Include="src\Graphical\Graphs\Graph.cs" />
-    <Compile Include="src\Graphical\Base\gVertex.cs" />
-    <Compile Include="src\Graphical\Base\gEdge.cs" />
-    <Compile Include="src\Graphical\Core\List.cs" />
-    <Compile Include="src\Graphical\Graphs\VisibilityGraph.cs" />
-    <Compile Include="src\Graphical\Base\gBase.cs" />
+    <Compile Include="src\Algorithms\Algorithms.cs" />
+    <Compile Include="src\Base\gPolygon.cs" />
+    <Compile Include="src\Base\gVector.cs" />
+    <Compile Include="src\Geometry\Mesh.cs" />
+    <Compile Include="src\Geometry\MeshToolkit.cs" />
+    <Compile Include="src\Geometry\Visibility.cs" />
+    <Compile Include="src\Geometry\Voxelate.cs" />
+    <Compile Include="src\Graphs\Graph.cs" />
+    <Compile Include="src\Base\gVertex.cs" />
+    <Compile Include="src\Base\gEdge.cs" />
+    <Compile Include="src\Core\List.cs" />
+    <Compile Include="src\Graphs\VisibilityGraph.cs" />
+    <Compile Include="src\Base\gBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="extern\" />
@@ -177,7 +177,7 @@
     <None Include="app.config" />
     <None Include="Manifests\pkg.json" />
     <None Include="packages.config" />
-    <Compile Include="src\Graphical\Geometry\Point.cs" />
+    <Compile Include="src\Geometry\Point.cs" />
     <None Include="packages\z_Graphical\pkg.json" />
   </ItemGroup>
   <ItemGroup>

@@ -209,6 +209,7 @@ namespace Graphical.Base
         {
             return DSPoint.ByCoordinates(this.X, this.Y, this.Z);
         }
+
         #region Override Methods
         //TODO: Improve overriding equality methods as per http://www.loganfranken.com/blog/687/overriding-equals-in-c-part-1/
 
