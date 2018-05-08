@@ -36,56 +36,48 @@
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Analysis, Version=1.3.0.1281, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.DynamoCoreNodes.1.3.0\lib\net45\Analysis.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="CommonServiceLocator, Version=2.0.1.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\CommonServiceLocator.2.0.1\lib\net45\CommonServiceLocator.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Display, Version=1.3.0.1281, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.DynamoCoreNodes.1.3.0\lib\net45\Display.dll</HintPath>
+    <Reference Include="DesignScriptBuiltin, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Core.2.0.0.4714\lib\net45\DesignScriptBuiltin.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="DSCoreNodes, Version=1.3.0.1281, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.DynamoCoreNodes.1.3.0\lib\net45\DSCoreNodes.dll</HintPath>
+    <Reference Include="DSIronPython, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Core.2.0.0.4714\lib\net45\DSIronPython.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="DSIronPython, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.Core.1.3.0\lib\net45\DSIronPython.dll</HintPath>
+    <Reference Include="DynamoApplications, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Core.2.0.0.4714\lib\net45\DynamoApplications.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="DynamoApplications, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.Core.1.3.0\lib\net45\DynamoApplications.dll</HintPath>
+    <Reference Include="DynamoCore, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Core.2.0.0.4714\lib\net45\DynamoCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="DynamoCore, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.Core.1.3.0\lib\net45\DynamoCore.dll</HintPath>
+    <Reference Include="DynamoCoreTests, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Tests.2.0.0.4714\lib\net45\DynamoCoreTests.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="DynamoCoreTests, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.Tests.1.3.0\lib\net45\DynamoCoreTests.dll</HintPath>
+    <Reference Include="DynamoInstallDetective, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Core.2.0.0.4714\lib\net45\DynamoInstallDetective.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="DynamoInstallDetective, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.Core.1.3.0\lib\net45\DynamoInstallDetective.dll</HintPath>
+    <Reference Include="DynamoServices, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.DynamoServices.2.0.0.4714\lib\net45\DynamoServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="DynamoServices, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.DynamoServices.1.3.0\lib\net45\DynamoServices.dll</HintPath>
+    <Reference Include="DynamoShapeManager, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Core.2.0.0.4714\lib\net45\DynamoShapeManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="DynamoShapeManager, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.Core.1.3.0\lib\net45\DynamoShapeManager.dll</HintPath>
+    <Reference Include="DynamoUnits, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.ZeroTouchLibrary.2.0.0.4714\lib\net45\DynamoUnits.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="DynamoUnits, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.ZeroTouchLibrary.1.3.0\lib\net45\DynamoUnits.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="DynamoUtilities, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.Core.1.3.0\lib\net45\DynamoUtilities.dll</HintPath>
+    <Reference Include="DynamoUtilities, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Core.2.0.0.4714\lib\net45\DynamoUtilities.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MeshToolkit">
@@ -108,20 +100,16 @@
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="NodeServices2, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.DynamoServices.1.3.0\lib\net45\NodeServices2.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="nunit.framework, Version=3.9.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.9.0\lib\net45\nunit.framework.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="ProtoCore, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.Core.1.3.0\lib\net45\ProtoCore.dll</HintPath>
+    <Reference Include="ProtoCore, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Core.2.0.0.4714\lib\net45\ProtoCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ProtoGeometry, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.ZeroTouchLibrary.1.3.0\lib\net45\ProtoGeometry.dll</HintPath>
+      <HintPath>..\packages\DynamoVisualProgramming.ZeroTouchLibrary.2.0.0.4714\lib\net45\ProtoGeometry.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -137,16 +125,16 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="SystemTestServices, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.Tests.1.3.0\lib\net45\SystemTestServices.dll</HintPath>
+    <Reference Include="SystemTestServices, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Tests.2.0.0.4714\lib\net45\SystemTestServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="TestServices, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.Tests.1.3.0\lib\net45\TestServices.dll</HintPath>
+    <Reference Include="TestServices, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Tests.2.0.0.4714\lib\net45\TestServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="VMDataBridge, Version=1.3.0.961, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamoVisualProgramming.Core.1.3.0\lib\net45\VMDataBridge.dll</HintPath>
+    <Reference Include="VMDataBridge, Version=2.0.0.4714, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamoVisualProgramming.Core.2.0.0.4714\lib\net45\VMDataBridge.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -155,6 +143,8 @@
     <Compile Include="src\Algorithms\Algorithms.cs" />
     <Compile Include="src\Base\gPolygon.cs" />
     <Compile Include="src\Base\gVector.cs" />
+    <Compile Include="src\DataStructures\BinaryHeap.cs" />
+    <Compile Include="src\DataStructures\PriorityQ.cs" />
     <Compile Include="src\Geometry\Mesh.cs" />
     <Compile Include="src\Geometry\MeshToolkit.cs" />
     <Compile Include="src\Geometry\Visibility.cs" />
@@ -185,12 +175,6 @@
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\DataStructures\DataStructures.csproj">
-      <Project>{aff19908-b2a9-4233-8fee-8be8cbe85009}</Project>
-      <Name>DataStructures</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -216,41 +200,42 @@
     <MakeDir Directories="$(ProjectDir)packages\z_$(SolutionName)\extra" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>echo Configuration: $(Configuration)
+    <PostBuildEvent>
+      echo Configuration: $(Configuration)
 
 
 
-if $(Configuration) == Debug goto Dynamo1
-
-
-
-
-
-:Dynamo1
-
-
-echo Copying to Dynamo Core 1.3
-
-if not exist "%25appdata%25\Dynamo\Dynamo Core\1.3\packages\z_Graphical" mkdir "%25appdata%25\Dynamo\Dynamo Core\1.3\packages\z_Graphical" 
-
-xcopy /y /s /e "$(ProjectDir)packages\z_Graphical" "%25appdata%25\Dynamo\Dynamo Core\1.3\packages\z_Graphical" 
-
-
-echo Copying to Dynamo Revit 1.3
-
-if not exist "%25appdata%25\Dynamo\Dynamo Revit\1.3\packages\z_Graphical" mkdir "%25appdata%25\Dynamo\Dynamo Revit\1.3\packages\z_Graphical" 
-
-xcopy /y /s /e "$(ProjectDir)packages\z_Graphical" "%25appdata%25\Dynamo\Dynamo Revit\1.3\packages\z_Graphical" 
-
-goto exit
+      if $(Configuration) == Debug goto Dynamo1
 
 
 
 
 
+      :Dynamo1
 
-:exit
-</PostBuildEvent>
+
+      echo Copying to Dynamo Core 2.0
+
+      if not exist "%25appdata%25\Dynamo\Dynamo Core\2.0\packages\z_Graphical" mkdir "%25appdata%25\Dynamo\Dynamo Core\2.0\packages\z_Graphical"
+
+      xcopy /y /s /e "$(ProjectDir)packages\z_Graphical" "%25appdata%25\Dynamo\Dynamo Core\2.0\packages\z_Graphical"
+
+
+      echo Copying to Dynamo Revit 2.0
+
+      if not exist "%25appdata%25\Dynamo\Dynamo Revit\2.0\packages\z_Graphical" mkdir "%25appdata%25\Dynamo\Dynamo Revit\2.0\packages\z_Graphical"
+
+      xcopy /y /s /e "$(ProjectDir)packages\z_Graphical" "%25appdata%25\Dynamo\Dynamo Revit\2.0\packages\z_Graphical"
+
+      goto exit
+
+
+
+
+
+
+      :exit
+    </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

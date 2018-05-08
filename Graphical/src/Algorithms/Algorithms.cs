@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Graphical.Graphs;
 using Graphical.Base;
-using DataStructures.PriorityQueues;
+using Graphical.DataStructures;
 
 namespace Graphical
 {

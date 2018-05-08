@@ -39,7 +39,7 @@ namespace Graphical.Base
         }
 
         /// <summary>
-        /// gEdge constructor method by a given set of XYZ coordinates
+        /// gVertex constructor method by a given set of XYZ coordinates
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
@@ -70,7 +70,7 @@ namespace Graphical.Base
             
         }
 
-        internal static int Orientation(gVertex v1, gVertex p2, gVertex p3, string plane = "xy")
+        public static int Orientation(gVertex v1, gVertex p2, gVertex p3, string plane = "xy")
         {
             // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
             // for details of below formula.
@@ -95,7 +95,7 @@ namespace Graphical.Base
             return (value > 0) ? 1 : -1; //Counter clock or clock wise
         }
 
-        internal static double RadAngle(gVertex centre, gVertex vertex)
+        public static double RadAngle(gVertex centre, gVertex vertex)
         {
             //Rad angles http://math.rice.edu/~pcmi/sphere/drg_txt.html
             double dx = vertex.X - centre.X;
@@ -132,7 +132,7 @@ namespace Graphical.Base
             return Math.Atan(dy / dx);
         }
 
-        internal static double ArcRadAngle (gVertex centre, gVertex start, gVertex end)
+        public static double ArcRadAngle (gVertex centre, gVertex start, gVertex end)
         {
             double a = Math.Pow((end.X - centre.X), 2) + Math.Pow((end.Y - centre.Y), 2);
             double b = Math.Pow((end.X - start.X), 2) + Math.Pow((end.Y - start.Y), 2);
