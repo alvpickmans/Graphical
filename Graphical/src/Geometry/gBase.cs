@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Autodesk.DesignScript.Runtime;
 
-namespace Graphical.Base
+namespace Graphical.Geometry
 {
-    [IsVisibleInDynamoLibrary(false)]
     public abstract class gBase
     {
         #region Constants

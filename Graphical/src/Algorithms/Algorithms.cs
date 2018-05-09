@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Graphical.Graphs;
-using Graphical.Base;
+using Graphical.Geometry;
 using Graphical.DataStructures;
 
 namespace Graphical

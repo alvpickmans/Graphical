@@ -4,23 +4,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Autodesk.DesignScript.Geometry;
-using Autodesk.DesignScript.Interfaces;
-using Autodesk.DesignScript.Runtime;
-using DSPoint = Autodesk.DesignScript.Geometry.Point;
 #endregion
 
-namespace Graphical.Base
+namespace Graphical.Geometry
 {
     /// <summary>
     /// Representation of vertex points on a graph.
     /// </summary>
-    [IsVisibleInDynamoLibrary(false)]
-    public class gVertex : gBase, IGraphicItem, ICloneable, IEquatable<gVertex>
+    public class gVertex : gBase, ICloneable, IEquatable<gVertex>
     {
         //TODO: Reorganize methods 
         #region Variables
-        internal DSPoint point { get { return DSPoint.ByCoordinates(X, Y, Z); } }
         internal int polygonId { get; set; }
 
         public double X { get; private set; }
@@ -205,10 +199,10 @@ namespace Graphical.Base
             }
         }
 
-        public DSPoint AsPoint()
-        {
-            return DSPoint.ByCoordinates(this.X, this.Y, this.Z);
-        }
+        //public DSPoint AsPoint()
+        //{
+        //    return DSPoint.ByCoordinates(this.X, this.Y, this.Z);
+        //}
 
         #region Override Methods
         //TODO: Improve overriding equality methods as per http://www.loganfranken.com/blog/687/overriding-equals-in-c-part-1/
@@ -251,17 +245,16 @@ namespace Graphical.Base
         /// </summary>
         /// <param name="package"></param>
         /// <param name="parameters"></param>
-        [IsVisibleInDynamoLibrary(false)]
-        public void Tessellate(IRenderPackage package, TessellationParameters parameters)
-        {
-            package.AddPointVertex(X, Y, Z);
-            package.AddPointVertexColor(255, 0, 0, 255);
-        }
+        //[IsVisibleInDynamoLibrary(false)]
+        //public void Tessellate(IRenderPackage package, TessellationParameters parameters)
+        //{
+        //    package.AddPointVertex(X, Y, Z);
+        //    package.AddPointVertexColor(255, 0, 0, 255);
+        //}
 
         /// <summary>
         /// Implementation of Clone method
         /// </summary>
-        [IsVisibleInDynamoLibrary(false)]
         public object Clone()
         {
             gVertex newVertex = new gVertex(this.X, this.Y, this.Z, this.polygonId);

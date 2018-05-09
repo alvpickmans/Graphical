@@ -1,12 +1,12 @@
 ﻿using NUnit.Framework;
-using Graphical.Base;
+using Graphical.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Graphical.Base.Tests
+namespace Graphical.Geometry.Tests
 {
     [TestFixture]
     public class gVertexTests

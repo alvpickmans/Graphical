@@ -4,21 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DSPoint = Autodesk.DesignScript.Geometry.Point;
-//using DSLine = Autodesk.DesignScript.Geometry.Line;
-using Autodesk.DesignScript.Geometry;
-using Autodesk.DesignScript.Interfaces;
-using Autodesk.DesignScript.Runtime;
 #endregion
 
 
-namespace Graphical.Base
+namespace Graphical.Geometry
 {
     /// <summary>
     /// Representation of Edges on a graph
     /// </summary>
-    [IsVisibleInDynamoLibrary(false)]
-    public class gEdge : gBase, IGraphicItem
+    public class gEdge : gBase
     {
         #region Variables
         /// <summary>
@@ -63,12 +57,12 @@ namespace Graphical.Base
         /// </summary>
         /// <param name="line">line</param>
         /// <returns name="edge">edge</returns>
-        public static gEdge ByLine(Line line)
-        {
-            gVertex start = gVertex.ByCoordinates(line.StartPoint.X, line.StartPoint.Y, line.StartPoint.Z);
-            gVertex end = gVertex.ByCoordinates(line.EndPoint.X, line.EndPoint.Y, line.EndPoint.Z);
-            return new gEdge(start, end);
-        }
+        //public static gEdge ByLine(Line line)
+        //{
+        //    gVertex start = gVertex.ByCoordinates(line.StartPoint.X, line.StartPoint.Y, line.StartPoint.Z);
+        //    gVertex end = gVertex.ByCoordinates(line.EndPoint.X, line.EndPoint.Y, line.EndPoint.Z);
+        //    return new gEdge(start, end);
+        //}
         #endregion
 
         /// <summary>
@@ -198,10 +192,10 @@ namespace Graphical.Base
             
         }
 
-        public Line AsLine()
-        {
-            return Line.ByStartPointEndPoint(StartVertex.AsPoint(), EndVertex.AsPoint());
-        }
+        //public Line AsLine()
+        //{
+        //    return Line.ByStartPointEndPoint(StartVertex.AsPoint(), EndVertex.AsPoint());
+        //}
 
         #region override methods
         //TODO: Improve overriding equality methods as per http://www.loganfranken.com/blog/687/overriding-equals-in-c-part-1/
@@ -246,22 +240,21 @@ namespace Graphical.Base
         /// </summary>
         /// <param name="package"></param>
         /// <param name="parameters"></param>
-        [IsVisibleInDynamoLibrary(false)]
-        public void Tessellate(IRenderPackage package, TessellationParameters parameters)
-        {
-            //throw new NotImplementedException();
-            //package.AddLineStripVertexCount(2);
-            package.AddLineStripVertex(StartVertex.X, StartVertex.Y, StartVertex.Z);
-            package.AddLineStripVertex(EndVertex.X, EndVertex.Y, EndVertex.Z);
-            /*Colour addition can be done iteratively with a for loop,
-             * but for just two elements might be better to save the overhead
-             * variable declaration and all.
-             */
-            package.AddLineStripVertexColor(150, 200, 255, 255);
-            package.AddLineStripVertexColor(150, 200, 255, 255);
+        //public void Tessellate(IRenderPackage package, TessellationParameters parameters)
+        //{
+        //    //throw new NotImplementedException();
+        //    //package.AddLineStripVertexCount(2);
+        //    package.AddLineStripVertex(StartVertex.X, StartVertex.Y, StartVertex.Z);
+        //    package.AddLineStripVertex(EndVertex.X, EndVertex.Y, EndVertex.Z);
+        //    /*Colour addition can be done iteratively with a for loop,
+        //     * but for just two elements might be better to save the overhead
+        //     * variable declaration and all.
+        //     */
+        //    package.AddLineStripVertexColor(150, 200, 255, 255);
+        //    package.AddLineStripVertexColor(150, 200, 255, 255);
 
 
-        }
+        //}
 
         #endregion
 

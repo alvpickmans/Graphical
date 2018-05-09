@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Graphical.Base;
+using Graphical.Geometry;
 using EdgeKey = Graphical.Graphs.EdgeKey;
 
 namespace Graphical.Core

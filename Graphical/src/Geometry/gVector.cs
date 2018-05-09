@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Autodesk.DesignScript.Runtime;
 
-namespace Graphical.Base
+namespace Graphical.Geometry
 {
     // Resources:
     // https://www.mathsisfun.com/algebra/vectors-cross-product.html
@@ -13,7 +12,6 @@ namespace Graphical.Base
     // https://betterexplained.com/articles/cross-product/
     // http://mathworld.wolfram.com/CrossProduct.html
 
-    [IsVisibleInDynamoLibrary(false)]
     public class gVector : gBase
     {
         #region Public Properties

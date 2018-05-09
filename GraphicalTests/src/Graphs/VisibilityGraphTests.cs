@@ -1,12 +1,11 @@
 ﻿using Graphical.Graphs;
-using Graphical.Base;
+using Graphical.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using NUnit.Framework;
-using TestServices;
 
 namespace Graphical.Graphs.Tests
 {

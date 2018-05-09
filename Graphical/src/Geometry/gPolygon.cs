@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Autodesk.DesignScript.Runtime;
-using Graphical.Geometry;
 
-namespace Graphical.Base
+namespace Graphical.Geometry
 {
     /// <summary>
     /// gPolygon class to hold graph´s polygon information in relation to its function on the graph
     /// like if it is internal or limit boundary.
     /// </summary>
-    [IsVisibleInDynamoLibrary(false)]
     public class gPolygon : gBase, ICloneable
     {
         #region Variables

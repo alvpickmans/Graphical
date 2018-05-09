@@ -4,11 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Autodesk.DesignScript.Geometry;
-using Autodesk.DesignScript.Interfaces;
-using Autodesk.DesignScript.Runtime;
-using System.Globalization;
-using Graphical.Base;
+using Graphical.Geometry;
 #endregion
 
 namespace Graphical.Graphs
@@ -18,7 +14,7 @@ namespace Graphical.Graphs
     /// Representation of a Graph.
     /// Graph contains a Dictionary where
     /// </summary>
-    public class Graph : IGraphicItem, ICloneable
+    public class Graph : ICloneable
     {
         #region Variables
 
@@ -132,19 +128,19 @@ namespace Graphical.Graphs
         /// <param name="polygons"></param>
         /// <param name="isExternal"></param>
         /// <returns></returns>
-        internal static List<gPolygon> FromPolygons(Polygon[] polygons, bool isExternal)
-        {
-            if(polygons == null) { throw new NullReferenceException("polygons"); }
-            List<gPolygon> input = new List<gPolygon>();
-            foreach(Polygon pol in polygons)
-            {
-                gPolygon gPol = new gPolygon(-1, isExternal);
-                gPol.vertices = pol.Points.Select(pt => gVertex.ByCoordinates(pt.X, pt.Y, pt.Z)).ToList();
-                input.Add(gPol);
-            }
+        //internal static List<gPolygon> FromPolygons(Polygon[] polygons, bool isExternal)
+        //{
+        //    if(polygons == null) { throw new NullReferenceException("polygons"); }
+        //    List<gPolygon> input = new List<gPolygon>();
+        //    foreach(Polygon pol in polygons)
+        //    {
+        //        gPolygon gPol = new gPolygon(-1, isExternal);
+        //        gPol.vertices = pol.Points.Select(pt => gVertex.ByCoordinates(pt.X, pt.Y, pt.Z)).ToList();
+        //        input.Add(gPol);
+        //    }
 
-            return input;
-        }
+        //    return input;
+        //}
 
 
         #endregion
@@ -222,11 +218,11 @@ namespace Graphical.Graphs
         /// <summary>
         /// Get graph edges as lines
         /// </summary>
-        /// <returns name="lines"></returns>
-        public List<Line> GetAsLines()
-        {
-            return edges.Select(e => e.AsLine()).ToList();
-        }
+        ///// <returns name="lines"></returns>
+        //public List<Line> GetAsLines()
+        //{
+        //    return edges.Select(e => e.AsLine()).ToList();
+        //}
 
         public List<int> EdgesPerVertex()
         {
@@ -251,24 +247,23 @@ namespace Graphical.Graphs
         /// </summary>
         /// <param name="package"></param>
         /// <param name="parameters"></param>
-        [IsVisibleInDynamoLibrary(false)]
-        public void Tessellate(IRenderPackage package, TessellationParameters parameters)
-        {
-            foreach(gVertex v in vertices)
-            {
-                v.Tessellate(package, parameters);
-            }
-            foreach(gEdge e in edges)
-            {
-                e.Tessellate(package, parameters);
-            }
-        }
+        //[IsVisibleInDynamoLibrary(false)]
+        //public void Tessellate(IRenderPackage package, TessellationParameters parameters)
+        //{
+        //    foreach(gVertex v in vertices)
+        //    {
+        //        v.Tessellate(package, parameters);
+        //    }
+        //    foreach(gEdge e in edges)
+        //    {
+        //        e.Tessellate(package, parameters);
+        //    }
+        //}
 
         /// <summary>
         /// Implementation of IClonable interface
         /// </summary>
         /// <returns></returns>
-        [IsVisibleInDynamoLibrary(false)]
         public virtual object Clone()
         {
             Graph newGraph = new Graph()
