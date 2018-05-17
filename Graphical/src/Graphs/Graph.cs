@@ -41,12 +41,14 @@ namespace Graphical.Graphs
         /// <summary>
         /// Graph's vertices
         /// </summary>
-        internal List<gVertex> vertices { get { return graph.Keys.ToList(); } }
+        public List<gVertex> vertices { get { return graph.Keys.ToList(); } }
 
         /// <summary>
         /// Graph's edges
         /// </summary>
-        internal List<gEdge> edges { get; set; }
+        public List<gEdge> edges { get; internal set; }
+
+        
 
         #endregion
 
