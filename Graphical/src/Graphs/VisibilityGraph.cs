@@ -27,7 +27,7 @@ namespace Graphical.Graphs
             baseGraph = new Graph();
         }
 
-        internal VisibilityGraph(Graph _baseGraph, bool reducedGraph, bool halfScan = true) : base()
+        public VisibilityGraph(Graph _baseGraph, bool reducedGraph, bool halfScan = true) : base()
         {
             baseGraph = _baseGraph;
 

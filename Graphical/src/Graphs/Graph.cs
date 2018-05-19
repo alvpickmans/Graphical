@@ -235,14 +235,7 @@ namespace Graphical.Graphs
         //TODO: Improve overriding equality methods as per http://www.loganfranken.com/blog/687/overriding-equals-in-c-part-1/
 
 
-        /// <summary>
-        /// Override of ToStringMethod
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            return String.Format("Graph:(gVertices: {0}, gEdges: {1})", vertices.Count.ToString(), edges.Count.ToString());
-        }
+        
 
         /// <summary>
         /// Customizing the render of gVertex
