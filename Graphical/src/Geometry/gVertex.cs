@@ -94,12 +94,14 @@ namespace Graphical.Geometry
             //Rad angles http://math.rice.edu/~pcmi/sphere/drg_txt.html
             double dx = vertex.X - centre.X;
             double dy = vertex.Y - centre.Y;
+            bool onYAxis = Threshold(dx, 0);
+            bool onXAxis = Threshold(dy, 0);
             //TODO: Implement Z angle? that would becom UV coordinates.
             //double dz = vertex.point.Z - centre.point.Z;
 
-            if (dx == 0 && dy == 0) { return 0; }
+            if (onYAxis && onXAxis) { return 0; }
 
-            if (dx == 0)// both vertices on Y axis
+            if (onYAxis)// both vertices on Y axis
             {
                 if (dy < 0)//vertex below X axis
                 {
@@ -110,7 +112,7 @@ namespace Graphical.Geometry
                     return Math.PI / 2;
                 }
             }
-            if (dy == 0)// both vertices on X Axis
+            if (onXAxis)// both vertices on X Axis
             {
                 if (dx < 0)// vertex on the left of Y axis
                 {
