@@ -354,7 +354,7 @@ namespace Graphical.Graphs
                             isTargetExtreme = orientationsTarget.All(o => o == orientationsTarget.First());
                         }
 
-                        if(isTargetExtreme && isOriginExtreme) { visibleVertices.Add(vertex); }
+                        if(isTargetExtreme || isOriginExtreme) { visibleVertices.Add(vertex); }
                     }
                     else
                     {
