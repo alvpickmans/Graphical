@@ -83,23 +83,28 @@ namespace Graphical.Graphs
         //    };
         //}
 
-        public static Graph VertexVisibility(gVertex origin, List<gPolygon> boundaries, List<gPolygon> internals = null, bool reducedGraph = true, bool halfScan = true)
+        public static Graph VertexVisibility(gVertex origin, Graph baseGraph, bool reducedGraph = true, bool halfScan = true)
         {
-            List<gPolygon> polygons = new List<gPolygon>(boundaries);
-            if (internals != null && internals.Any())
-            {
-                polygons.AddRange(internals);
-            }
+            //List<gPolygon> polygons = new List<gPolygon>(boundaries);
+            //if (internals != null && internals.Any())
+            //{
+            //    polygons.AddRange(internals);
+            //}
 
-            VisibilityGraph visGraph = new VisibilityGraph()
-            {
-                baseGraph = new Graph(polygons)
-            };
+            //VisibilityGraph visGraph = new VisibilityGraph()
+            //{
+            //    baseGraph = new Graph(polygons)
+            //};
 
             gVertex o = origin;
-            if(visGraph.baseGraph.Contains(origin)) { o = visGraph.baseGraph.vertices[visGraph.baseGraph.vertices.IndexOf(origin)]; }
-
-            visGraph.edges = visGraph.VisibilityAnalysis(visGraph.baseGraph, new List<gVertex>() { o }, reducedGraph, halfScan);
+            if(baseGraph.Contains(origin)) { o = baseGraph.vertices[baseGraph.vertices.IndexOf(origin)]; }
+            var visibleVertices = VisibilityGraph.VisibleVertices(o, baseGraph, null, null, null, reducedGraph, halfScan);
+            //visGraph.edges = visGraph.VisibilityAnalysis(visGraph.baseGraph, new List<gVertex>() { o }, reducedGraph, halfScan);
+            Graph visGraph = new Graph();
+            foreach(gVertex v in visibleVertices)
+            {
+                visGraph.AddEdge(gEdge.ByStartVertexEndVertex(o, v));
+            }
 
             return visGraph;
 
@@ -188,7 +193,7 @@ namespace Graphical.Graphs
         /// <param name="singleVertices"></param>
         /// <param name="scan"></param>
         /// <returns name="visibleVertices">List of vertices visible from the analysed vertex</returns>
-        internal static List<gVertex> VisibleVertices(
+        public static List<gVertex> VisibleVertices(
             gVertex centre,
             Graph baseGraph,
             gVertex origin = null,
@@ -500,7 +505,7 @@ namespace Graphical.Graphs
             //If intersections is odd, returns true, false otherwise
             return (intersections % 2 == 0) ? false : true;
         }
-        
+
         #endregion
 
         #region Public Methods
@@ -575,65 +580,55 @@ namespace Graphical.Graphs
         //}
 
         //[MultiReturn(new[] { "graph", "totalLength", "miliseconds" })]
-        //public static Dictionary<string, object> ShortestPath(VisibilityGraph visibilityGraph, DSPoint origin, DSPoint destination)
-        //{
-        //    Graph shortest;
-        //    Stopwatch sw = new Stopwatch();
-        //    sw.Start();
+        public static Graph ShortestPath(VisibilityGraph visibilityGraph, gVertex origin, gVertex destination)
+        {
+            Graph shortest;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
-        //    if (visibilityGraph == null) { throw new ArgumentNullException("visibilityGraph"); }
-        //    if (origin == null) { throw new ArgumentNullException("origin"); }
-        //    if (destination == null) { throw new ArgumentNullException("destination"); }
+            //if (visibilityGraph == null) { throw new ArgumentNullException("visibilityGraph"); }
+            //if (origin == null) { throw new ArgumentNullException("origin"); }
+            //if (destination == null) { throw new ArgumentNullException("destination"); }
 
-        //    gVertex gOrigin = gVertex.ByCoordinates(origin.X, origin.Y, origin.Z);
-        //    gVertex gDestination = gVertex.ByCoordinates(destination.X, destination.Y, destination.Z);
+            bool containsOrigin = visibilityGraph.Contains(origin);
+            bool containsDestination = visibilityGraph.Contains(destination);
 
-        //    bool containsOrigin = visibilityGraph.Contains(gOrigin);
-        //    bool containsDestination = visibilityGraph.Contains(gDestination);
-            
-        //    if(containsOrigin && containsDestination)
-        //    {
-        //        shortest = Algorithms.Dijkstra(visibilityGraph, gOrigin, gDestination);
-        //    }
-        //    else
-        //    {
-        //        gVertex gO = (!containsOrigin) ? gOrigin : null;
-        //        gVertex gD = (!containsDestination) ? gDestination : null;
-        //        Graph tempGraph = new Graph();
+            if (containsOrigin && containsDestination)
+            {
+                shortest = Algorithms.Dijkstra(visibilityGraph, origin, destination);
+            }
+            else
+            {
+                gVertex gO = (!containsOrigin) ? origin : null;
+                gVertex gD = (!containsDestination) ? destination : null;
+                Graph tempGraph = new Graph();
 
-        //        if (!containsOrigin)
-        //        {
-        //            foreach (gVertex v in VisibleVertices(gOrigin, visibilityGraph.baseGraph, null, gD, null, false, true))
-        //            {
-        //                tempGraph.AddEdge(new gEdge(gOrigin, v));
-        //            }
-        //        }
-        //        if (!containsDestination)
-        //        {
-        //            foreach (gVertex v in VisibleVertices(gDestination, visibilityGraph.baseGraph, gO, null, null, false, true))
-        //            {
-        //                tempGraph.AddEdge(new gEdge(gDestination, v));
-        //            }
-        //        }
-        //        shortest =  Algorithms.Dijkstra(visibilityGraph, gOrigin, gDestination, tempGraph);
-        //    }
+                if (!containsOrigin)
+                {
+                    foreach (gVertex v in VisibleVertices(origin, visibilityGraph.baseGraph, null, gD, null, false, true))
+                    {
+                        tempGraph.AddEdge(new gEdge(origin, v));
+                    }
+                }
+                if (!containsDestination)
+                {
+                    foreach (gVertex v in VisibleVertices(destination, visibilityGraph.baseGraph, gO, null, null, false, true))
+                    {
+                        tempGraph.AddEdge(new gEdge(destination, v));
+                    }
+                }
+                shortest = Algorithms.Dijkstra(visibilityGraph, origin, destination, tempGraph);
+            }
 
-        //    sw.Stop();
+            //    sw.Stop();
 
-        //    return new Dictionary<string, object>()
-        //    {
-        //        {"graph", shortest },
-        //        {"totalLength", shortest.edges.Select(e => e.Length).Sum() },
-        //        {"miliseconds", sw.ElapsedMilliseconds}
-        //    };
-
-
-        //}
+            return shortest;
+        }
 
         #endregion
 
 
-        
+
         public new object Clone()
         {
             VisibilityGraph newGraph = new VisibilityGraph()

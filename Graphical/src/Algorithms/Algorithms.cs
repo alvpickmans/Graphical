@@ -12,7 +12,7 @@ namespace Graphical
     public static class Algorithms
     {
         
-        internal static Graph Dijkstra(Graph graph, gVertex origin, gVertex destination, Graph tempGraph = null)
+        public static Graph Dijkstra(Graph graph, gVertex origin, gVertex destination, Graph tempGraph = null)
         {
             MinPriorityQ<gVertex, double> Q = new MinPriorityQ<gVertex, double>();
             graph.vertices.Where(v => !v.Equals(origin)).ToList().ForEach(v => Q.Add(v, Double.PositiveInfinity));

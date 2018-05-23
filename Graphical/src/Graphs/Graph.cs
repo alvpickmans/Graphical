@@ -154,7 +154,7 @@ namespace Graphical.Graphs
         /// </summary>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        internal bool Contains(gVertex vertex)
+        public bool Contains(gVertex vertex)
         {
             return graph.ContainsKey(vertex);
         }
@@ -190,7 +190,7 @@ namespace Graphical.Graphs
         /// Add edge to the analisys graph
         /// </summary>
         /// <param name="edge">New edge</param>
-        internal void AddEdge(gEdge edge)
+        public void AddEdge(gEdge edge)
         {
             List<gEdge> startEdgesList = new List<gEdge>();
             List<gEdge> endEdgesList = new List<gEdge>();

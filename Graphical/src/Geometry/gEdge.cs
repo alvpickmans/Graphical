@@ -33,7 +33,7 @@ namespace Graphical.Geometry
         #endregion
 
         #region Constructors
-        internal gEdge(gVertex start, gVertex end)
+        public gEdge(gVertex start, gVertex end)
         {
             StartVertex = start;
             EndVertex = end;
