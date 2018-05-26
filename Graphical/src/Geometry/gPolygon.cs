@@ -51,7 +51,7 @@ namespace Graphical.Geometry
         {
             get
             {
-                return edges.First().StartVertex.Equals(edges.Last().EndVertex);
+                return this.edges.Count > 2 && (edges.First().StartVertex.OnEdge(edges.Last()) || edges.First().EndVertex.OnEdge(edges.Last()));
             }
         }
         #endregion
