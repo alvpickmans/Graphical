@@ -113,7 +113,12 @@ namespace Graphical.Geometry
 
             if(Threshold(dot, 0))
             {
-                if(this.StartVertex.OnEdge(edge) || this.EndVertex.OnEdge(edge))
+                //Fully contains the test edge
+                if(edge.StartVertex.OnEdge(this) && edge.EndVertex.OnEdge(this))
+                {
+                    return edge;
+                }
+                else if(this.StartVertex.OnEdge(edge) || this.EndVertex.OnEdge(edge))
                 {
                     gVertex[] vertices = new gVertex[4]
                     {

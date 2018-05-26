@@ -31,7 +31,7 @@ namespace Graphical.Graphs
         /// <summary>
         /// Polygon's Id counter.
         /// </summary>
-        internal int pId = 0;
+        internal int pId { get; private set; }
 
         /// <summary>
         /// Dictionary with vertex as key and values edges associated with the vertex.
@@ -48,7 +48,10 @@ namespace Graphical.Graphs
         /// </summary>
         public List<gEdge> edges { get; internal set; }
 
-        
+        public List<gPolygon> Polygons
+        {
+            get { return polygons.Values.ToList(); }
+        }
 
         #endregion
 
@@ -90,6 +93,7 @@ namespace Graphical.Graphs
                 // If valid polygon
                 if (vertexCount >= 3)
                 {
+                    int newId = GetNextId();
                     for (var j = 0; j < vertexCount; j++)
                     {
                         int next_index = (j + 1) % vertexCount;
@@ -101,53 +105,47 @@ namespace Graphical.Graphs
                         //edge to vertices dictionary
                         if (vertexCount > 2)
                         {
-                            vertex.polygonId = pId;
-                            next_vertex.polygonId = pId;
+                            vertex.polygonId = newId;
+                            next_vertex.polygonId = newId;
                             gPolygon gPol = new gPolygon();
-                            if (polygons.TryGetValue(pId, out gPol))
+                            if (polygons.TryGetValue(newId, out gPol))
                             {
                                 gPol.edges.Add(edge);
                             }
                             else
                             {
                                 gPolygon.edges.Add(edge);
-                                gPolygon.id = pId;
-                                polygons.Add(pId, gPolygon);
+                                gPolygon.id = newId;
+                                polygons.Add(newId, gPolygon);
                             }
                         }
                         AddEdge(edge);
                     }
-                    pId += 1;
                 }
 
             }
         }
 
-        
-        /// <summary>
-        /// Create a list of gPolygons from a set of DS polygons.
-        /// </summary>
-        /// <param name="polygons"></param>
-        /// <param name="isExternal"></param>
-        /// <returns></returns>
-        //internal static List<gPolygon> FromPolygons(Polygon[] polygons, bool isExternal)
-        //{
-        //    if(polygons == null) { throw new NullReferenceException("polygons"); }
-        //    List<gPolygon> input = new List<gPolygon>();
-        //    foreach(Polygon pol in polygons)
-        //    {
-        //        gPolygon gPol = new gPolygon(-1, isExternal);
-        //        gPol.vertices = pol.Points.Select(pt => gVertex.ByCoordinates(pt.X, pt.Y, pt.Z)).ToList();
-        //        input.Add(gPol);
-        //    }
-
-        //    return input;
-        //}
-
-
         #endregion
 
         #region Internal Methods
+
+        internal int GetNextId()
+        {
+            if(this.pId == null)
+            {
+                this.pId = 0;
+            }
+            else
+            {
+                pId++;
+            }
+            return pId;
+        }
+
+        #endregion
+
+        #region Public Methods
 
         /// <summary>
         /// Contains mathod for vertex in graph
@@ -164,12 +162,12 @@ namespace Graphical.Graphs
         /// </summary>
         /// <param name="edge"></param>
         /// <returns></returns>
-        internal bool Contains(gEdge edge)
+        public bool Contains(gEdge edge)
         {
             return edges.Contains(edge);
         }
 
-        internal List<gEdge> GetVertexEdges(gVertex vertex)
+        public List<gEdge> GetVertexEdges(gVertex vertex)
         {
             List<gEdge> edgesList = new List<gEdge>();
             if(graph.TryGetValue(vertex, out edgesList))
@@ -182,10 +180,11 @@ namespace Graphical.Graphs
             }
         }
 
-        internal List<gVertex> GetAdjecentVertices(gVertex v)
+        public List<gVertex> GetAdjecentVertices(gVertex v)
         {
             return graph[v].Select(edge => edge.GetVertexPair(v)).ToList();
         }
+
         /// <summary>
         /// Add edge to the analisys graph
         /// </summary>
@@ -215,27 +214,53 @@ namespace Graphical.Graphs
             if (!edges.Contains(edge)) { edges.Add(edge); }
         }
 
+        /// <summary>
+        /// Computes edges and creates polygons from those connected by vertices.
+        /// </summary>
+        public void BuildPolygons()
+        {
+            var computedVertices = new List<gVertex>();
+
+            foreach(gVertex v in vertices)
+            {
+                // If already belongs to a polygon or is not a polygon vertex or already computed
+                if( computedVertices.Contains(v) || v.polygonId >= 0 || graph[v].Count > 2) { continue; }
+
+                computedVertices.Add(v);
+                gPolygon polygon = new gPolygon(GetNextId(), false);
+                
+                polygon.AddVertex(v);
+                foreach(gEdge edge in GetVertexEdges(v))
+                {
+                    gEdge nextEdge = edge;
+                    gVertex nextVertex = edge.GetVertexPair(v);
+                    while (!polygon.vertices.Contains(nextVertex))
+                    {
+                        computedVertices.Add(nextVertex);
+                        polygon.AddVertex(nextVertex);
+                        polygon.edges.Add(nextEdge);
+
+                        //It is extreme vertex, polygon not closed
+                        if(graph[nextVertex].Count < 2) { break; }
+
+                        nextEdge = graph[nextVertex].Where(e => !e.Equals(nextEdge)).First();
+                        nextVertex = nextEdge.GetVertexPair(nextVertex);
+                    }
+                    if (!polygon.edges.Last().Equals(nextEdge))
+                    {
+                        polygon.edges.Add(nextEdge);
+                    }
+                }
+                this.polygons.Add(polygon.id, polygon);
+            }
+        }
+
         #endregion
 
-        /// <summary>
-        /// Get graph edges as lines
-        /// </summary>
-        ///// <returns name="lines"></returns>
-        //public List<Line> GetAsLines()
-        //{
-        //    return edges.Select(e => e.AsLine()).ToList();
-        //}
-
-        public List<int> EdgesPerVertex()
-        {
-            return graph.Values.Select(v => v.Count).ToList();
-        }
+        
 
         #region Override Methods
         //TODO: Improve overriding equality methods as per http://www.loganfranken.com/blog/687/overriding-equals-in-c-part-1/
-
-
-        
 
         /// <summary>
         /// Customizing the render of gVertex

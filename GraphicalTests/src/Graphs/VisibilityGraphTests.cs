@@ -47,7 +47,8 @@ namespace Graphical.Graphs.Tests
             var j = gVertex.ByCoordinates(i.X, a.Y);
 
             gPolygon polygon = gPolygon.ByVertices(new List<gVertex>() { a, b, c, d, e, f, g, h, i, j }, true);
-            Graph visGraph = VisibilityGraph.VertexVisibility(i, new List<gPolygon>() { polygon }, null, true, true);
+            Graph baseGraph = new Graph(new List<gPolygon>() { polygon });
+            Graph visGraph = VisibilityGraph.VertexVisibility(i, baseGraph, true, true);
 
             Assert.NotNull(visGraph);
         }
@@ -65,7 +66,9 @@ namespace Graphical.Graphs.Tests
             var h = gVertex.ByCoordinates(a.X, g.Y);
 
             gPolygon polygon = gPolygon.ByVertices(new List<gVertex>() { a, b, c, d, e, f, g, h}, true);
-            Graph visGraph = VisibilityGraph.VertexVisibility(b, new List<gPolygon>() { polygon }, null, true, true);
+            Graph baseGraph = new Graph(new List<gPolygon>() { polygon });
+
+            Graph visGraph = VisibilityGraph.VertexVisibility(b, baseGraph, true, true);
 
             Assert.NotNull(visGraph);
         }

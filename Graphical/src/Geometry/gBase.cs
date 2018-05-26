@@ -9,12 +9,17 @@ namespace Graphical.Geometry
     public abstract class gBase
     {
         #region Constants
-        const double threshold = 0.000001;
+        const double threshold = 0.00001;
         #endregion
 
         public static bool Threshold(double value1, double value2)
         {
             return Math.Abs(value1 - value2) <= threshold;
+        }
+
+        public static double Round(double value, int decimals = 6)
+        {
+            return Math.Round(value, decimals);
         }
 
         public static double ToDegrees(double radians)

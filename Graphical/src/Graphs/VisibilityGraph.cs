@@ -149,9 +149,8 @@ namespace Graphical.Graphs
             {
                 foreach (gPolygon p in g.baseGraph.polygons.Values)
                 {
-                    p.id = newGraph.baseGraph.pId;
+                    p.id = newGraph.baseGraph.GetNextId();
                     newGraph.baseGraph.polygons.Add(p.id, p);
-                    newGraph.baseGraph.pId++;
                 }               
 
                 foreach (gEdge e in g.edges)
@@ -223,12 +222,12 @@ namespace Graphical.Graphs
             //Initialize openEdges with any intersection edges on the half line 
             //from centre to maxDistance on the XAxis
             List<EdgeKey> openEdges = new List<EdgeKey>();
-            double xMax = Math.Abs(centre.X) * maxDistance;
+            double xMax = Math.Abs(centre.X) + 1.5 * maxDistance;
             gEdge halfEdge = gEdge.ByStartVertexEndVertex(centre, gVertex.ByCoordinates(xMax, centre.Y, centre.Z));
             foreach (gEdge e in edges)
             {
                 if (e.Contains(centre)) { continue; }
-                if (EdgeIntersect(halfEdge, e))
+                if (halfEdge.Intersects(e))
                 {
                     if (e.StartVertex.OnEdge(halfEdge)) { continue; }
                     if (e.EndVertex.OnEdge(halfEdge)) { continue; }
@@ -242,8 +241,9 @@ namespace Graphical.Graphs
             List<gVertex> visibleVertices = new List<gVertex>();
             gVertex prev = null;
             bool prevVisible = false;
-            foreach (gVertex vertex in vertices)
+            for (var i = 0; i < vertices.Count; i++)
             {
+                gVertex vertex = vertices[i];
                 if (vertex.Equals(centre) || vertex.Equals(prev)) { continue; }// v == to centre or to previous when updating graph
                 //Check only half of vertices as eventually they will become 'v'
                 if (halfScan && gVertex.RadAngle(centre, vertex) > Math.PI) { break; }
@@ -453,7 +453,8 @@ namespace Graphical.Graphs
             //At least one doesn't belong to any polygon
             if (v1.polygonId == -1 || v2.polygonId == -1) { return false; }
             gVertex midVertex = gVertex.MidVertex(v1, v2);
-            return VertexInPolygon(midVertex, graph.polygons[v1.polygonId].edges, maxDistance);
+            return graph.polygons[v1.polygonId].ContainsVertex(midVertex);
+            //return VertexInPolygon(midVertex, graph.polygons[v1.polygonId].edges, maxDistance);
             //return DSVertexInPolygon(midVertex, graph.polygons[v1.polygonId].vertices);
         }
 
@@ -482,7 +483,13 @@ namespace Graphical.Graphs
                     if (intersection.GetType() == typeof(gEdge))
                     {
                         gEdge edgeIntesection = (gEdge)intersection;
-                        return edgeIntesection.StartVertex.OnEdge(edge) || edgeIntesection.EndVertex.OnEdge(edge);
+                        if (!edgeIntesection.Equals(edge))
+                        {
+                            return edgeIntesection.StartVertex.OnEdge(edge) || edgeIntesection.EndVertex.OnEdge(edge);
+                        }else
+                        {
+                            intersections++;
+                        }
                     }
                     else
                     {

@@ -14,8 +14,8 @@ namespace Graphical.Geometry
     public class gVertex : gBase, ICloneable, IEquatable<gVertex>
     {
         //TODO: Reorganize methods 
-        #region Variables
-        internal int polygonId { get; set; }
+        #region Properties
+        public int polygonId { get; set; }
 
         public double X { get; private set; }
         public double Y { get; private set; }
@@ -27,9 +27,9 @@ namespace Graphical.Geometry
         private gVertex(double x, double y, double z = 0, int pId = -1)
         {
             polygonId = pId;
-            X = x;
-            Y = y;
-            Z = z;
+            X = Round(x);
+            Y = Round(y);
+            Z = Round(z);
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace Graphical.Geometry
         /// <param name="v1"></param>
         /// <param name="v2"></param>
         /// <returns name="midVertex"></returns>
-        internal static gVertex MidVertex ( gVertex v1, gVertex v2)
+        public static gVertex MidVertex ( gVertex v1, gVertex v2)
         {
             double x = (v1.X + v2.X) / 2, y = (v1.Y + v2.Y) / 2, z = (v1.Z + v2.Z) / 2;
             return new gVertex(x, y, z);
@@ -134,7 +134,6 @@ namespace Graphical.Geometry
             double b = Math.Pow((end.X - start.X), 2) + Math.Pow((end.Y - start.Y), 2);
             double c = Math.Pow((centre.X - start.X), 2) + Math.Pow((centre.Y - start.Y), 2);
             return Math.Acos((a + c - b) / (2 * Math.Sqrt(a) * Math.Sqrt(c)));
-            
         }
 
         internal static gVertex MinimumVertex(List<gVertex> vertices)
@@ -162,7 +161,7 @@ namespace Graphical.Geometry
             return gVertex.ByCoordinates(this.X + vector.X, this.Y + vector.Y, this.Z + vector.Z);
         }
 
-        internal bool OnEdge(gEdge edge)
+        public bool OnEdge(gEdge edge)
         {
             return this.OnEdge(edge.StartVertex, edge.EndVertex);
         }
