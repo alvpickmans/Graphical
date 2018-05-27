@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graphical", "Graphical\Grap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphicalTests", "GraphicalTests\GraphicalTests.csproj", "{16A2BC2F-B048-436E-B700-876FE11B04E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphicalDynamo", "..\GraphicalDynamo\GraphicalDynamo.csproj", "{51F9EC22-BEA3-4837-8EA4-48DB6E075D09}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,12 +26,6 @@ Global
 		{16A2BC2F-B048-436E-B700-876FE11B04E1}.Debug2|Any CPU.Build.0 = Debug2|Any CPU
 		{16A2BC2F-B048-436E-B700-876FE11B04E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16A2BC2F-B048-436E-B700-876FE11B04E1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{51F9EC22-BEA3-4837-8EA4-48DB6E075D09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{51F9EC22-BEA3-4837-8EA4-48DB6E075D09}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{51F9EC22-BEA3-4837-8EA4-48DB6E075D09}.Debug2|Any CPU.ActiveCfg = Debug2|Any CPU
-		{51F9EC22-BEA3-4837-8EA4-48DB6E075D09}.Debug2|Any CPU.Build.0 = Debug2|Any CPU
-		{51F9EC22-BEA3-4837-8EA4-48DB6E075D09}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{51F9EC22-BEA3-4837-8EA4-48DB6E075D09}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
