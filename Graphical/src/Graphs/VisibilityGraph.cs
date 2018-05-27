@@ -454,64 +454,13 @@ namespace Graphical.Graphs
             if (v1.polygonId == -1 || v2.polygonId == -1) { return false; }
             gVertex midVertex = gVertex.MidVertex(v1, v2);
             return graph.polygons[v1.polygonId].ContainsVertex(midVertex);
-            //return VertexInPolygon(midVertex, graph.polygons[v1.polygonId].edges, maxDistance);
-            //return DSVertexInPolygon(midVertex, graph.polygons[v1.polygonId].vertices);
         }
 
         internal static bool IsBoundaryVertex(gVertex vertex, Graph graph)
         {
             return (vertex.polygonId < 0) ? false : graph.polygons[vertex.polygonId].isBoundary;
         }
-
-        public static bool VertexInPolygon(gVertex v1, List<gEdge> polygonEdges, double maxDistance)
-        {
-            gVertex v2 = gVertex.ByCoordinates(v1.X + maxDistance, v1.Y, v1.Z);
-            gEdge ray = gEdge.ByStartVertexEndVertex(v1, v2);
-            gVertex coincident = null;
-            int intersections = 0;
-            bool co_flag = false;
-            int co_dir = 0;
-            foreach (gEdge edge in polygonEdges)
-            {
-                //gVertex above or below edge
-                if (v1.Y < edge.StartVertex.Y && v1.Y < edge.EndVertex.Y) { continue; }
-                if (v1.Y > edge.StartVertex.Y && v1.Y > edge.EndVertex.Y) { continue; }
-                //Vertices colinear to v1
-                gBase intersection = ray.Intersection(edge);
-                if (intersection != null)
-                {
-                    if (intersection.GetType() == typeof(gEdge))
-                    {
-                        gEdge edgeIntesection = (gEdge)intersection;
-                        if (!edgeIntesection.Equals(edge))
-                        {
-                            return edgeIntesection.StartVertex.OnEdge(edge) || edgeIntesection.EndVertex.OnEdge(edge);
-                        }else
-                        {
-                            intersections++;
-                        }
-                    }
-                    else
-                    {
-                        gVertex vertexIntersection = (gVertex)intersection;
-                        if (edge.Contains(vertexIntersection))
-                        {
-                            intersections += intersection.Equals(coincident) ? 0 : 1;
-                            coincident = vertexIntersection;
-                        }
-                        else
-                        {
-                            intersections += 1;
-                        }
-                    }
-                    
-
-                }
-            }
-
-            //If intersections is odd, returns true, false otherwise
-            return (intersections % 2 == 0) ? false : true;
-        }
+        
 
         #endregion
 

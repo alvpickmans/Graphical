@@ -26,8 +26,10 @@ namespace Graphical.Graphs.Tests
                 gEdge.ByStartVertexEndVertex(c, d),
                 gEdge.ByStartVertexEndVertex(d, a)
             };
+            var pol = gPolygon.ByVertices(new List<gVertex>() { a, b, c, d }, false);
+            
 
-            bool inside = VisibilityGraph.VertexInPolygon(origin, edges, 120);
+            bool inside = pol.ContainsVertex(origin);
 
             Assert.IsTrue(inside);
         }

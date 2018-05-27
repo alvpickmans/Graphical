@@ -125,60 +125,23 @@ namespace Graphical.Geometry
             gVertex v2 = gVertex.ByCoordinates(vertex.X + maxDistance, vertex.Y, vertex.Z);
             gEdge ray = gEdge.ByStartVertexEndVertex(vertex, v2);
             gVertex coincident = null;
-            int intersections = 0;
+            int windNumber = 0;
             foreach (gEdge edge in edges)
             {
-                ////gVertex above or below edge
-                //if (!Threshold(vertex.Y, edge.StartVertex.Y) && !Threshold(vertex.Y, edge.EndVertex.Y))
-                //{
-                //    if (vertex.Y < edge.StartVertex.Y && vertex.Y < edge.EndVertex.Y) { continue; }
-                //    if (vertex.Y > edge.StartVertex.Y && vertex.Y > edge.EndVertex.Y) { continue; }
-                //}
-                ////if((edge.StartVertex.Y > vertex.Y && edge.EndVertex.Y <= vertex.Y)) { continue; }
-                ////if(edge.StartVertex.Y <= vertex.Y && edge.EndVertex.Y > vertex.Y) { continue; }
-                ////Vertices colinear to v1
-                //gBase intersection = ray.Intersection(edge);
-                //if (intersection != null)
-                //{
-                //    if (intersection.GetType() == typeof(gEdge))
-                //    {
-                //        gEdge edgeIntesection = (gEdge)intersection;
-                //        if (!edgeIntesection.Equals(edge))
-                //        {
-                //            return edgeIntesection.StartVertex.OnEdge(edge) || edgeIntesection.EndVertex.OnEdge(edge);
-                //        }
-                //        else
-                //        {
-                //            intersections++;
-                //        }
-                //    }
-                //    else
-                //    {
-                //        gVertex vertexIntersection = (gVertex)intersection;
-                //        if (edge.Contains(vertexIntersection))
-                //        {
-                //            intersections += intersection.Equals(coincident) ? 0 : 1;
-                //            coincident = vertexIntersection;
-                //        }
-                //        else
-                //        {
-                //            intersections++;
-                //        }
-                //    }
                 gBase intersection = ray.Intersection(edge);
                 if (edge.StartVertex.Y <= vertex.Y)
                 {
                     
                     if (edge.EndVertex.Y > vertex.Y && intersection != null && intersection.GetType() == typeof(gVertex))
                     {
-                        ++intersections;
+                        ++windNumber;
                     }
                 }
                 else
                 {
                     if (edge.EndVertex.Y <= vertex.Y && intersection != null && intersection.GetType() == typeof(gVertex))
                     {
-                        --intersections;
+                        --windNumber;
                     }
                 }
 
@@ -187,7 +150,7 @@ namespace Graphical.Geometry
 
             //If intersections is odd, returns true, false otherwise
             //return (intersections % 2 == 0) ? false : true;
-            return intersections != 0;
+            return windNumber != 0;
         }
         #endregion
 
