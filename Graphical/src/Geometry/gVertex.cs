@@ -141,12 +141,12 @@ namespace Graphical.Geometry
             return vertices.OrderBy(v => v.Y).ThenBy(v => v.X).ThenBy(v => v.Z).ToList().First();
         }
 
-        internal double DistanceTo(gVertex vertex)
+        public double DistanceTo(gVertex vertex)
         {
             return Math.Sqrt(Math.Pow(vertex.X - X, 2) + Math.Pow(vertex.Y - Y, 2) + Math.Pow(vertex.Z - Z, 2));
         }
 
-        internal double DistanceTo(gEdge edge)
+        public double DistanceTo(gEdge edge)
         {
             // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
             gVector v1 = gVector.ByTwoVertices(this, edge.StartVertex);
