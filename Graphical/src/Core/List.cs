@@ -89,5 +89,11 @@ namespace Graphical.Core
                 .Select(x => x.Select(v => v.Value).ToList())
                 .ToList();
         }
+
+        public static double Map(double value, double min, double max, double newMin, double newMax)
+        {
+            double normal = (value - min) / (max - min);
+            return (normal * (newMax - newMin)) + newMin;
+        }
     }
 }
