@@ -19,7 +19,7 @@ namespace Graphical.Core
         /// <param name="list"></param>
         /// <param name="item"></param>
         /// <returns></returns>
-        internal static List<dynamic> AddItemSorted(List<dynamic> list, dynamic[] item)
+        public static List<dynamic> AddItemSorted(List<dynamic> list, dynamic[] item)
         {
             List<dynamic> clone = list.ToList();
             foreach(var it in item)
@@ -74,6 +74,24 @@ namespace Graphical.Core
                 {
                     hi = mid;
                 }else
+                {
+                    lo = mid + 1;
+                }
+            }
+            return lo;
+        }
+
+        public static int  BisectIndex<T> (List<T> list, T item) where T : IComparable
+        {
+            int lo = 0, hi = list.Count;
+            while (lo < hi)
+            {
+                int mid = (lo + hi) / 2;
+                if (item.CompareTo(list[mid]) < 0)
+                {
+                    hi = mid;
+                }
+                else
                 {
                     lo = mid + 1;
                 }
