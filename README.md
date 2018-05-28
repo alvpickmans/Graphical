@@ -5,9 +5,11 @@
 
 ## History
 
-**Graphical** was originally conceived as a purely Dynamo Package, where I tried to understand and implement visibility graphs in order to find the shortest path on a given layout.
+**Graphical** was originally conceived as a purely [Dynamo](https://github.com/DynamoDS) package, where I tried to understand and implement visibility graphs in order to find the shortest path on a given layout.
 
 I soon realized that Dynamo's geometry library was too heavy for this purpose, so I started to create custom geometry primitives (vertices, vectors, lines...) in order to improve the performance. 
+
+The result is the detachment of the logic used for the construction and computation of graph and visibilities from the purely Dynamo implementation. This might give more flexibility in the future to be aplied in other platforms.
 
 ## License
 
