@@ -111,14 +111,9 @@
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="app.config" />
-    <None Include="Manifests\pkg.json" />
     <None Include="packages.config" />
     <None Include="packages\z_Graphical\pkg.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Manifests\Graphical_DynamoCustomization.xml">
-      <SubType>Designer</SubType>
-    </Content>
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
