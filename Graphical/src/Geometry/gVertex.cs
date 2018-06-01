@@ -13,7 +13,12 @@ namespace Graphical.Geometry
     /// </summary>
     public class gVertex : gBase, ICloneable, IEquatable<gVertex>
     {
-        //TODO: Reorganize methods 
+        #region Internal Properties
+        internal double? thrX;
+        internal double? thrY;
+        internal double? thrZ;
+        #endregion
+
         #region Properties
         public int polygonId { get; set; }
 
@@ -216,8 +221,8 @@ namespace Graphical.Geometry
         public bool Equals(gVertex obj)
         {
             if (obj == null) { return false; }
-            
-            return Threshold(this.X, obj.X) && Threshold(this.Y, obj.Y) && Threshold(this.Z, obj.Z);
+            bool eq = Threshold(this.X, obj.X) && Threshold(this.Y, obj.Y) && Threshold(this.Z, obj.Z);
+            return eq;
         }
 
         /// <summary>
@@ -226,6 +231,17 @@ namespace Graphical.Geometry
         /// <returns></returns>
         public override int GetHashCode()
         {
+            if(gBase.thresholdOverride != null )
+            {
+                if(thrX == null || thrY == null || thrZ == null)
+                {
+                    thrX = Math.Round(X, thresholdDecimals);
+                    thrY = Math.Round(Y, thresholdDecimals);
+                    thrZ = Math.Round(Z, thresholdDecimals);
+                }
+
+                return thrX.GetHashCode() ^ thrY.GetHashCode() ^ thrZ.GetHashCode();
+            }
             return X.GetHashCode() ^ Y.GetHashCode() ^ Z.GetHashCode();
         }
 

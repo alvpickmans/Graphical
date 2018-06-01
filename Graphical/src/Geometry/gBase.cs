@@ -9,12 +9,31 @@ namespace Graphical.Geometry
     public abstract class gBase
     {
         #region Constants
-        const double threshold = 0.00001;
+        const double EPS = 1e-5;
         #endregion
+
+        #region Properties
+        internal double? thresholdOverride { get; private set; }
+        internal int thresholdDecimals { get; private set; }
+        #endregion
+
+        public  void ThresholdOverride(double value)
+        {
+            thresholdOverride = value;
+            decimal d = Convert.ToDecimal(thresholdOverride);
+            thresholdDecimals = BitConverter.GetBytes(decimal.GetBits(d)[3])[2];
+        }
 
         public static bool Threshold(double value1, double value2)
         {
-            return Math.Abs(value1 - value2) <= threshold;
+            if(thresholdOverride == null)
+            {
+                return Math.Abs(value1 - value2) <= EPS;
+            }else
+            {
+                bool eq = Math.Abs(value1 - value2) <= thresholdOverride;
+                return eq;
+            }
         }
 
         public static double Round(double value, int decimals = 6)
