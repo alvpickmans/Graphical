@@ -143,6 +143,20 @@ namespace Graphical.Graphs
             return pId;
         }
 
+        internal void ResetEdgesFromPolygons()
+        {
+            this.edges.Clear();
+            this.graph.Clear();
+
+            foreach(gPolygon polygon in polygons.Values)
+            {
+                foreach(gEdge edge in polygon.edges)
+                {
+                    this.AddEdge(edge);
+                }
+            }
+        }
+
         #endregion
 
         #region Public Methods
@@ -195,7 +209,7 @@ namespace Graphical.Graphs
             List<gEdge> endEdgesList = new List<gEdge>();
             if (graph.TryGetValue(edge.StartVertex, out startEdgesList))
             {
-                startEdgesList.Add(edge);
+                if (!startEdgesList.Contains(edge)) { startEdgesList.Add(edge); }
             }
             else
             {
@@ -204,7 +218,7 @@ namespace Graphical.Graphs
 
             if (graph.TryGetValue(edge.EndVertex, out endEdgesList))
             {
-                endEdgesList.Add(edge);
+                if (!endEdgesList.Contains(edge)) { endEdgesList.Add(edge); }
             }
             else
             {

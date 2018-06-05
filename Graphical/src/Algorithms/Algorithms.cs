@@ -15,7 +15,7 @@ namespace Graphical
         public static Graph Dijkstra(Graph graph, gVertex origin, gVertex destination, Graph tempGraph = null)
         {
             MinPriorityQ<gVertex, double> Q = new MinPriorityQ<gVertex, double>();
-            graph.vertices.Where(v => !v.Equals(origin)).ToList().ForEach(v => Q.Add(v, Double.PositiveInfinity));
+            graph.vertices.ForEach(v => Q.Add(v, Double.PositiveInfinity));
 
             //If tempGraph is not null, means graph doesn't contain origin and/or destination vertices.
             if (graph.Contains(origin))

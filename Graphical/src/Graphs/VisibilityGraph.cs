@@ -110,56 +110,45 @@ namespace Graphical.Graphs
 
         }
 
-        //[MultiReturn(new[] { "visibilityGraph", "miliseconds" })]
-        //public static Dictionary<string, object> ByPolygonsAndBoundariesFromPoint(DSPoint point,  DSPolygon[] boundaries, [DefaultArgument("{}")]DSPolygon[] polygons = null, bool reducedGraph = true)
-        //{
-        //    var sw = new System.Diagnostics.Stopwatch();
-        //    sw.Start();
-        //    List<gPolygon> gPolygons = FromPolygons(boundaries, true);
-        //    if (polygons.Any())
-        //    {
-        //        gPolygons.AddRange(FromPolygons(polygons, false));
-        //    }
-        //    Graph _baseGraph = new Graph(gPolygons);
-
-        //    var g = new VisibilityGraph()
-        //    {
-        //        baseGraph = _baseGraph
-        //    };
-
-        //    gVertex origin = gVertex.ByCoordinates(point.X, point.Y, point.Z);
-        //    if (g.baseGraph.Contains(origin)) { origin = g.baseGraph.vertices[g.baseGraph.vertices.IndexOf(origin)]; }
-        //    g.edges = g.VisibilityAnalysis(g.baseGraph, new List<gVertex>() { origin }, reducedGraph, false);
-
-        //    sw.Stop();
-
-        //    return new Dictionary<string, object>()
-        //    {
-        //        {"visibilityGraph", g },
-        //        {"miliseconds", sw.ElapsedMilliseconds }
-        //    };
-        //}
-
-
         public static VisibilityGraph Merge(List<VisibilityGraph> graphs)
         {
-            VisibilityGraph newGraph = new VisibilityGraph();
-
+            Graph graph = new Graph();
+            List<gEdge> edges = new List<gEdge>();
             foreach (VisibilityGraph g in graphs)
             {
+                Dictionary<int, int> oldNewIds = new Dictionary<int, int>();
                 foreach (gPolygon p in g.baseGraph.polygons.Values)
                 {
-                    p.id = newGraph.baseGraph.GetNextId();
-                    newGraph.baseGraph.polygons.Add(p.id, p);
+                    int nextId = graph.GetNextId();
+                    oldNewIds.Add(p.id, nextId);
+                    gPolygon polygon = (gPolygon)p.Clone();
+                    polygon.id = nextId;
+                    graph.polygons.Add(nextId, polygon);
                 }               
 
                 foreach (gEdge e in g.edges)
                 {
-                    newGraph.AddEdge(e);
+                    gVertex start = (gVertex)e.StartVertex.Clone();
+                    gVertex end = (gVertex)e.EndVertex.Clone();
+                    //start.polygonId = oldNewIds[start.polygonId];
+                    //end.polygonId = oldNewIds[end.polygonId];
+                    edges.Add(gEdge.ByStartVertexEndVertex(start, end));
                 }
             }
-            newGraph.baseGraph = new Graph(newGraph.baseGraph.polygons.Values.ToList());
-            return newGraph;
+            
+            VisibilityGraph visibilityGraph = new VisibilityGraph()
+            {
+                baseGraph = new Graph(graph.polygons.Values.ToList()),
+            };
+
+            foreach(gEdge edge in edges)
+            {
+                visibilityGraph.AddEdge(edge);
+            }
+
+            return visibilityGraph;
+
+
         }
         #endregion
 
@@ -482,7 +471,12 @@ namespace Graphical.Graphs
                 if (!singleVertices.Contains(e.StartVertex)) { singleVertices.Add(e.StartVertex); }
                 if (!singleVertices.Contains(e.EndVertex)) { singleVertices.Add(e.EndVertex); }
             }
-            VisibilityGraph updatedGraph = AddVertices(visibilityGraph, singleVertices);
+            VisibilityGraph updatedGraph = (VisibilityGraph)visibilityGraph.Clone();
+            if (singleVertices.Any())
+            {
+                updatedGraph = AddVertices(visibilityGraph, singleVertices);
+
+            }
 
             foreach (gEdge e in edges) { updatedGraph.AddEdge(e); }
 
@@ -508,7 +502,7 @@ namespace Graphical.Graphs
                 if (newVisGraph.Contains(v)) { continue; }
                 gEdge closestEdge = newVisGraph.baseGraph.edges.OrderBy(e => e.DistanceTo(v)).First();
 
-                if (closestEdge.DistanceTo(v) > 0)
+                if (!gBase.Threshold(closestEdge.DistanceTo(v),0))
                 {
                     singleVertices.Add(v);
                 }
@@ -519,6 +513,8 @@ namespace Graphical.Graphs
                     singleVertices.Add(v);
                 }
             }
+
+            newVisGraph.baseGraph.ResetEdgesFromPolygons();
 
             foreach (gVertex centre in singleVertices)
             {
