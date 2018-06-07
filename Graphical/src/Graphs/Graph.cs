@@ -217,12 +217,10 @@ namespace Graphical.Graphs
         /// <summary>
         /// Computes edges and creates polygons from those connected by vertices.
         /// </summary>
-        public void BuildPolygons(double? tolerance = null)
+        public void BuildPolygons()
         {
             var computedVertices = new List<gVertex>();
-
-            if(tolerance != null) { gBase.ThresholdOverride(tolerance.Value); }
-
+            
             foreach(gVertex v in vertices)
             {
                 // If already belongs to a polygon or is not a polygon vertex or already computed

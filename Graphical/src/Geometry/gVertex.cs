@@ -166,6 +166,13 @@ namespace Graphical.Geometry
             return gVertex.ByCoordinates(this.X + vector.X, this.Y + vector.Y, this.Z + vector.Z);
         }
 
+        internal gVertex Translate(gVector vector, double distance)
+        {
+            gVector normalized = vector.Normalized();
+            gVector distVector = normalized * distance;
+            return this.Translate(distVector);
+        }
+
         public bool OnEdge(gEdge edge)
         {
             return this.OnEdge(edge.StartVertex, edge.EndVertex);
@@ -231,17 +238,6 @@ namespace Graphical.Geometry
         /// <returns></returns>
         public override int GetHashCode()
         {
-            if(gBase.thresholdOverride != null )
-            {
-                if(thrX == null || thrY == null || thrZ == null)
-                {
-                    thrX = Math.Round(X, thresholdDecimals);
-                    thrY = Math.Round(Y, thresholdDecimals);
-                    thrZ = Math.Round(Z, thresholdDecimals);
-                }
-
-                return thrX.GetHashCode() ^ thrY.GetHashCode() ^ thrZ.GetHashCode();
-            }
             return X.GetHashCode() ^ Y.GetHashCode() ^ Z.GetHashCode();
         }
 
