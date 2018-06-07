@@ -234,7 +234,7 @@ namespace Graphical.Graphs
         public void BuildPolygons()
         {
             var computedVertices = new List<gVertex>();
-
+            
             foreach(gVertex v in vertices)
             {
                 // If already belongs to a polygon or is not a polygon vertex or already computed

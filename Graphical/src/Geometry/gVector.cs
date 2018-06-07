@@ -116,6 +116,11 @@ namespace Graphical.Geometry
         {
             return gVertex.ByCoordinates(this.X, this.Y, this.Z);
         }
+
+        public static gVector operator *(gVector vector, double value)
+        {
+            return new gVector(vector.X * value, vector.Y * value, vector.Z * value);
+        }
         #endregion
 
         #region Internal Methods

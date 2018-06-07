@@ -13,7 +13,12 @@ namespace Graphical.Geometry
     /// </summary>
     public class gVertex : gBase, ICloneable, IEquatable<gVertex>
     {
-        //TODO: Reorganize methods 
+        #region Internal Properties
+        internal double? thrX;
+        internal double? thrY;
+        internal double? thrZ;
+        #endregion
+
         #region Properties
         public int polygonId { get; set; }
 
@@ -161,6 +166,13 @@ namespace Graphical.Geometry
             return gVertex.ByCoordinates(this.X + vector.X, this.Y + vector.Y, this.Z + vector.Z);
         }
 
+        internal gVertex Translate(gVector vector, double distance)
+        {
+            gVector normalized = vector.Normalized();
+            gVector distVector = normalized * distance;
+            return this.Translate(distVector);
+        }
+
         public bool OnEdge(gEdge edge)
         {
             return this.OnEdge(edge.StartVertex, edge.EndVertex);
@@ -216,8 +228,8 @@ namespace Graphical.Geometry
         public bool Equals(gVertex obj)
         {
             if (obj == null) { return false; }
-            
-            return Threshold(this.X, obj.X) && Threshold(this.Y, obj.Y) && Threshold(this.Z, obj.Z);
+            bool eq = Threshold(this.X, obj.X) && Threshold(this.Y, obj.Y) && Threshold(this.Z, obj.Z);
+            return eq;
         }
 
         /// <summary>

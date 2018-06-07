@@ -171,24 +171,25 @@ namespace Graphical.Graphs
 
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="centre"></param>
-        /// <param name="baseGraph"></param>
-        /// <param name="origin"></param>
-        /// <param name="destination"></param>
-        /// <param name="singleVertices"></param>
-        /// <param name="scan"></param>
-        /// <returns name="visibleVertices">List of vertices visible from the analysed vertex</returns>
-        public static List<gVertex> VisibleVertices(
-            gVertex centre,
-            Graph baseGraph,
-            gVertex origin = null,
-            gVertex destination = null,
-            List<gVertex> singleVertices = null,
-            bool halfScan = true,
-            bool reducedGraph = true)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="centre"></param>
+    /// <param name="baseGraph"></param>
+    /// <param name="origin"></param>
+    /// <param name="destination"></param>
+    /// <param name="singleVertices"></param>
+    /// <param name="scan"></param>
+    /// <returns name="visibleVertices">List of vertices visible from the analysed vertex</returns>
+    public static List<gVertex> VisibleVertices(
+        gVertex centre,
+        Graph baseGraph,
+        gVertex origin = null,
+        gVertex destination = null,
+        List<gVertex> singleVertices = null,
+        bool halfScan = true,
+        bool reducedGraph = true,
+        bool maxVisibility = false)
         {
             #region Initialize variables and sort vertices
             List<gEdge> edges = baseGraph.edges;
@@ -364,6 +365,34 @@ namespace Graphical.Graphs
                         {
                             EdgeKey k = new EdgeKey(centre, vertex, e);
                             Core.List.AddItemSorted(openEdges, k);
+                        }
+                    }
+                }
+
+                if(isVisible && maxVisibility && vertex.polygonId >= 0)
+                {
+                    List<gVertex> vertexPairs = baseGraph.GetAdjecentVertices(vertex);
+                    int firstOrientation = gVertex.Orientation(centre, vertex, vertexPairs[0]);
+                    int secondOrientation = gVertex.Orientation(centre, vertex, vertexPairs[1]);
+
+                    //if both edges lie on the same side of the centre-vertex edge or one of them is colinear
+                    if(firstOrientation == secondOrientation || firstOrientation == 0 || secondOrientation == 0)
+                    {
+                        gVertex rayVertex = vertex.Translate(gVector.ByTwoVertices(centre, vertex), maxDistance);
+                        gEdge rayEdge = gEdge.ByStartVertexEndVertex(centre, rayVertex);
+                        gBase intersection = rayEdge.Intersection(openEdges.First().Edge);
+                        if(intersection != null && intersection is gVertex)
+                        {
+                            gVertex projectionVertex = intersection as gVertex;
+                            // if edges are before rayEdge, projection Vertex goes after vertex
+                            if(firstOrientation == -1 || secondOrientation == -1)
+                            {
+                                visibleVertices.Add(projectionVertex);
+                            }
+                            else
+                            {
+                                visibleVertices.Insert(visibleVertices.Count - 1, projectionVertex);
+                            }
                         }
                     }
                 }
