@@ -1,3 +1,8 @@
+branches:
+  # whitelist
+  only:
+    - master
+
 version: '{build}'
 image: Visual Studio 2017
 configuration: Release
