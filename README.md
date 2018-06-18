@@ -1,4 +1,6 @@
-﻿# Graphical
+﻿# Graphical 
+ 
+ [![Build status](https://ci.appveyor.com/api/projects/status/8j96lm7aucye9d87/branch/master?svg=true)](https://ci.appveyor.com/project/alvpickmans/graphical/branch/master)
 
 **Graphical** is a personal research project where I explore different topics I am interested about like algorithm theory, geometry, data structures or computer graphics.
 
