@@ -41,47 +41,6 @@ namespace Graphical.Graphs
         #endregion
 
         #region Public Constructors
-        /// <summary>
-        /// Creates a visibility graph by a set of polygons.
-        /// </summary>
-        /// <param name="polygons">Set of internal polygons</param>
-        /// <returns name="visibilityGraph">VisibilityGraph graph</returns>
-        //public static VisibilityGraph ByPolygons(DSPolygon[] polygons, bool reducedGraph = true)
-        //{
-        //    List<gPolygon> gPolygons = FromPolygons(polygons, false);
-        //    Graph baseGraph = new Graph(gPolygons);
-        //    VisibilityGraph g = new VisibilityGraph(baseGraph, reducedGraph, true);
-        //    return g;
-        //}
-
-        /// <summary>
-        /// Creates a visibility graph by a set of polygons and boundaries.
-        /// </summary>
-        /// <param name="polygons">Set of internal polygons</param>
-        /// <param name="boundaries">Set of boundary polygons. These must not be present on the internal polygons list.</param>
-        /// <returns name="visibilityGraph">VisibilityGraph graph</returns>
-        //[MultiReturn(new[] { "visibilityGraph", "miliseconds" })]
-        //public static Dictionary<string, object> ByPolygonsAndBoundaries(DSPolygon[] boundaries, [DefaultArgument("{}")]DSPolygon[] polygons = null, bool reducedGraph = true)
-        //{
-        //    var sw = new System.Diagnostics.Stopwatch();
-        //    sw.Start();
-        //    List<gPolygon> gPolygons = FromPolygons(boundaries, true);
-        //    if(polygons.Any())
-        //    {
-        //        gPolygons.AddRange(FromPolygons(polygons, false));
-        //    }
-        //    Graph baseGraph = new Graph(gPolygons);
-
-        //    var g = new VisibilityGraph(baseGraph, reducedGraph);
-
-        //    sw.Stop();
-
-        //    return new Dictionary<string, object>()
-        //    {
-        //        {"visibilityGraph", g },
-        //        {"miliseconds", sw.ElapsedMilliseconds }
-        //    };
-        //}
 
         public static List<gVertex> VertexVisibility(gVertex origin, Graph baseGraph)
         {
