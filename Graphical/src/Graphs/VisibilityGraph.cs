@@ -83,30 +83,13 @@ namespace Graphical.Graphs
         //    };
         //}
 
-        public static Graph VertexVisibility(gVertex origin, Graph baseGraph, bool reducedGraph = true, bool halfScan = true)
+        public static List<gVertex> VertexVisibility(gVertex origin, Graph baseGraph)
         {
-            //List<gPolygon> polygons = new List<gPolygon>(boundaries);
-            //if (internals != null && internals.Any())
-            //{
-            //    polygons.AddRange(internals);
-            //}
-
-            //VisibilityGraph visGraph = new VisibilityGraph()
-            //{
-            //    baseGraph = new Graph(polygons)
-            //};
-
             gVertex o = origin;
             if(baseGraph.Contains(origin)) { o = baseGraph.vertices[baseGraph.vertices.IndexOf(origin)]; }
-            var visibleVertices = VisibilityGraph.VisibleVertices(o, baseGraph, null, null, null, reducedGraph, halfScan);
-            //visGraph.edges = visGraph.VisibilityAnalysis(visGraph.baseGraph, new List<gVertex>() { o }, reducedGraph, halfScan);
-            Graph visGraph = new Graph();
-            foreach(gVertex v in visibleVertices)
-            {
-                visGraph.AddEdge(gEdge.ByStartVertexEndVertex(o, v));
-            }
-
-            return visGraph;
+            var visibleVertices = VisibilityGraph.VisibleVertices(o, baseGraph, null, null, null, false, false, true);
+            
+            return visibleVertices;
 
         }
 
@@ -380,10 +363,18 @@ namespace Graphical.Graphs
                     {
                         gVertex rayVertex = vertex.Translate(gVector.ByTwoVertices(centre, vertex), maxDistance);
                         gEdge rayEdge = gEdge.ByStartVertexEndVertex(centre, rayVertex);
-                        gBase intersection = rayEdge.Intersection(openEdges.First().Edge);
-                        if(intersection != null && intersection is gVertex)
+                        gVertex projectionVertex = null;
+                        foreach(EdgeKey ek in openEdges)
                         {
-                            gVertex projectionVertex = intersection as gVertex;
+                            gBase intersection = rayEdge.Intersection(ek.Edge);
+                            if(intersection != null && intersection is gVertex && !(intersection as gVertex).Equals(vertex))
+                            {
+                                projectionVertex = intersection as gVertex;
+                                break;
+                            }
+                        }
+                        if(projectionVertex != null)
+                        {
                             // if edges are before rayEdge, projection Vertex goes after vertex
                             if(firstOrientation == -1 || secondOrientation == -1)
                             {

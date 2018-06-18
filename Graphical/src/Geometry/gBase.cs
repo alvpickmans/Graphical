@@ -26,14 +26,9 @@ namespace Graphical.Geometry
 
         public static bool Threshold(double value1, double value2)
         {
-            if(thresholdOverride == null)
-            {
-                return Math.Abs(value1 - value2) <= EPS;
-            }else
-            {
-                bool eq = Math.Abs(value1 - value2) <= thresholdOverride;
-                return eq;
-            }
+            
+            return Math.Abs(value1 - value2) <= EPS;
+            
         }
 
         public static double Round(double value, int decimals = 6)
