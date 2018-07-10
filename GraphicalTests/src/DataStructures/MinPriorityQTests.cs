@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Graphical.Core;
+using Graphical.Geometry;
 
 namespace Graphical.DataStructures.Tests
 {
@@ -23,8 +25,38 @@ namespace Graphical.DataStructures.Tests
         public void AddTest()
         {
             var minQ = TestMinQ();
-            Assert.AreEqual(10, minQ.Size);
-            Assert.AreEqual(10, minQ.HeapIndices.Count);
+            //Assert.AreEqual(10, minQ.Size);
+            //Assert.AreEqual(10, minQ.HeapIndices.Count);
+
+            var a1 = gVertex.ByCoordinates(0, 0);
+            var a2 = gVertex.ByCoordinates(10, 10);
+            var b1 = gVertex.ByCoordinates(0, 10);
+            var b2 = gVertex.ByCoordinates(10, 0);
+
+            List<gEdge> edges = new List<gEdge>()
+            {
+                gEdge.ByStartVertexEndVertex(a1, a2),
+                gEdge.ByStartVertexEndVertex(b1,b2)
+            };
+
+            var EventsQ = new MinPriorityQ<SweepEvent>(edges.Count * 2);
+
+            foreach (gEdge e in edges)
+            {
+                var sw1 = new SweepEvent(e.StartVertex, e);
+                var sw2 = new SweepEvent(e.EndVertex, e);
+                sw1.Pair = sw2;
+                sw2.Pair = sw1;
+                sw1.IsLeft = sw1 < sw1.Pair;
+                sw2.IsLeft = !sw1.IsLeft;
+                EventsQ.Add(sw2);
+                EventsQ.Add(sw1);
+            }
+
+            Assert.AreEqual(a1, EventsQ.Take().Vertex);
+            Assert.AreEqual(b1, EventsQ.Take().Vertex);
+            Assert.AreEqual(b2, EventsQ.Take().Vertex);
+            Assert.AreEqual(a2, EventsQ.Take().Vertex);
         }
 
         [Test]
@@ -49,7 +81,7 @@ namespace Graphical.DataStructures.Tests
             minQ.Add("uno", 1);
             Assert.AreEqual(4, minQ.Size);
             Assert.AreEqual("uno", minQ.Peek());
-            minQ.UpdateValue("diez", 0);
+            minQ.UpdateItem("diez", 0);
             Assert.AreEqual("diez", minQ.Peek());
 
         }

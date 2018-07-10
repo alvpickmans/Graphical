@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Graphical.Extensions;
 
 namespace Graphical.Geometry.Tests
 {
@@ -54,10 +55,10 @@ namespace Graphical.Geometry.Tests
             var v4 = gVector.ByCoordinates(-10, 0, 0);
             var v5 = gVector.ByCoordinates(10, 0.00001, 0);
             var v6 = gVector.ByCoordinates(10, 0.0000001, 0);
-            Assert.IsTrue(gBase.Threshold(v1.Angle(v2), 45.0));
-            Assert.IsTrue(gBase.Threshold(v1.Angle(v3), 90.0));
-            Assert.IsFalse(gBase.Threshold(v4.Angle(v5), 180.0)); // Floating point threshold
-            Assert.IsTrue(gBase.Threshold(v4.Angle(v6), 180.0)); // Floating point threshold
+            Assert.IsTrue(v1.Angle(v2).AlmostEqualTo(45.0));
+            Assert.IsTrue(v1.Angle(v3).AlmostEqualTo(90.0));
+            Assert.IsFalse(v4.Angle(v5).AlmostEqualTo(180.0)); // Floating point threshold
+            Assert.IsTrue(v4.Angle(v6).AlmostEqualTo(180.0)); // Floating point threshold
         }
 
         [Test]

@@ -50,9 +50,9 @@ namespace Graphical.Graphs.Tests
 
             gPolygon polygon = gPolygon.ByVertices(new List<gVertex>() { a, b, c, d, e, f, g, h, i, j }, true);
             Graph baseGraph = new Graph(new List<gPolygon>() { polygon });
-            Graph visGraph = VisibilityGraph.VertexVisibility(i, baseGraph, true, true);
+            List<gVertex> vertices = VisibilityGraph.VertexVisibility(i, baseGraph);
 
-            Assert.NotNull(visGraph);
+            Assert.NotNull(vertices);
         }
 
         [Test]
@@ -70,9 +70,9 @@ namespace Graphical.Graphs.Tests
             gPolygon polygon = gPolygon.ByVertices(new List<gVertex>() { a, b, c, d, e, f, g, h}, true);
             Graph baseGraph = new Graph(new List<gPolygon>() { polygon });
 
-            Graph visGraph = VisibilityGraph.VertexVisibility(b, baseGraph, true, true);
+            List<gVertex> vertices = VisibilityGraph.VertexVisibility(b, baseGraph);
 
-            Assert.NotNull(visGraph);
+            Assert.NotNull(vertices);
         }
 
     }

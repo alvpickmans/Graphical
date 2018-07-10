@@ -15,12 +15,12 @@ namespace Graphical
         public static Graph Dijkstra(Graph graph, gVertex origin, gVertex destination, Graph tempGraph = null)
         {
             MinPriorityQ<gVertex, double> Q = new MinPriorityQ<gVertex, double>();
-            graph.vertices.Where(v => !v.Equals(origin)).ToList().ForEach(v => Q.Add(v, Double.PositiveInfinity));
+            graph.vertices.ForEach(v => Q.Add(v, Double.PositiveInfinity));
 
             //If tempGraph is not null, means graph doesn't contain origin and/or destination vertices.
             if (graph.Contains(origin))
             {
-                Q.UpdateValue(origin, 0);
+                Q.UpdateItem(origin, 0);
             }else
             {
                 Q.Add(origin, 0);
@@ -53,7 +53,7 @@ namespace Graphical
                     
                     if(!S.Contains(w) && newLength < Q.GetValue(w))
                     {
-                        Q.UpdateValue(w, newLength);
+                        Q.UpdateItem(w, newLength);
                         //dist[w] = newLength;
                         ParentVertices[w] = vertex;
                     }
@@ -66,10 +66,11 @@ namespace Graphical
             while (dest != origin)
             {
                 gVertex parent = ParentVertices[dest];
-                path.AddEdge(new gEdge(dest, parent));
+                path.AddEdge(new gEdge(parent, dest));
                 dest = parent;
             }
-
+            // Reversing edges list so they will be sorted from origin to target
+            path.edges.Reverse();
             return path;
             
         }

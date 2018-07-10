@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Graphical.Geometry;
+using Graphical.Extensions;
 using System.Diagnostics;
 #endregion
 
@@ -41,125 +42,56 @@ namespace Graphical.Graphs
         #endregion
 
         #region Public Constructors
-        /// <summary>
-        /// Creates a visibility graph by a set of polygons.
-        /// </summary>
-        /// <param name="polygons">Set of internal polygons</param>
-        /// <returns name="visibilityGraph">VisibilityGraph graph</returns>
-        //public static VisibilityGraph ByPolygons(DSPolygon[] polygons, bool reducedGraph = true)
-        //{
-        //    List<gPolygon> gPolygons = FromPolygons(polygons, false);
-        //    Graph baseGraph = new Graph(gPolygons);
-        //    VisibilityGraph g = new VisibilityGraph(baseGraph, reducedGraph, true);
-        //    return g;
-        //}
 
-        /// <summary>
-        /// Creates a visibility graph by a set of polygons and boundaries.
-        /// </summary>
-        /// <param name="polygons">Set of internal polygons</param>
-        /// <param name="boundaries">Set of boundary polygons. These must not be present on the internal polygons list.</param>
-        /// <returns name="visibilityGraph">VisibilityGraph graph</returns>
-        //[MultiReturn(new[] { "visibilityGraph", "miliseconds" })]
-        //public static Dictionary<string, object> ByPolygonsAndBoundaries(DSPolygon[] boundaries, [DefaultArgument("{}")]DSPolygon[] polygons = null, bool reducedGraph = true)
-        //{
-        //    var sw = new System.Diagnostics.Stopwatch();
-        //    sw.Start();
-        //    List<gPolygon> gPolygons = FromPolygons(boundaries, true);
-        //    if(polygons.Any())
-        //    {
-        //        gPolygons.AddRange(FromPolygons(polygons, false));
-        //    }
-        //    Graph baseGraph = new Graph(gPolygons);
-
-        //    var g = new VisibilityGraph(baseGraph, reducedGraph);
-
-        //    sw.Stop();
-
-        //    return new Dictionary<string, object>()
-        //    {
-        //        {"visibilityGraph", g },
-        //        {"miliseconds", sw.ElapsedMilliseconds }
-        //    };
-        //}
-
-        public static Graph VertexVisibility(gVertex origin, Graph baseGraph, bool reducedGraph = true, bool halfScan = true)
+        public static List<gVertex> VertexVisibility(gVertex origin, Graph baseGraph)
         {
-            //List<gPolygon> polygons = new List<gPolygon>(boundaries);
-            //if (internals != null && internals.Any())
-            //{
-            //    polygons.AddRange(internals);
-            //}
-
-            //VisibilityGraph visGraph = new VisibilityGraph()
-            //{
-            //    baseGraph = new Graph(polygons)
-            //};
-
             gVertex o = origin;
             if(baseGraph.Contains(origin)) { o = baseGraph.vertices[baseGraph.vertices.IndexOf(origin)]; }
-            var visibleVertices = VisibilityGraph.VisibleVertices(o, baseGraph, null, null, null, reducedGraph, halfScan);
-            //visGraph.edges = visGraph.VisibilityAnalysis(visGraph.baseGraph, new List<gVertex>() { o }, reducedGraph, halfScan);
-            Graph visGraph = new Graph();
-            foreach(gVertex v in visibleVertices)
-            {
-                visGraph.AddEdge(gEdge.ByStartVertexEndVertex(o, v));
-            }
-
-            return visGraph;
+            var visibleVertices = VisibilityGraph.VisibleVertices(o, baseGraph, null, null, null, false, false, true);
+            
+            return visibleVertices;
 
         }
 
-        //[MultiReturn(new[] { "visibilityGraph", "miliseconds" })]
-        //public static Dictionary<string, object> ByPolygonsAndBoundariesFromPoint(DSPoint point,  DSPolygon[] boundaries, [DefaultArgument("{}")]DSPolygon[] polygons = null, bool reducedGraph = true)
-        //{
-        //    var sw = new System.Diagnostics.Stopwatch();
-        //    sw.Start();
-        //    List<gPolygon> gPolygons = FromPolygons(boundaries, true);
-        //    if (polygons.Any())
-        //    {
-        //        gPolygons.AddRange(FromPolygons(polygons, false));
-        //    }
-        //    Graph _baseGraph = new Graph(gPolygons);
-
-        //    var g = new VisibilityGraph()
-        //    {
-        //        baseGraph = _baseGraph
-        //    };
-
-        //    gVertex origin = gVertex.ByCoordinates(point.X, point.Y, point.Z);
-        //    if (g.baseGraph.Contains(origin)) { origin = g.baseGraph.vertices[g.baseGraph.vertices.IndexOf(origin)]; }
-        //    g.edges = g.VisibilityAnalysis(g.baseGraph, new List<gVertex>() { origin }, reducedGraph, false);
-
-        //    sw.Stop();
-
-        //    return new Dictionary<string, object>()
-        //    {
-        //        {"visibilityGraph", g },
-        //        {"miliseconds", sw.ElapsedMilliseconds }
-        //    };
-        //}
-
-
         public static VisibilityGraph Merge(List<VisibilityGraph> graphs)
         {
-            VisibilityGraph newGraph = new VisibilityGraph();
-
+            Graph graph = new Graph();
+            List<gEdge> edges = new List<gEdge>();
             foreach (VisibilityGraph g in graphs)
             {
+                Dictionary<int, int> oldNewIds = new Dictionary<int, int>();
                 foreach (gPolygon p in g.baseGraph.polygons.Values)
                 {
-                    p.id = newGraph.baseGraph.GetNextId();
-                    newGraph.baseGraph.polygons.Add(p.id, p);
+                    int nextId = graph.GetNextId();
+                    oldNewIds.Add(p.id, nextId);
+                    gPolygon polygon = (gPolygon)p.Clone();
+                    polygon.id = nextId;
+                    graph.polygons.Add(nextId, polygon);
                 }               
 
                 foreach (gEdge e in g.edges)
                 {
-                    newGraph.AddEdge(e);
+                    gVertex start = (gVertex)e.StartVertex.Clone();
+                    gVertex end = (gVertex)e.EndVertex.Clone();
+                    //start.polygonId = oldNewIds[start.polygonId];
+                    //end.polygonId = oldNewIds[end.polygonId];
+                    edges.Add(gEdge.ByStartVertexEndVertex(start, end));
                 }
             }
-            newGraph.baseGraph = new Graph(newGraph.baseGraph.polygons.Values.ToList());
-            return newGraph;
+            
+            VisibilityGraph visibilityGraph = new VisibilityGraph()
+            {
+                baseGraph = new Graph(graph.polygons.Values.ToList()),
+            };
+
+            foreach(gEdge edge in edges)
+            {
+                visibilityGraph.AddEdge(edge);
+            }
+
+            return visibilityGraph;
+
+
         }
         #endregion
 
@@ -182,24 +114,25 @@ namespace Graphical.Graphs
 
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="centre"></param>
-        /// <param name="baseGraph"></param>
-        /// <param name="origin"></param>
-        /// <param name="destination"></param>
-        /// <param name="singleVertices"></param>
-        /// <param name="scan"></param>
-        /// <returns name="visibleVertices">List of vertices visible from the analysed vertex</returns>
-        public static List<gVertex> VisibleVertices(
-            gVertex centre,
-            Graph baseGraph,
-            gVertex origin = null,
-            gVertex destination = null,
-            List<gVertex> singleVertices = null,
-            bool halfScan = true,
-            bool reducedGraph = true)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="centre"></param>
+    /// <param name="baseGraph"></param>
+    /// <param name="origin"></param>
+    /// <param name="destination"></param>
+    /// <param name="singleVertices"></param>
+    /// <param name="scan"></param>
+    /// <returns name="visibleVertices">List of vertices visible from the analysed vertex</returns>
+    public static List<gVertex> VisibleVertices(
+        gVertex centre,
+        Graph baseGraph,
+        gVertex origin = null,
+        gVertex destination = null,
+        List<gVertex> singleVertices = null,
+        bool halfScan = true,
+        bool reducedGraph = true,
+        bool maxVisibility = false)
         {
             #region Initialize variables and sort vertices
             List<gEdge> edges = baseGraph.edges;
@@ -232,7 +165,7 @@ namespace Graphical.Graphs
                     if (e.StartVertex.OnEdge(halfEdge)) { continue; }
                     if (e.EndVertex.OnEdge(halfEdge)) { continue; }
                     EdgeKey k = new EdgeKey(halfEdge, e);
-                    Core.List.AddItemSorted(openEdges, k);
+                    openEdges.AddItemSorted(k);
                 }
             }
            
@@ -257,7 +190,7 @@ namespace Graphical.Graphs
                         if (orientation == -1)
                         {
                             EdgeKey k = new EdgeKey(centre, vertex, edge);
-                            int index = Core.List.Bisect(openEdges, k) - 1;
+                            int index = openEdges.BisectIndex(k) - 1;
                             index = (index < 0) ? openEdges.Count - 1 : index;
                             if (openEdges.Count > 0 && openEdges.ElementAt(index).Equals(k))
                             {
@@ -374,7 +307,43 @@ namespace Graphical.Graphs
                         if (!e.Contains(centre) && gVertex.Orientation(centre, vertex, e.GetVertexPair(vertex)) == 1)
                         {
                             EdgeKey k = new EdgeKey(centre, vertex, e);
-                            Core.List.AddItemSorted(openEdges, k);
+                            openEdges.AddItemSorted(k);
+                        }
+                    }
+                }
+
+                if(isVisible && maxVisibility && vertex.polygonId >= 0)
+                {
+                    List<gVertex> vertexPairs = baseGraph.GetAdjecentVertices(vertex);
+                    int firstOrientation = gVertex.Orientation(centre, vertex, vertexPairs[0]);
+                    int secondOrientation = gVertex.Orientation(centre, vertex, vertexPairs[1]);
+
+                    //if both edges lie on the same side of the centre-vertex edge or one of them is colinear
+                    if(firstOrientation == secondOrientation || firstOrientation == 0 || secondOrientation == 0)
+                    {
+                        gVertex rayVertex = vertex.Translate(gVector.ByTwoVertices(centre, vertex), maxDistance);
+                        gEdge rayEdge = gEdge.ByStartVertexEndVertex(centre, rayVertex);
+                        gVertex projectionVertex = null;
+                        foreach(EdgeKey ek in openEdges)
+                        {
+                            gBase intersection = rayEdge.Intersection(ek.Edge);
+                            if(intersection != null && intersection is gVertex && !(intersection as gVertex).Equals(vertex))
+                            {
+                                projectionVertex = intersection as gVertex;
+                                break;
+                            }
+                        }
+                        if(projectionVertex != null)
+                        {
+                            // if edges are before rayEdge, projection Vertex goes after vertex
+                            if(firstOrientation == -1 || secondOrientation == -1)
+                            {
+                                visibleVertices.Add(projectionVertex);
+                            }
+                            else
+                            {
+                                visibleVertices.Insert(visibleVertices.Count - 1, projectionVertex);
+                            }
                         }
                     }
                 }
@@ -482,7 +451,12 @@ namespace Graphical.Graphs
                 if (!singleVertices.Contains(e.StartVertex)) { singleVertices.Add(e.StartVertex); }
                 if (!singleVertices.Contains(e.EndVertex)) { singleVertices.Add(e.EndVertex); }
             }
-            VisibilityGraph updatedGraph = AddVertices(visibilityGraph, singleVertices);
+            VisibilityGraph updatedGraph = (VisibilityGraph)visibilityGraph.Clone();
+            if (singleVertices.Any())
+            {
+                updatedGraph = AddVertices(visibilityGraph, singleVertices);
+
+            }
 
             foreach (gEdge e in edges) { updatedGraph.AddEdge(e); }
 
@@ -508,7 +482,7 @@ namespace Graphical.Graphs
                 if (newVisGraph.Contains(v)) { continue; }
                 gEdge closestEdge = newVisGraph.baseGraph.edges.OrderBy(e => e.DistanceTo(v)).First();
 
-                if (closestEdge.DistanceTo(v) > 0)
+                if (!closestEdge.DistanceTo(v).AlmostEqualTo(0))
                 {
                     singleVertices.Add(v);
                 }
@@ -519,6 +493,8 @@ namespace Graphical.Graphs
                     singleVertices.Add(v);
                 }
             }
+
+            newVisGraph.baseGraph.ResetEdgesFromPolygons();
 
             foreach (gVertex centre in singleVertices)
             {
@@ -579,7 +555,7 @@ namespace Graphical.Graphs
             int min = connected.Min();
             int max = connected.Max();
 
-            return connected.Select(x => Core.List.Map(x, min, max, 0, 1)).ToList();
+            return connected.Select(x => Convert.ToDouble(x).Map(min, max, 0, 1)).ToList();
         }
 
         #endregion

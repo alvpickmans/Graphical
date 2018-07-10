@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Graphical.Extensions;
 using NUnit.Framework;
 
 namespace Graphical.Geometry.Tests
@@ -14,7 +15,7 @@ namespace Graphical.Geometry.Tests
         [Test]
         public void RoundTest()
         {
-            Assert.AreEqual(648.000, gBase.Round(648.00000000000023));
+            Assert.AreEqual(648.000, (648.00000000000023).Round());
         }
     }
 }
