@@ -114,25 +114,25 @@ namespace Graphical.Graphs
 
         }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="centre"></param>
-    /// <param name="baseGraph"></param>
-    /// <param name="origin"></param>
-    /// <param name="destination"></param>
-    /// <param name="singleVertices"></param>
-    /// <param name="scan"></param>
-    /// <returns name="visibleVertices">List of vertices visible from the analysed vertex</returns>
-    public static List<gVertex> VisibleVertices(
-        gVertex centre,
-        Graph baseGraph,
-        gVertex origin = null,
-        gVertex destination = null,
-        List<gVertex> singleVertices = null,
-        bool halfScan = true,
-        bool reducedGraph = true,
-        bool maxVisibility = false)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="centre"></param>
+        /// <param name="baseGraph"></param>
+        /// <param name="origin"></param>
+        /// <param name="destination"></param>
+        /// <param name="singleVertices"></param>
+        /// <param name="scan"></param>
+        /// <returns name="visibleVertices">List of vertices visible from the analysed vertex</returns>
+        public static List<gVertex> VisibleVertices(
+            gVertex centre,
+            Graph baseGraph,
+            gVertex origin = null,
+            gVertex destination = null,
+            List<gVertex> singleVertices = null,
+            bool halfScan = true,
+            bool reducedGraph = true,
+            bool maxVisibility = false)
         {
             #region Initialize variables and sort vertices
             List<gEdge> edges = baseGraph.edges;
@@ -159,7 +159,7 @@ namespace Graphical.Graphs
             gEdge halfEdge = gEdge.ByStartVertexEndVertex(centre, gVertex.ByCoordinates(xMax, centre.Y, centre.Z));
             foreach (gEdge e in edges)
             {
-                if (e.Contains(centre)) { continue; }
+                if (centre.OnEdge(e)) { continue; }
                 if (halfEdge.Intersects(e))
                 {
                     if (e.StartVertex.OnEdge(halfEdge)) { continue; }
@@ -168,7 +168,7 @@ namespace Graphical.Graphs
                     openEdges.AddItemSorted(k);
                 }
             }
-           
+
             #endregion
 
             List<gVertex> visibleVertices = new List<gVertex>();
@@ -202,15 +202,33 @@ namespace Graphical.Graphs
 
                 //Checking if p is visible from p.
                 bool isVisible = false;
-
+                gPolygon vertexPolygon = null;
+                if (vertex.polygonId >= 0) {
+                    baseGraph.polygons.TryGetValue(vertex.polygonId, out vertexPolygon);
+                }
+                // If centre is on an edge of a inner polygon vertex belongs, check if the centre-vertex edge lies inside
+                // or if on one of vertex's edges.
+                if (vertexPolygon != null && !vertexPolygon.isBoundary && vertexPolygon.ContainsVertex(centre))
+                {
+                    gVertex mid = gVertex.MidVertex(centre, vertex);
+                    // If mid is on any edge of vertex, is visible, otherwise not.
+                    foreach(gEdge edge in baseGraph.graph[vertex])
+                    {
+                        if (mid.OnEdge(edge))
+                        {
+                            isVisible = true;
+                            break;
+                        }
+                    }
+                }
                 //No collinear vertices
-                if (prev == null || gVertex.Orientation(centre, prev, vertex) != 0 || !prev.OnEdge(centre, vertex))
+                else if (prev == null || gVertex.Orientation(centre, prev, vertex) != 0 || !prev.OnEdge(centre, vertex))
                 {
                     if (openEdges.Count == 0)
                     {
                         isVisible = true;
                     }
-                    else if (!EdgeIntersect(centre, vertex, openEdges[0].Edge))
+                    else if (vertex.OnEdge(openEdges.First().Edge) || !EdgeIntersect(centre, vertex, openEdges.First().Edge)) //TODO: Change this intersection to Edge.Intersects
                     {
                         isVisible = true;
                     }
@@ -304,7 +322,7 @@ namespace Graphical.Graphs
                 {
                     foreach (gEdge e in baseGraph.graph[vertex])
                     {
-                        if (!e.Contains(centre) && gVertex.Orientation(centre, vertex, e.GetVertexPair(vertex)) == 1)
+                        if (!centre.OnEdge(e) && gVertex.Orientation(centre, vertex, e.GetVertexPair(vertex)) == 1)
                         {
                             EdgeKey k = new EdgeKey(centre, vertex, e);
                             openEdges.AddItemSorted(k);
