@@ -134,7 +134,8 @@ namespace Graphical.Geometry
 
             // No parallels but intersecting on one of the extreme vertices
             if (other.Contains(this.StartVertex)) { return this.StartVertex; }
-            if (other.Contains(this.EndVertex)) { return this.EndVertex; }
+            else if (other.Contains(this.EndVertex)) { return this.EndVertex; }
+
 
             // No coincident nor same extremes
             var c = gVector.ByTwoVertices(this.StartVertex, other.StartVertex);
@@ -145,15 +146,20 @@ namespace Graphical.Geometry
             // If dot == 0 it means that other edge contains at least a vertex from this edge
             // and they are parallel or perpendicular. Cannot be parallel as that was tested before.
             // It might also mean they don't intersect but the would if extending the projections.
-            if (dot.AlmostEqualTo(0))
+            if (dot.AlmostEqualTo(0) || dot < 0)
             {
                 if (this.StartVertex.OnEdge(other)) { return this.StartVertex; }
                 else if(this.EndVertex.OnEdge(other)) { return this.EndVertex; }
                 else { return null; }
             }
+            //else if(dot < 0)
+            //{
+            //    if (other.StartVertex.OnEdge(this)) { return other.StartVertex; }
+            //    else if (other.EndVertex.OnEdge(this)) { return other.EndVertex; }
+            //}
 
             double s = (dot) / Math.Pow(axb.Length, 2);
-
+            
             // s > 1, means that "intersection" vertex is not on either edge
             // s == NaN means they are parallels so never intersect
             if (s < 0 || s > 1 || Double.IsNaN(s)) { return null; }
