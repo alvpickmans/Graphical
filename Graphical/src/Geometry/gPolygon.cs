@@ -151,7 +151,21 @@ namespace Graphical.Geometry
             return newPolygon;
         }
 
-        
+
+        /// <summary>
+        /// R
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <param name="vertex"></param>
+        /// <returns> 
+        ///     greater than 0 for vertex left of the edge
+        ///     equal 0 for vertex on the edge
+        ///     less than 0 for vertex right of the edege
+        /// </returns>
+        internal double IsLeft(gEdge edge, gVertex vertex)
+        {
+            return (edge.EndVertex.X - edge.StartVertex.X * vertex.Y - edge.StartVertex.X) - (vertex.X - edge.StartVertex.X * edge.EndVertex.Y - edge.StartVertex.Y);
+        }
         #endregion
 
         #region Public Methods
@@ -163,6 +177,7 @@ namespace Graphical.Geometry
         /// <returns></returns>
         public bool ContainsVertex(gVertex vertex)
         {
+            // http://geomalgorithms.com/a03-_inclusion.html
             gVertex maxVertex = vertices.OrderByDescending(v => v.DistanceTo(vertex)).First();
             double maxDistance = vertex.DistanceTo(maxVertex) * 1.5;
             gVertex v2 = gVertex.ByCoordinates(vertex.X + maxDistance, vertex.Y, vertex.Z);
@@ -170,23 +185,28 @@ namespace Graphical.Geometry
             int windNumber = 0;
             foreach (gEdge edge in edges)
             {
+                if(vertex.OnEdge(edge)) { return true; }
                 gBase intersection = ray.Intersection(edge);
-                if (intersection  is gVertex)
+                if (intersection is gVertex)
                 {
                     gVertex vtx = (gVertex)intersection;
                     if (edge.StartVertex.Y <= vertex.Y)
                     {
-                        // If interection is a vertex from the ray edge, don't count it
-                        if (edge.EndVertex.Y > vertex.Y && !ray.Contains(vtx))
+                        if (edge.EndVertex.Y > vertex.Y)
                         {
-                            ++windNumber;
+                            if(IsLeft(edge, vtx) > 0) {
+                                ++windNumber;
+                            }
                         }
                     }
                     else
                     {
-                        if (edge.EndVertex.Y <= vertex.Y)
+                        if (edge.EndVertex.Y < vertex.Y)
                         {
-                            --windNumber;
+                            if(IsLeft(edge, vtx) < 0)
+                            {
+                                --windNumber;
+                            }
                         }
                     }
                 }
