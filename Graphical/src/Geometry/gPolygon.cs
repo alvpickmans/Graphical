@@ -203,7 +203,7 @@ namespace Graphical.Geometry
                     {
                         if (edge.EndVertex.Y < vertex.Y)
                         {
-                            if(IsLeft(edge, vtx) < 0)
+                            if(IsLeft(edge, vtx) > 0)
                             {
                                 --windNumber;
                             }
