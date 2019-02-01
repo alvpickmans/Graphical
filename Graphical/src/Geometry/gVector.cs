@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Graphical.Extensions;
 
 namespace Graphical.Geometry
 {
@@ -12,7 +13,7 @@ namespace Graphical.Geometry
     // https://betterexplained.com/articles/cross-product/
     // http://mathworld.wolfram.com/CrossProduct.html
 
-    public class gVector : gBase
+    public class gVector 
     {
         #region Public Properties
         public double X { get; private set; }
@@ -74,15 +75,15 @@ namespace Graphical.Geometry
             double cos = dot / (this.Length * vector.Length);
             if(cos > 1)
             {
-                return ToDegrees(Math.Acos(1));
+                return Math.Acos(1).ToDegrees();
             }
             else if(cos < -1)
             {
-                return ToDegrees(Math.Acos(-1));
+                return Math.Acos(-1).ToDegrees();
             }
             else
             {
-                return ToDegrees(Math.Acos(cos));
+                return Math.Acos(cos).ToDegrees();
             }
         }
 
@@ -91,7 +92,7 @@ namespace Graphical.Geometry
             double x = (this.Y * vector.Z) - (this.Z * vector.Y);
             double y = (this.Z * vector.X) - (this.X * vector.Z);
             double z = (this.X * vector.Y) - (this.Y * vector.X);
-            double angle = ToRadians(this.Angle(vector));
+            double angle = this.Angle(vector).ToRadians();
             double length = this.Length * vector.Length * Math.Sin(angle);
             return new gVector(x, y, z, length);
         }
@@ -108,8 +109,8 @@ namespace Graphical.Geometry
 
         public bool IsParallelTo(gVector vector)
         {
-            var dot = this.Normalized().Dot(vector.Normalized());
-            return Threshold(dot, 1);
+            var dot = Math.Abs(this.Normalized().Dot(vector.Normalized()));
+            return dot.AlmostEqualTo(1);
         }
 
         public gVertex AsVertex()

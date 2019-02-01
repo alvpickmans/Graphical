@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Graphical.Extensions;
 #endregion
 
 
@@ -95,58 +96,78 @@ namespace Graphical.Geometry
             return c.Dot(a.Cross(b)) == 0;
         }
 
-        public gBase Intersection(gEdge edge)
+        public gBase Intersection(gEdge other)
         {
             // http://mathworld.wolfram.com/Line-LineIntersection.html
-            if (!this.IsCoplanarTo(edge)) { return null; }
-            if (edge.Contains(this.StartVertex)) { return StartVertex; }
-            if (edge.Contains(this.EndVertex)) { return EndVertex; }
+            if (!this.BoundingBox.Intersects(other.BoundingBox)) { return null; }
+            if (!this.IsCoplanarTo(other)) { return null; }
+            if (this.Equals(other)) { return this; } // Issues if same polygon id???
 
             var a = this.Direction;
-            var b = edge.Direction;
-            var c = gVector.ByTwoVertices(this.StartVertex, edge.StartVertex);
-            var cxb = c.Cross(b);
-            var axb = a.Cross(b);
-            var dot = cxb.Dot(axb);
-
-            // if dot == 0 it means that they are parallels
-
-            if(Threshold(dot, 0))
+            var b = other.Direction;
+            
+            if (a.IsParallelTo(b))
             {
-                //Fully contains the test edge
-                if(edge.StartVertex.OnEdge(this) && edge.EndVertex.OnEdge(this))
-                {
-                    return edge;
-                }
-                else if(this.StartVertex.OnEdge(edge) || this.EndVertex.OnEdge(edge))
+                // Fully contains the test edge
+                if (other.StartVertex.OnEdge(this) && other.EndVertex.OnEdge(this)) { return other; }
+                // Is fully contained by test edge
+                else if (this.StartVertex.OnEdge(other) && this.EndVertex.OnEdge(other)) { return this; }
+                // Not fully inclusive but overlapping
+                else if (this.StartVertex.OnEdge(other) || this.EndVertex.OnEdge(other))
                 {
                     gVertex[] vertices = new gVertex[4]
                     {
                         this.StartVertex,
                         this.EndVertex,
-                        edge.StartVertex,
-                        edge.EndVertex
+                        other.StartVertex,
+                        other.EndVertex
                     };
                     var sorted = vertices.OrderBy(v => v.Y).ThenBy(v => v.X).ThenBy(v => v.Z).ToList();
                     return gEdge.ByStartVertexEndVertex(sorted[1], sorted[2]);
                 }
+                // Not intersecting
                 else
                 {
                     return null;
                 }
             }
 
+            // No parallels but intersecting on one of the extreme vertices
+            if (other.Contains(this.StartVertex)) { return this.StartVertex; }
+            else if (other.Contains(this.EndVertex)) { return this.EndVertex; }
+
+
+            // No coincident nor same extremes
+            var c = gVector.ByTwoVertices(this.StartVertex, other.StartVertex);
+            var cxb = c.Cross(b);
+            var axb = a.Cross(b);
+            var dot = cxb.Dot(axb);
+
+            // If dot == 0 it means that other edge contains at least a vertex from this edge
+            // and they are parallel or perpendicular. Cannot be parallel as that was tested before.
+            // It might also mean they don't intersect but the would if extending the projections
             double s = (dot) / Math.Pow(axb.Length, 2);
 
+            if (s.AlmostEqualTo(0))
+            {
+                if (this.StartVertex.OnEdge(other)) { return this.StartVertex; }
+                else if(this.EndVertex.OnEdge(other)) { return this.EndVertex; }
+                else if(other.StartVertex.OnEdge(this)) { return other.StartVertex; }
+                else if(other.EndVertex.OnEdge(this)) { return other.EndVertex; }
+                else { return null; }
+            }
+
+            
+            
             // s > 1, means that "intersection" vertex is not on either edge
             // s == NaN means they are parallels so never intersect
             if (s < 0 || s > 1 || Double.IsNaN(s)) { return null; }
 
             gVertex intersection = this.StartVertex.Translate(a.Scale(s));
 
-            if (intersection.Equals(edge.StartVertex)){ return edge.StartVertex; }
-            if (intersection.Equals(edge.EndVertex)) { return edge.EndVertex; }
-            if (!intersection.OnEdge(edge))
+            if (intersection.Equals(other.StartVertex)){ return other.StartVertex; }
+            if (intersection.Equals(other.EndVertex)) { return other.EndVertex; }
+            if (!intersection.OnEdge(other))
             {
                 return null;
             }
@@ -197,11 +218,6 @@ namespace Graphical.Geometry
             
         }
 
-        //public Line AsLine()
-        //{
-        //    return Line.ByStartPointEndPoint(StartVertex.AsPoint(), EndVertex.AsPoint());
-        //}
-
         #region override methods
         //TODO: Improve overriding equality methods as per http://www.loganfranken.com/blog/687/overriding-equals-in-c-part-1/
 
@@ -240,26 +256,10 @@ namespace Graphical.Geometry
             return String.Format("gEdge(StartVertex: {0}, EndVertex: {1})", StartVertex, EndVertex);
         }
 
-        /// <summary>
-        /// Implementation of Tessellation render method
-        /// </summary>
-        /// <param name="package"></param>
-        /// <param name="parameters"></param>
-        //public void Tessellate(IRenderPackage package, TessellationParameters parameters)
-        //{
-        //    //throw new NotImplementedException();
-        //    //package.AddLineStripVertexCount(2);
-        //    package.AddLineStripVertex(StartVertex.X, StartVertex.Y, StartVertex.Z);
-        //    package.AddLineStripVertex(EndVertex.X, EndVertex.Y, EndVertex.Z);
-        //    /*Colour addition can be done iteratively with a for loop,
-        //     * but for just two elements might be better to save the overhead
-        //     * variable declaration and all.
-        //     */
-        //    package.AddLineStripVertexColor(150, 200, 255, 255);
-        //    package.AddLineStripVertexColor(150, 200, 255, 255);
-
-
-        //}
+        internal override gBoundingBox ComputeBoundingBox()
+        {
+            return gBoundingBox.ByMinVertexMaxVertex(StartVertex, EndVertex);
+        }
 
         #endregion
 

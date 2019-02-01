@@ -6,44 +6,32 @@ using System.Threading.Tasks;
 
 namespace Graphical.Geometry
 {
+    /// <summary>
+    /// Base abstract class for all spatial geometries
+    /// </summary>
     public abstract class gBase
     {
-        #region Constants
-        const double EPS = 1e-5;
-        #endregion
 
         #region Properties
-        internal double? thresholdOverride { get; private set; }
-        internal int thresholdDecimals { get; private set; }
+        //internal double? thresholdOverride { get; private set; }
+        //internal int thresholdDecimals { get; private set; }
         #endregion
 
-        public  void ThresholdOverride(double value)
+        private gBoundingBox boundingBox;
+
+        /// <summary>
+        /// Geometry's Axis Aligned Bounding Box
+        /// </summary>
+        public gBoundingBox BoundingBox
         {
-            thresholdOverride = value;
-            decimal d = Convert.ToDecimal(thresholdOverride);
-            thresholdDecimals = BitConverter.GetBytes(decimal.GetBits(d)[3])[2];
+            get
+            {
+                if(boundingBox == null) { boundingBox = ComputeBoundingBox(); }
+                return boundingBox;
+            }
         }
 
-        public static bool Threshold(double value1, double value2)
-        {
-            
-            return Math.Abs(value1 - value2) <= EPS;
-            
-        }
+        internal abstract gBoundingBox ComputeBoundingBox();
 
-        public static double Round(double value, int decimals = 6)
-        {
-            return Math.Round(value, decimals);
-        }
-
-        public static double ToDegrees(double radians)
-        {
-            return radians * (180 / Math.PI);
-        }
-
-        public static double ToRadians(double degrees)
-        {
-            return degrees * (Math.PI / 180);
-        }
     }
 }

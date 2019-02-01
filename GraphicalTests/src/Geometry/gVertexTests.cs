@@ -29,6 +29,22 @@ namespace Graphical.Geometry.Tests
             Assert.IsTrue(e.OnEdge(a, a2)); // Almost colinear, smaller than threshold
             Assert.IsFalse(e2.OnEdge(a, a2)); // Almost colinear, bigger than threshold
         }
+
+        [Test]
+        public void CoplanarTest()
+        {
+            var a = gVertex.ByCoordinates(0, 0, 0);
+            var b = gVertex.ByCoordinates(0, 10, 0);
+            var c = gVertex.ByCoordinates(10, 10, 0);
+            var d = gVertex.ByCoordinates(15, 25, 0);
+            var e = gVertex.ByCoordinates(0, 50, 0);
+            var f = gVertex.ByCoordinates(15, 15, 0.5);
+            
+            Assert.IsTrue(gVertex.Coplanar(new List<gVertex>() { a, b}));
+            Assert.IsTrue(gVertex.Coplanar(new List<gVertex>() { a, b, c }));
+            Assert.IsFalse(gVertex.Coplanar(new List<gVertex>() { a, b, c, d, e, f}));
+            Assert.IsFalse(gVertex.Coplanar(new List<gVertex>() { c, d, e, f}));
+        }
         
     }
 }

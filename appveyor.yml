@@ -1,11 +1,6 @@
-branches:
-  # whitelist
-  only:
-    - master
-
 version: 1.0.{build}
 image: Visual Studio 2017
-configuration: Release
+configuration: Debug
 before_build:
   - nuget restore
 build:

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Graphical.Extensions;
 #endregion
 
 namespace Graphical.Geometry
@@ -28,15 +29,21 @@ namespace Graphical.Geometry
 
         #endregion
 
-        #region Constructors
+        #region Internal/Private Constructors
         private gVertex(double x, double y, double z = 0, int pId = -1)
         {
             polygonId = pId;
-            X = Round(x);
-            Y = Round(y);
-            Z = Round(z);
+            X = x.Round();
+            Y = y.Round();
+            Z = z.Round();
         }
 
+        internal static gVertex ByCoordinatesArray(double[] array)
+        {
+            return new gVertex(array[0], array[1], array[3]);
+        }
+        #endregion
+        #region Public Constructors
         /// <summary>
         /// gVertex constructor method by a given set of XYZ coordinates
         /// </summary>
@@ -60,9 +67,14 @@ namespace Graphical.Geometry
             double x = (v1.X + v2.X) / 2, y = (v1.Y + v2.Y) / 2, z = (v1.Z + v2.Z) / 2;
             return new gVertex(x, y, z);
         }
+
+        public static gVertex Origin()
+        {
+            return new gVertex(0, 0, 0);
+        }
         #endregion
                 
-        internal static List<gVertex> OrderByRadianAndDistance (List<gVertex> vertices, gVertex centre = null)
+        public static List<gVertex> OrderByRadianAndDistance (List<gVertex> vertices, gVertex centre = null)
         {
             if(centre == null) { centre = gVertex.MinimumVertex(vertices); }
             return vertices.OrderBy(v => RadAngle(centre, v)).ThenBy(v => centre.DistanceTo(v)).ToList();
@@ -89,7 +101,7 @@ namespace Graphical.Geometry
                     throw new Exception("Plane not defined");
             }
             //Rounding due to floating point error.
-            if (Threshold(value,0)) { return 0; } //Points are colinear
+            if (value.AlmostEqualTo(0)) { return 0; } //Points are colinear
 
             return (value > 0) ? 1 : -1; //Counter clock or clock wise
         }
@@ -99,8 +111,8 @@ namespace Graphical.Geometry
             //Rad angles http://math.rice.edu/~pcmi/sphere/drg_txt.html
             double dx = vertex.X - centre.X;
             double dy = vertex.Y - centre.Y;
-            bool onYAxis = Threshold(dx, 0);
-            bool onXAxis = Threshold(dy, 0);
+            bool onYAxis = dx.AlmostEqualTo(0);
+            bool onXAxis = dy.AlmostEqualTo(0);
             //TODO: Implement Z angle? that would becom UV coordinates.
             //double dz = vertex.point.Z - centre.point.Z;
 
@@ -161,12 +173,12 @@ namespace Graphical.Geometry
             return numerator.Length / denominator.Length;
         }
         
-        internal gVertex Translate(gVector vector)
+        public gVertex Translate(gVector vector)
         {
             return gVertex.ByCoordinates(this.X + vector.X, this.Y + vector.Y, this.Z + vector.Z);
         }
 
-        internal gVertex Translate(gVector vector, double distance)
+        public gVertex Translate(gVector vector, double distance)
         {
             gVector normalized = vector.Normalized();
             gVector distVector = normalized * distance;
@@ -191,6 +203,23 @@ namespace Graphical.Geometry
             return 0 <= dotAC && dotAC <= dotAB;
         }
 
+        /// <summary>
+        /// Checks if a list of vertices are coplanar. True for three or less vertices.
+        /// </summary>
+        /// <param name="vertices"></param>
+        /// <returns>Boolean</returns>
+        public static bool Coplanar(List<gVertex> vertices)
+        {
+            // https://math.stackexchange.com/questions/1330357/show-that-four-points-are-coplanar
+            if (!vertices.Any()) { throw new ArgumentOutOfRangeException("vertices", "Vertices list cannot be empty"); }
+            if (vertices.Count <= 3) { return true; }
+            gVector ab = gVector.ByTwoVertices(vertices[0], vertices[1]);
+            gVector ac = gVector.ByTwoVertices(vertices[0], vertices[2]);
+            gVector cross = ab.Cross(ac);
+
+            return vertices.Skip(3).All(vtx => gVector.ByTwoVertices(vertices[0], vtx).Dot(cross).AlmostEqualTo(0));
+        }
+
         internal static bool OnEdgeProjection(gVertex start, gVertex point, gVertex end, string plane = "xy")
         {
             double x = point.X, y = point.Y, z = point.Z;
@@ -212,11 +241,6 @@ namespace Graphical.Geometry
             }
         }
 
-        //public DSPoint AsPoint()
-        //{
-        //    return DSPoint.ByCoordinates(this.X, this.Y, this.Z);
-        //}
-
         #region Override Methods
         //TODO: Improve overriding equality methods as per http://www.loganfranken.com/blog/687/overriding-equals-in-c-part-1/
 
@@ -228,7 +252,7 @@ namespace Graphical.Geometry
         public bool Equals(gVertex obj)
         {
             if (obj == null) { return false; }
-            bool eq = Threshold(this.X, obj.X) && Threshold(this.Y, obj.Y) && Threshold(this.Z, obj.Z);
+            bool eq = this.X.AlmostEqualTo(obj.X) && this.Y.AlmostEqualTo(obj.Y) && this.Z.AlmostEqualTo(obj.Z);
             return eq;
         }
 
@@ -275,7 +299,12 @@ namespace Graphical.Geometry
             return newVertex;
         }
 
-        
+        internal override gBoundingBox ComputeBoundingBox()
+        {
+            return gBoundingBox.ByMinVertexMaxVertex(this, this);
+        }
+
+
         #endregion
 
     }

@@ -79,21 +79,37 @@ namespace Graphical.Geometry.Tests
                     gVertex.ByCoordinates(-49.544, 39.031, 0), gVertex.ByCoordinates(5827.960, 39.031, 0)
                 );
 
-            //gVertex ab = a.Intersection(b); // Intersecting
-            //gVertex ac = a.Intersection(c); // Skew edges
-            //gVertex ad = a.Intersection(d); // Coplanar but not intersecting
-            //gVertex ef = e.Intersection(f); // Coplanar and parallel
-            //gVertex gh = g.Intersection(h); // Coplanar, not intersecting and second edge shorter than first
+            var vertical = gEdge.ByStartVertexEndVertex(a1, b1);
+            var otherRay = gEdge.ByStartVertexEndVertex(
+                    gVertex.ByCoordinates(0, 5, 0), gVertex.ByCoordinates(15, 5, 0)
+                );
+
+            var coincidentProjection1 = gEdge.ByStartVertexEndVertex(
+                    gVertex.ByCoordinates(35, 30),
+                    gVertex.ByCoordinates(13.571429, 17.142857)
+                );
+            var coincidentProjection2 = gEdge.ByStartVertexEndVertex(
+                    gVertex.ByCoordinates(17, 28),
+                    gVertex.ByCoordinates(8, 25.5)
+                );
+
+            gBase ab = a.Intersection(b); // Intersecting
+            gBase ac = a.Intersection(c); // Skew edges
+            gBase ad = a.Intersection(d); // Coplanar but not intersecting
+            gBase ef = e.Intersection(f); // Coplanar and parallel
+            gBase gh = g.Intersection(h); // Coplanar, not intersecting and second edge shorter than first
 
             //Assert.NotNull(ab);
-            //Assert.AreEqual(5, ab.X);
-            //Assert.AreEqual(5, ab.Y);
+            //Assert.AreEqual(5, (ab as gVertex).X);
+            //Assert.AreEqual(5, (ab as gVertex).Y);
             //Assert.IsNull(ac);
             //Assert.IsNull(ad);
             //Assert.IsNull(ef);
             //Assert.IsNull(gh);
             //Assert.NotNull(rayEdge.Intersection(side));
-            Assert.NotNull(xaligned.Intersection(xCoincident));
+            //Assert.NotNull(xaligned.Intersection(xCoincident));
+            //Assert.AreEqual(otherRay.StartVertex, otherRay.Intersection(vertical));
+            Assert.IsNull(coincidentProjection1.Intersection(coincidentProjection2));
         }
 
         //[Test]
