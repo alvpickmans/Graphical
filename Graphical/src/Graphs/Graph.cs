@@ -157,6 +157,20 @@ namespace Graphical.Graphs
             }
         }
 
+        internal void ResetEdgesFromPolygons()
+        {
+            this.edges.Clear();
+            this.graph.Clear();
+
+            foreach(gPolygon polygon in polygons.Values)
+            {
+                foreach(gEdge edge in polygon.edges)
+                {
+                    this.AddEdge(edge);
+                }
+            }
+        }
+
         #endregion
 
         #region Public Methods
