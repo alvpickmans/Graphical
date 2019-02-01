@@ -164,7 +164,7 @@ namespace Graphical.Geometry
         /// </returns>
         internal double IsLeft(gEdge edge, gVertex vertex)
         {
-            return (edge.EndVertex.X - edge.StartVertex.X * vertex.Y - edge.StartVertex.X) - (vertex.X - edge.StartVertex.X * edge.EndVertex.Y - edge.StartVertex.Y);
+            return (edge.EndVertex.X - edge.StartVertex.X) * (vertex.Y - edge.StartVertex.X) - (edge.EndVertex.Y - edge.StartVertex.Y) * (vertex.X - edge.StartVertex.X);
         }
         #endregion
 
@@ -186,15 +186,14 @@ namespace Graphical.Geometry
             foreach (gEdge edge in edges)
             {
                 if(vertex.OnEdge(edge)) { return true; }
-                gBase intersection = ray.Intersection(edge);
+                gVertex intersection = ray.Intersection(edge) as gVertex;
                 if (intersection is gVertex)
                 {
-                    gVertex vtx = (gVertex)intersection;
                     if (edge.StartVertex.Y <= vertex.Y)
                     {
                         if (edge.EndVertex.Y > vertex.Y)
                         {
-                            if(IsLeft(edge, vtx) > 0) {
+                            if(IsLeft(edge, vertex) > 0) {
                                 ++windNumber;
                             }
                         }
@@ -203,7 +202,7 @@ namespace Graphical.Geometry
                     {
                         if (edge.EndVertex.Y < vertex.Y)
                         {
-                            if(IsLeft(edge, vtx) > 0)
+                            if(IsLeft(edge, vertex) < 0)
                             {
                                 --windNumber;
                             }
