@@ -224,11 +224,19 @@ namespace Graphical.Graphs
                 //No collinear vertices
                 else if (prev == null || gVertex.Orientation(centre, prev, vertex) != 0 || !prev.OnEdge(centre, vertex))
                 {
+                    
                     if (openEdges.Count == 0)
                     {
-                        isVisible = true;
+                        if (vertexPolygon != null && vertexPolygon.isBoundary && vertexPolygon.ContainsVertex(centre))
+                        {
+                            isVisible = vertexPolygon.ContainsVertex(gVertex.MidVertex(centre, vertex));
+                        }
+                        else
+                        {
+                            isVisible = true;
+                        }
                     }
-                    else if (vertex.OnEdge(openEdges.First().Edge) || !EdgeIntersect(centre, vertex, openEdges.First().Edge)) //TODO: Change this intersection to Edge.Intersects
+                    else if (vertex.OnEdge(openEdges.First().Edge) || !openEdges.First().Edge.Intersects(new gEdge(centre, vertex))) //TODO: Change this intersection to Edge.Intersects
                     {
                         isVisible = true;
                     }
@@ -335,19 +343,36 @@ namespace Graphical.Graphs
                     List<gVertex> vertexPairs = baseGraph.GetAdjecentVertices(vertex);
                     int firstOrientation = gVertex.Orientation(centre, vertex, vertexPairs[0]);
                     int secondOrientation = gVertex.Orientation(centre, vertex, vertexPairs[1]);
+                    bool isColinear = false;
 
-                    //if both edges lie on the same side of the centre-vertex edge or one of them is colinear
+                    //if both edges lie on the same side of the centre-vertex edge or one of them is colinear or centre is contained on any of the edges
                     if(firstOrientation == secondOrientation || firstOrientation == 0 || secondOrientation == 0)
                     {
                         gVertex rayVertex = vertex.Translate(gVector.ByTwoVertices(centre, vertex), maxDistance);
                         gEdge rayEdge = gEdge.ByStartVertexEndVertex(centre, rayVertex);
                         gVertex projectionVertex = null;
+
+                        // if both orientation are not on the same side, means that one of them is colinear
+                        isColinear = firstOrientation != secondOrientation ? true : false;
+
                         foreach(EdgeKey ek in openEdges)
                         {
-                            gBase intersection = rayEdge.Intersection(ek.Edge);
-                            if(intersection != null && intersection is gVertex && !(intersection as gVertex).Equals(vertex))
+                            gVertex intersection = rayEdge.Intersection(ek.Edge) as gVertex;
+                            if(intersection != null &&!intersection.Equals(vertex))
                             {
-                                projectionVertex = intersection as gVertex;
+                                projectionVertex = intersection;
+                                gPolygon polygon = null;
+                                baseGraph.polygons.TryGetValue(vertex.polygonId, out polygon);
+                                if(polygon != null)
+                                {
+                                    // If polygon is internal, don't compute intersection if mid point lies inside the polygon but not on its edges
+                                    gVertex mid = gVertex.MidVertex(vertex, intersection);
+                                    bool containsEdge = gVertex.Orientation(centre, vertex, mid) != 0  && polygon.ContainsVertex(mid);
+                                    if (!polygon.isBoundary && containsEdge)
+                                    {
+                                        projectionVertex = null;
+                                    }
+                                }
                                 break;
                             }
                         }
@@ -363,6 +388,10 @@ namespace Graphical.Graphs
                                 visibleVertices.Insert(visibleVertices.Count - 1, projectionVertex);
                             }
                         }
+                    }
+                    if(vertexPairs.Contains(centre) && !visibleVertices.Contains(centre))
+                    {
+                        visibleVertices.Add(centre);
                     }
                 }
             }
