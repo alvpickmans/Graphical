@@ -28,14 +28,14 @@ namespace Graphical.Core.Tests
         public void FindIntersectionsTest()
         {
             // Similar example as in http://www.webcitation.org/6ahkPQIsN
-            gVertex a1 = gVertex.ByCoordinates(1, 3);
-            gVertex a2 = gVertex.ByCoordinates(9, 8);
-            gVertex b1 = gVertex.ByCoordinates(5, 1);
-            gVertex b2 = gVertex.ByCoordinates(9, 4);
-            gVertex c1 = gVertex.ByCoordinates(3, 5);
-            gVertex c2 = gVertex.ByCoordinates(7, 1);
-            gVertex d1 = gVertex.ByCoordinates(3, 9);
-            gVertex d2 = gVertex.ByCoordinates(10, 2);
+            Vertex a1 = Vertex.ByCoordinates(1, 3);
+            Vertex a2 = Vertex.ByCoordinates(9, 8);
+            Vertex b1 = Vertex.ByCoordinates(5, 1);
+            Vertex b2 = Vertex.ByCoordinates(9, 4);
+            Vertex c1 = Vertex.ByCoordinates(3, 5);
+            Vertex c2 = Vertex.ByCoordinates(7, 1);
+            Vertex d1 = Vertex.ByCoordinates(3, 9);
+            Vertex d2 = Vertex.ByCoordinates(10, 2);
 
             List<gEdge> edges = new List<gEdge>()
             {
@@ -53,14 +53,14 @@ namespace Graphical.Core.Tests
         [Test]
         public void FindIntersectionsNotHorizontalTest()
         {
-            gVertex a1 = gVertex.ByCoordinates(0, 0, 0);
-            gVertex a2 = gVertex.ByCoordinates(10, 10, 10);
-            gVertex b1 = gVertex.ByCoordinates(0, 10, 0);
-            gVertex b2 = gVertex.ByCoordinates(10, 0, 10);
-            //gVertex c1 = gVertex.ByCoordinates(0, 0, 0);
-            //gVertex c2 = gVertex.ByCoordinates(0, 10, 10);
-            //gVertex d1 = gVertex.ByCoordinates(0, 10, 0);
-            //gVertex d2 = gVertex.ByCoordinates(0, 0, 10);
+            Vertex a1 = Vertex.ByCoordinates(0, 0, 0);
+            Vertex a2 = Vertex.ByCoordinates(10, 10, 10);
+            Vertex b1 = Vertex.ByCoordinates(0, 10, 0);
+            Vertex b2 = Vertex.ByCoordinates(10, 0, 10);
+            //Vertex c1 = Vertex.ByCoordinates(0, 0, 0);
+            //Vertex c2 = Vertex.ByCoordinates(0, 10, 10);
+            //Vertex d1 = Vertex.ByCoordinates(0, 10, 0);
+            //Vertex d2 = Vertex.ByCoordinates(0, 0, 10);
 
             List<gEdge> edges = new List<gEdge>()
             {
@@ -80,14 +80,14 @@ namespace Graphical.Core.Tests
         [Test]
         public void IntersectionCoincidentLinesTest()
         {
-            gVertex a1 = gVertex.ByCoordinates(0, 0);
-            gVertex a2 = gVertex.ByCoordinates(10, 10);
-            gVertex b1 = gVertex.ByCoordinates(5, 5);
-            gVertex b2 = gVertex.ByCoordinates(15, 15);
-            gVertex c1 = gVertex.ByCoordinates(3, 5);
-            gVertex c2 = gVertex.ByCoordinates(7, 1);
-            gVertex d1 = gVertex.ByCoordinates(3, 9);
-            gVertex d2 = gVertex.ByCoordinates(10, 2);
+            Vertex a1 = Vertex.ByCoordinates(0, 0);
+            Vertex a2 = Vertex.ByCoordinates(10, 10);
+            Vertex b1 = Vertex.ByCoordinates(5, 5);
+            Vertex b2 = Vertex.ByCoordinates(15, 15);
+            Vertex c1 = Vertex.ByCoordinates(3, 5);
+            Vertex c2 = Vertex.ByCoordinates(7, 1);
+            Vertex d1 = Vertex.ByCoordinates(3, 9);
+            Vertex d2 = Vertex.ByCoordinates(10, 2);
 
             List<gEdge> sameEdges = new List<gEdge>()
             {
@@ -133,21 +133,21 @@ namespace Graphical.Core.Tests
         [Test]
         public void ComplexPolygonBoolean()
         {
-            var clip = gPolygon.ByVertices(new List<gVertex>()
+            var clip = gPolygon.ByVertices(new List<Vertex>()
             {
-                gVertex.ByCoordinates(5, 25),
-                gVertex.ByCoordinates(5, 30),
-                gVertex.ByCoordinates(15, 15),
-                gVertex.ByCoordinates(30, 15),
-                gVertex.ByCoordinates(20, 10),
-                gVertex.ByCoordinates(17, 27)
+                Vertex.ByCoordinates(5, 25),
+                Vertex.ByCoordinates(5, 30),
+                Vertex.ByCoordinates(15, 15),
+                Vertex.ByCoordinates(30, 15),
+                Vertex.ByCoordinates(20, 10),
+                Vertex.ByCoordinates(17, 27)
             });
-            var subject = gPolygon.ByVertices(new List<gVertex>()
+            var subject = gPolygon.ByVertices(new List<Vertex>()
             {
-                gVertex.ByCoordinates(5, 12),
-                gVertex.ByCoordinates(35, 30),
-                gVertex.ByCoordinates(32, 5),
-                gVertex.ByCoordinates(15, 0)
+                Vertex.ByCoordinates(5, 12),
+                Vertex.ByCoordinates(35, 30),
+                Vertex.ByCoordinates(32, 5),
+                Vertex.ByCoordinates(15, 0)
             });
             
             Assert.AreEqual(2, subject.Union(clip).Count);
@@ -164,20 +164,20 @@ namespace Graphical.Core.Tests
         [Test]
         public void NotIntersectingPolygons()
         {
-            var clip = gPolygon.ByVertices(new List<gVertex>()
+            var clip = gPolygon.ByVertices(new List<Vertex>()
             {
-                gVertex.ByCoordinates(0, 0),
-                gVertex.ByCoordinates(0, 10),
-                gVertex.ByCoordinates(15, 5),
-                gVertex.ByCoordinates(15, 0)
+                Vertex.ByCoordinates(0, 0),
+                Vertex.ByCoordinates(0, 10),
+                Vertex.ByCoordinates(15, 5),
+                Vertex.ByCoordinates(15, 0)
             });
-            var subject = gPolygon.ByVertices(new List<gVertex>()
+            var subject = gPolygon.ByVertices(new List<Vertex>()
             {
-                gVertex.ByCoordinates(0, 12.5),
-                gVertex.ByCoordinates(0, 20),
-                gVertex.ByCoordinates(7.5, 20),
-                gVertex.ByCoordinates(15, 20),
-                gVertex.ByCoordinates(15, 7.5)
+                Vertex.ByCoordinates(0, 12.5),
+                Vertex.ByCoordinates(0, 20),
+                Vertex.ByCoordinates(7.5, 20),
+                Vertex.ByCoordinates(15, 20),
+                Vertex.ByCoordinates(15, 7.5)
             });
 
             var swLine = SweepLine.BySubjectClipPolygons(subject, clip);

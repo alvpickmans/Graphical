@@ -28,10 +28,10 @@ namespace Graphical.DataStructures.Tests
             //Assert.AreEqual(10, minQ.Size);
             //Assert.AreEqual(10, minQ.HeapIndices.Count);
 
-            var a1 = gVertex.ByCoordinates(0, 0);
-            var a2 = gVertex.ByCoordinates(10, 10);
-            var b1 = gVertex.ByCoordinates(0, 10);
-            var b2 = gVertex.ByCoordinates(10, 0);
+            var a1 = Vertex.ByCoordinates(0, 0);
+            var a2 = Vertex.ByCoordinates(10, 10);
+            var b1 = Vertex.ByCoordinates(0, 10);
+            var b2 = Vertex.ByCoordinates(10, 0);
 
             List<gEdge> edges = new List<gEdge>()
             {

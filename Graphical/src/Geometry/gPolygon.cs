@@ -33,14 +33,14 @@ namespace Graphical.Geometry
         /// <summary>
         /// Polygon's Vertices
         /// </summary>
-        internal List<gVertex> vertices = new List<gVertex>();
+        internal List<Vertex> vertices = new List<Vertex>();
         #endregion
 
         #region Public Variables
         /// <summary>
         /// gPolygon's vertices
         /// </summary>
-        public List<gVertex> Vertices
+        public List<Vertex> Vertices
         {
             get { return vertices; }
         }
@@ -85,7 +85,7 @@ namespace Graphical.Geometry
         /// <param name="vertices"></param>
         /// <param name="isExternal"></param>
         /// <returns></returns>
-        public static gPolygon ByVertices(List<gVertex> vertices, bool isExternal = false)
+        public static gPolygon ByVertices(List<Vertex> vertices, bool isExternal = false)
         {
             gPolygon polygon = new gPolygon(-1, isExternal);
             polygon.vertices = vertices;
@@ -93,22 +93,22 @@ namespace Graphical.Geometry
             for (var j = 0; j < vertexCount; j++)
             {
                 int next_index = (j + 1) % vertexCount;
-                gVertex vertex = vertices[j];
-                gVertex next_vertex = vertices[next_index];
+                Vertex vertex = vertices[j];
+                Vertex next_vertex = vertices[next_index];
                 polygon.edges.Add( new gEdge(vertex, next_vertex));
             }
             return polygon;
         }
 
-        public static gPolygon ByCenterRadiusAndSides(gVertex center, double radius, int sides)
+        public static gPolygon ByCenterRadiusAndSides(Vertex center, double radius, int sides)
         {
             // TODO: create polygon by plane?
             if(sides < 3) { throw new ArgumentOutOfRangeException("sides", "Any polygon must have at least 3 sides."); }
-            List<gVertex> vertices = new List<gVertex>();
+            List<Vertex> vertices = new List<Vertex>();
             double angle = (Math.PI * 2) / sides;
             for(var i = 0; i < sides; i++)
             {
-                var vertex = gVertex.ByCoordinates(
+                var vertex = Vertex.ByCoordinates(
                         (Math.Sin(i * angle) * radius) + center.X,
                         (Math.Cos(i * angle) * radius) + center.Y,
                         center.Z
@@ -120,13 +120,13 @@ namespace Graphical.Geometry
         #endregion
 
         #region Internal Methods
-        internal void AddVertex(gVertex vertex)
+        internal void AddVertex(Vertex vertex)
         {
             vertex.polygonId = this.id;
             vertices.Add(vertex);
         }
 
-        internal gPolygon AddVertex(gVertex v, gEdge intersectingEdge)
+        internal gPolygon AddVertex(Vertex v, gEdge intersectingEdge)
         {
             //Assumes that vertex v intersects one of polygons edges.
             gPolygon newPolygon = (gPolygon)this.Clone();
@@ -162,7 +162,7 @@ namespace Graphical.Geometry
         ///     equal 0 for vertex on the edge
         ///     less than 0 for vertex right of the edege
         /// </returns>
-        internal double IsLeft(gEdge edge, gVertex vertex)
+        internal double IsLeft(gEdge edge, Vertex vertex)
         {
             return (edge.EndVertex.X - edge.StartVertex.X) * (vertex.Y - edge.StartVertex.X) - (edge.EndVertex.Y - edge.StartVertex.Y) * (vertex.X - edge.StartVertex.X);
         }
@@ -171,23 +171,23 @@ namespace Graphical.Geometry
         #region Public Methods
 
         /// <summary>
-        /// Determines if a gVertex is inside the gPolygon using Fast Winding Number method
+        /// Determines if a Vertex is inside the gPolygon using Fast Winding Number method
         /// </summary>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        public bool ContainsVertex(gVertex vertex)
+        public bool ContainsVertex(Vertex vertex)
         {
             // http://geomalgorithms.com/a03-_inclusion.html
-            gVertex maxVertex = vertices.OrderByDescending(v => v.DistanceTo(vertex)).First();
+            Vertex maxVertex = vertices.OrderByDescending(v => v.DistanceTo(vertex)).First();
             double maxDistance = vertex.DistanceTo(maxVertex) * 1.5;
-            gVertex v2 = gVertex.ByCoordinates(vertex.X + maxDistance, vertex.Y, vertex.Z);
+            Vertex v2 = Vertex.ByCoordinates(vertex.X + maxDistance, vertex.Y, vertex.Z);
             gEdge ray = gEdge.ByStartVertexEndVertex(vertex, v2);
             int windNumber = 0;
             foreach (gEdge edge in edges)
             {
                 if(vertex.OnEdge(edge)) { return true; }
-                gVertex intersection = ray.Intersection(edge) as gVertex;
-                if (intersection is gVertex)
+                Vertex intersection = ray.Intersection(edge) as Vertex;
+                if (intersection is Vertex)
                 {
                     if (edge.StartVertex.Y <= vertex.Y)
                     {
@@ -227,7 +227,7 @@ namespace Graphical.Geometry
             // TODO: Check if edge intersects polygon in vertices different than start/end.
             return this.ContainsVertex(edge.StartVertex)
                 && this.ContainsVertex(edge.EndVertex)
-                && this.ContainsVertex(gVertex.MidVertex(edge.StartVertex, edge.EndVertex));
+                && this.ContainsVertex(Vertex.MidVertex(edge.StartVertex, edge.EndVertex));
         }
         /// <summary>
         /// Checks if a polygon is planar
@@ -236,7 +236,7 @@ namespace Graphical.Geometry
         /// <returns>boolean</returns>
         public static bool IsPlanar(gPolygon polygon)
         {
-            return gVertex.Coplanar(polygon.Vertices);
+            return Vertex.Coplanar(polygon.Vertices);
         }
 
         /// <summary>
@@ -247,10 +247,10 @@ namespace Graphical.Geometry
         /// <returns></returns>
         public static bool Coplanar(gPolygon polygon, gPolygon otherPolygon)
         {
-            List<gVertex> joinedVertices = new List<gVertex>(polygon.Vertices);
+            List<Vertex> joinedVertices = new List<Vertex>(polygon.Vertices);
             joinedVertices.AddRange(otherPolygon.Vertices);
 
-            return gVertex.Coplanar(joinedVertices);
+            return Vertex.Coplanar(joinedVertices);
         }
 
         /// <summary>
@@ -357,7 +357,7 @@ namespace Graphical.Geometry
         {
             gPolygon newPolygon = new gPolygon(this.id, this.isBoundary);
             newPolygon.edges = new List<gEdge>(this.edges);
-            newPolygon.vertices = new List<gVertex>(this.vertices);
+            newPolygon.vertices = new List<Vertex>(this.vertices);
             return newPolygon;
         }
 
@@ -366,7 +366,7 @@ namespace Graphical.Geometry
             var xCoord = new List<double>(this.vertices.Count);
             var yCoord = new List<double>(this.vertices.Count);
             var zCoord = new List<double>(this.vertices.Count);
-            foreach(gVertex v in vertices)
+            foreach(Vertex v in vertices)
             {
                 xCoord.Add(v.X);
                 yCoord.Add(v.Y);

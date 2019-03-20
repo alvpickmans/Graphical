@@ -25,8 +25,8 @@ namespace Graphical.Geometry.Tests
         [Test]
         public void ByTwoVerticesTest()
         {
-            gVertex vertex1 = gVertex.ByCoordinates(10, 10, 10);
-            gVertex vertex2 = gVertex.ByCoordinates(10, 14, 13);
+            Vertex vertex1 = Vertex.ByCoordinates(10, 10, 10);
+            Vertex vertex2 = Vertex.ByCoordinates(10, 14, 13);
             gVector v = gVector.ByTwoVertices(vertex1, vertex2);
             Assert.AreEqual(0, v.X);
             Assert.AreEqual(4, v.Y);
@@ -85,8 +85,8 @@ namespace Graphical.Geometry.Tests
         [Test]
         public void IsParallelToTest()
         {
-            var a = gVector.ByTwoVertices(gVertex.ByCoordinates(0, 0, 0), gVertex.ByCoordinates(0, 10, 10));
-            var b = gVector.ByTwoVertices(gVertex.ByCoordinates(10, 0, 0), gVertex.ByCoordinates(10, 10, 10));
+            var a = gVector.ByTwoVertices(Vertex.ByCoordinates(0, 0, 0), Vertex.ByCoordinates(0, 10, 10));
+            var b = gVector.ByTwoVertices(Vertex.ByCoordinates(10, 0, 0), Vertex.ByCoordinates(10, 10, 10));
             var c = gVector.ByCoordinates(5, 15, 10);
             Assert.IsTrue(a.IsParallelTo(b));
             Assert.IsFalse(a.IsParallelTo(c));

@@ -38,7 +38,7 @@ namespace Graphical.Geometry
             return new gVector(x, y, z);
         }
 
-        public static gVector ByTwoVertices(gVertex start, gVertex end)
+        public static gVector ByTwoVertices(Vertex start, Vertex end)
         {
             var x = end.X - start.X;
             var y = end.Y - start.Y;
@@ -113,9 +113,9 @@ namespace Graphical.Geometry
             return dot.AlmostEqualTo(1);
         }
 
-        public gVertex AsVertex()
+        public Vertex AsVertex()
         {
-            return gVertex.ByCoordinates(this.X, this.Y, this.Z);
+            return Vertex.ByCoordinates(this.X, this.Y, this.Z);
         }
 
         public static gVector operator *(gVector vector, double value)

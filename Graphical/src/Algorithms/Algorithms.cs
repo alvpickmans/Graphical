@@ -12,12 +12,12 @@ namespace Graphical
     public static class Algorithms
     {
         
-        public static Graph Dijkstra(Graph graph, gVertex origin, gVertex destination, Graph tempGraph = null)
+        public static Graph Dijkstra(Graph graph, Vertex origin, Vertex destination, Graph tempGraph = null)
         {
-            MinPriorityQ<gVertex, double> Q = new MinPriorityQ<gVertex, double>();
+            MinPriorityQ<Vertex, double> Q = new MinPriorityQ<Vertex, double>();
             bool originInGraph = false;
 
-            foreach(gVertex v in graph.vertices)
+            foreach(Vertex v in graph.vertices)
             {
                 if (v.Equals(origin))
                 {
@@ -38,13 +38,13 @@ namespace Graphical
 
             if (!graph.Contains(destination)) { Q.Add(destination, Double.PositiveInfinity); }
 
-            Dictionary<gVertex, gVertex> ParentVertices = new Dictionary<gVertex, gVertex>();
-            List<gVertex> S = new List<gVertex>();
+            Dictionary<Vertex, Vertex> ParentVertices = new Dictionary<Vertex, Vertex>();
+            List<Vertex> S = new List<Vertex>();
 
             while (Q.Size > 0)
             {
                 double minDistance = Q.PeekValue();
-                gVertex vertex = Q.Take();
+                Vertex vertex = Q.Take();
                 S.Add(vertex);
 
                 if (vertex.Equals(destination)) { break; }
@@ -58,7 +58,7 @@ namespace Graphical
 
                 foreach(gEdge e in edges)
                 {
-                    gVertex w = e.GetVertexPair(vertex);
+                    Vertex w = e.GetVertexPair(vertex);
                     double newLength = minDistance + e.Length;
                     
                     if(!S.Contains(w) && newLength < Q.GetValue(w))
@@ -72,10 +72,10 @@ namespace Graphical
             }
 
             Graph path = new Graph();
-            gVertex dest = destination;
+            Vertex dest = destination;
             while (dest != origin)
             {
-                gVertex parent = ParentVertices[dest];
+                Vertex parent = ParentVertices[dest];
                 path.AddEdge(new gEdge(parent, dest));
                 dest = parent;
             }

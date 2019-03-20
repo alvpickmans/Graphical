@@ -102,7 +102,7 @@
     <Compile Include="src\DataStructures\BinaryHeap.cs" />
     <Compile Include="src\DataStructures\PriorityQ.cs" />
     <Compile Include="src\Graphs\Graph.cs" />
-    <Compile Include="src\Geometry\gVertex.cs" />
+    <Compile Include="src\Geometry\Vertex.cs" />
     <Compile Include="src\Geometry\gEdge.cs" />
     <Compile Include="src\Extensions\ListExtensions.cs" />
     <Compile Include="src\Graphs\VisibilityGraph.cs" />

@@ -19,12 +19,12 @@ namespace Graphical.Geometry
         /// <summary>
         /// StartVertex
         /// </summary>
-        public gVertex StartVertex { get; private set; }
+        public Vertex StartVertex { get; private set; }
 
         /// <summary>
         /// EndVertex
         /// </summary>
-        public gVertex EndVertex { get; private set; }
+        public Vertex EndVertex { get; private set; }
 
 
         public double Length { get; private set; }
@@ -34,7 +34,7 @@ namespace Graphical.Geometry
         #endregion
 
         #region Constructors
-        public gEdge(gVertex start, gVertex end)
+        public gEdge(Vertex start, Vertex end)
         {
             StartVertex = start;
             EndVertex = end;
@@ -46,9 +46,9 @@ namespace Graphical.Geometry
         /// gEdge constructor by start and end vertices
         /// </summary>
         /// <param name="start">Start vertex</param>
-        /// <param name="end">End gVertex</param>
+        /// <param name="end">End Vertex</param>
         /// <returns name="edge">edge</returns>
-        public static gEdge ByStartVertexEndVertex(gVertex start, gVertex end)
+        public static gEdge ByStartVertexEndVertex(Vertex start, Vertex end)
         {
             return new gEdge(start, end);
         }
@@ -60,8 +60,8 @@ namespace Graphical.Geometry
         /// <returns name="edge">edge</returns>
         //public static gEdge ByLine(Line line)
         //{
-        //    gVertex start = gVertex.ByCoordinates(line.StartPoint.X, line.StartPoint.Y, line.StartPoint.Z);
-        //    gVertex end = gVertex.ByCoordinates(line.EndPoint.X, line.EndPoint.Y, line.EndPoint.Z);
+        //    Vertex start = Vertex.ByCoordinates(line.StartPoint.X, line.StartPoint.Y, line.StartPoint.Z);
+        //    Vertex end = Vertex.ByCoordinates(line.EndPoint.X, line.EndPoint.Y, line.EndPoint.Z);
         //    return new gEdge(start, end);
         //}
         #endregion
@@ -71,7 +71,7 @@ namespace Graphical.Geometry
         /// </summary>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        public bool Contains(gVertex vertex)
+        public bool Contains(Vertex vertex)
         {
             return StartVertex.Equals(vertex) || EndVertex.Equals(vertex);
         }
@@ -81,7 +81,7 @@ namespace Graphical.Geometry
         /// </summary>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        public gVertex GetVertexPair(gVertex vertex)
+        public Vertex GetVertexPair(Vertex vertex)
         {
             return (StartVertex.Equals(vertex)) ? EndVertex : StartVertex;
         }
@@ -115,7 +115,7 @@ namespace Graphical.Geometry
                 // Not fully inclusive but overlapping
                 else if (this.StartVertex.OnEdge(other) || this.EndVertex.OnEdge(other))
                 {
-                    gVertex[] vertices = new gVertex[4]
+                    Vertex[] vertices = new Vertex[4]
                     {
                         this.StartVertex,
                         this.EndVertex,
@@ -163,7 +163,7 @@ namespace Graphical.Geometry
             // s == NaN means they are parallels so never intersect
             if (s < 0 || s > 1 || Double.IsNaN(s)) { return null; }
 
-            gVertex intersection = this.StartVertex.Translate(a.Scale(s));
+            Vertex intersection = this.StartVertex.Translate(a.Scale(s));
 
             if (intersection.Equals(other.StartVertex)){ return other.StartVertex; }
             if (intersection.Equals(other.EndVertex)) { return other.EndVertex; }
@@ -187,7 +187,7 @@ namespace Graphical.Geometry
             return this.Intersection(edge) != null;
         }
 
-        public double DistanceTo(gVertex vertex)
+        public double DistanceTo(Vertex vertex)
         {
             return vertex.DistanceTo(this);
         }

@@ -311,7 +311,7 @@ namespace Graphical.Core
             return computedPolygons;
         }
 
-        internal void UpdateEventPair(SweepEvent swEvent, gVertex newVertexPair)
+        internal void UpdateEventPair(SweepEvent swEvent, Vertex newVertexPair)
         {
             var pairEvent = swEvent.Pair;
             int index = eventsQ.IndexOf(pairEvent);
@@ -333,9 +333,9 @@ namespace Graphical.Core
             Geometry.Geometry intersection = next.Edge.Intersection(prev.Edge);
             bool inserted = false;
             #region Is gVertex
-            if (intersection is gVertex)
+            if (intersection is Vertex)
             {
-                gVertex v = intersection as gVertex;
+                Vertex v = intersection as Vertex;
                 // Intersection is between extremes vertices
                 foreach (SweepEvent sw in new List<SweepEvent>() { next, prev })
                 {
@@ -381,7 +381,7 @@ namespace Graphical.Core
                 else if (prev.Vertex.Equals(next.Vertex))
                 {
                     // TODO: check this is true in all cases
-                    gVertex dividingVtx = prev.Pair.Vertex;
+                    Vertex dividingVtx = prev.Pair.Vertex;
                     UpdateEventPair(next, dividingVtx);
                 }
                 // Case 3: same end point, next will be always shorter
@@ -391,7 +391,7 @@ namespace Graphical.Core
                 else if (prev.Pair.Vertex.Equals(next.Pair.Vertex))
                 {
                     // TODO: check this is true in all cases
-                    gVertex dividingVtx = next.Vertex;
+                    Vertex dividingVtx = next.Vertex;
                     UpdateEventPair(prev, dividingVtx);
                 }
                 // Case 4: events overlap
@@ -400,8 +400,8 @@ namespace Graphical.Core
                 else if (prev < next && prev.Pair < next.Pair)
                 {
                     // TODO: check this is true in all cases
-                    gVertex prevDividingVtx = next.Vertex;
-                    gVertex nextDividingVtx = prev.Pair.Vertex;
+                    Vertex prevDividingVtx = next.Vertex;
+                    Vertex nextDividingVtx = prev.Pair.Vertex;
 
                     UpdateEventPair(prev, prevDividingVtx);
                     UpdateEventPair(next, nextDividingVtx);
@@ -412,8 +412,8 @@ namespace Graphical.Core
                 else if (prev < next && prev.Pair > next.Pair)
                 {
                     next.Label = SweepEventLabel.NoContributing;
-                    gVertex dividingVtx = next.Vertex;
-                    gVertex pairDividingVtx = next.Pair.Vertex;
+                    Vertex dividingVtx = next.Vertex;
+                    Vertex pairDividingVtx = next.Pair.Vertex;
 
                     // Storing reference to prevPair before updating it
                     var prevPair = prev.Pair;

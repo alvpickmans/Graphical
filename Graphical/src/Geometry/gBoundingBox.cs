@@ -21,17 +21,17 @@ namespace Graphical.Geometry
         /// <summary>
         /// Bounding Box's minimum vertex
         /// </summary>
-        public gVertex MinVertex
+        public Vertex MinVertex
         {
-            get { return gVertex.ByCoordinatesArray(min); }
+            get { return Vertex.ByCoordinatesArray(min); }
         }
 
         /// <summary>
         /// Bounding Box's maximum vertex
         /// </summary>
-        public gVertex MaxVertex
+        public Vertex MaxVertex
         {
-            get { return gVertex.ByCoordinatesArray(max); }
+            get { return Vertex.ByCoordinatesArray(max); }
         }
         #endregion
 
@@ -50,7 +50,7 @@ namespace Graphical.Geometry
         /// <param name="min"></param>
         /// <param name="max"></param>
         /// <returns></returns>
-        public static gBoundingBox ByMinVertexMaxVertex(gVertex min, gVertex max)
+        public static gBoundingBox ByMinVertexMaxVertex(Vertex min, Vertex max)
         {
             return new gBoundingBox(new double[2] { min.X, max.X}, new double[2] { min.Y, max.Y }, new double[2] { min.Z, max.Z });
         }

@@ -14,13 +14,13 @@ namespace Graphical.Geometry.Tests
         [Test]
         public void OnEdgeTest()
         {
-            var a = gVertex.ByCoordinates(0, 0, 0);
-            var a2 = gVertex.ByCoordinates(10, 0, 0);
-            var b = gVertex.ByCoordinates(5, 5, 5);
-            var c = gVertex.ByCoordinates(10, 10, 10);
-            var d = gVertex.ByCoordinates(3, 4, 6);
-            var e = gVertex.ByCoordinates(5, 0.00001, 0);
-            var e2 = gVertex.ByCoordinates(5, 0.1, 0);
+            var a = Vertex.ByCoordinates(0, 0, 0);
+            var a2 = Vertex.ByCoordinates(10, 0, 0);
+            var b = Vertex.ByCoordinates(5, 5, 5);
+            var c = Vertex.ByCoordinates(10, 10, 10);
+            var d = Vertex.ByCoordinates(3, 4, 6);
+            var e = Vertex.ByCoordinates(5, 0.00001, 0);
+            var e2 = Vertex.ByCoordinates(5, 0.1, 0);
 
             Assert.IsTrue(b.OnEdge(a, b)); // Same end point
             Assert.IsTrue(b.OnEdge(a, c)); // On edge
@@ -33,17 +33,17 @@ namespace Graphical.Geometry.Tests
         [Test]
         public void CoplanarTest()
         {
-            var a = gVertex.ByCoordinates(0, 0, 0);
-            var b = gVertex.ByCoordinates(0, 10, 0);
-            var c = gVertex.ByCoordinates(10, 10, 0);
-            var d = gVertex.ByCoordinates(15, 25, 0);
-            var e = gVertex.ByCoordinates(0, 50, 0);
-            var f = gVertex.ByCoordinates(15, 15, 0.5);
+            var a = Vertex.ByCoordinates(0, 0, 0);
+            var b = Vertex.ByCoordinates(0, 10, 0);
+            var c = Vertex.ByCoordinates(10, 10, 0);
+            var d = Vertex.ByCoordinates(15, 25, 0);
+            var e = Vertex.ByCoordinates(0, 50, 0);
+            var f = Vertex.ByCoordinates(15, 15, 0.5);
             
-            Assert.IsTrue(gVertex.Coplanar(new List<gVertex>() { a, b}));
-            Assert.IsTrue(gVertex.Coplanar(new List<gVertex>() { a, b, c }));
-            Assert.IsFalse(gVertex.Coplanar(new List<gVertex>() { a, b, c, d, e, f}));
-            Assert.IsFalse(gVertex.Coplanar(new List<gVertex>() { c, d, e, f}));
+            Assert.IsTrue(Vertex.Coplanar(new List<Vertex>() { a, b}));
+            Assert.IsTrue(Vertex.Coplanar(new List<Vertex>() { a, b, c }));
+            Assert.IsFalse(Vertex.Coplanar(new List<Vertex>() { a, b, c, d, e, f}));
+            Assert.IsFalse(Vertex.Coplanar(new List<Vertex>() { c, d, e, f}));
         }
         
     }
