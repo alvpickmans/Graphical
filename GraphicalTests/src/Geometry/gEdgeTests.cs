@@ -93,11 +93,11 @@ namespace Graphical.Geometry.Tests
                     gVertex.ByCoordinates(8, 25.5)
                 );
 
-            gBase ab = a.Intersection(b); // Intersecting
-            gBase ac = a.Intersection(c); // Skew edges
-            gBase ad = a.Intersection(d); // Coplanar but not intersecting
-            gBase ef = e.Intersection(f); // Coplanar and parallel
-            gBase gh = g.Intersection(h); // Coplanar, not intersecting and second edge shorter than first
+            Geometry ab = a.Intersection(b); // Intersecting
+            Geometry ac = a.Intersection(c); // Skew edges
+            Geometry ad = a.Intersection(d); // Coplanar but not intersecting
+            Geometry ef = e.Intersection(f); // Coplanar and parallel
+            Geometry gh = g.Intersection(h); // Coplanar, not intersecting and second edge shorter than first
 
             //Assert.NotNull(ab);
             //Assert.AreEqual(5, (ab as gVertex).X);

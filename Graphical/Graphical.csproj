@@ -106,7 +106,7 @@
     <Compile Include="src\Geometry\gEdge.cs" />
     <Compile Include="src\Extensions\ListExtensions.cs" />
     <Compile Include="src\Graphs\VisibilityGraph.cs" />
-    <Compile Include="src\Geometry\gBase.cs" />
+    <Compile Include="src\Geometry\Geometry.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="extern\" />

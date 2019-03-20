@@ -11,7 +11,7 @@ namespace Graphical.Geometry
     /// gPolygon class to hold graph´s polygon information in relation to its function on the graph
     /// like if it is internal or limit boundary.
     /// </summary>
-    public class gPolygon : gBase, ICloneable
+    public class gPolygon : Geometry, ICloneable
     {
         #region Internal Variables
 

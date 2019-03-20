@@ -202,10 +202,10 @@ namespace Graphical.Core
         }
 
         // TODO: Check no coplanar edges.
-        public List<gBase> GetIntersections()
+        public List<Geometry.Geometry> GetIntersections()
         {
             activeEvents = new List<SweepEvent>();
-            List<gBase> tempIntersections = new List<gBase>();
+            List<Geometry.Geometry> tempIntersections = new List<Geometry.Geometry>();
             this.eventsQ = new MinPriorityQ<SweepEvent>(this.eventsList.Capacity);
             this.eventsQ.AddRange(this.eventsList);
 
@@ -328,9 +328,9 @@ namespace Graphical.Core
             eventsQ.Add(pairEvent.Pair);
         }
 
-        internal void ProcessIntersection(SweepEvent next, SweepEvent prev, List<gBase> intersections = null)
+        internal void ProcessIntersection(SweepEvent next, SweepEvent prev, List<Geometry.Geometry> intersections = null)
         {
-            gBase intersection = next.Edge.Intersection(prev.Edge);
+            Geometry.Geometry intersection = next.Edge.Intersection(prev.Edge);
             bool inserted = false;
             #region Is gVertex
             if (intersection is gVertex)

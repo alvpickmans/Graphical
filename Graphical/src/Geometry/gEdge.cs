@@ -13,7 +13,7 @@ namespace Graphical.Geometry
     /// <summary>
     /// Representation of Edges on a graph
     /// </summary>
-    public class gEdge : gBase
+    public class gEdge : Geometry
     {
         #region Variables
         /// <summary>
@@ -96,7 +96,7 @@ namespace Graphical.Geometry
             return c.Dot(a.Cross(b)) == 0;
         }
 
-        public gBase Intersection(gEdge other)
+        public Geometry Intersection(gEdge other)
         {
             // http://mathworld.wolfram.com/Line-LineIntersection.html
             if (!this.BoundingBox.Intersects(other.BoundingBox)) { return null; }

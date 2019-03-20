@@ -12,7 +12,7 @@ namespace Graphical.Geometry
     /// <summary>
     /// Representation of vertex points on a graph.
     /// </summary>
-    public class gVertex : gBase, ICloneable, IEquatable<gVertex>
+    public class gVertex : Geometry, ICloneable, IEquatable<gVertex>
     {
         #region Internal Properties
         internal double? thrX;

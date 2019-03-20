@@ -663,7 +663,7 @@ namespace Graphical.Graphs
             var endProj = gVertex.ByCoordinates(e.EndVertex.X, e.EndVertex.Y, 0);
             gEdge rayEdge = gEdge.ByStartVertexEndVertex(centreProj, maxProj);
             gEdge edgeProj = gEdge.ByStartVertexEndVertex(startProj, endProj);
-            gBase intersection = rayEdge.Intersection(edgeProj);
+            Geometry.Geometry intersection = rayEdge.Intersection(edgeProj);
             if(intersection != null && intersection.GetType() == typeof(gVertex))
             {
                 return centre.DistanceTo((gVertex)intersection);
