@@ -1,0 +1,6 @@
+#-lib promhx
+-main graphical.Graphical
+-cp src
+-cs build/cs
+-dce std
+-D dll
