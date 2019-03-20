@@ -14,7 +14,7 @@ namespace Graphical.Geometry
 
         #region Properties
         private gBoundingBox _boundingBox;
-        private Dictionary<string, object> _userData;
+        private UserData _userData;
         #endregion
 
         /// <summary>
@@ -33,11 +33,11 @@ namespace Graphical.Geometry
         /// <summary>
         /// Geometry's Custom data dictionary.
         /// </summary>
-        public Dictionary<string, object> UserData
+        public UserData UserData
         {
             get
             {
-                if(_userData == null) { _userData = new Dictionary<string, object>(); }
+                if(_userData == null) { _userData = new UserData(); }
                 return _userData;
             }
             set { _userData = value; }
