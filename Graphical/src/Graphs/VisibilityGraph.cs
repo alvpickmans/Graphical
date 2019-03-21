@@ -50,49 +50,26 @@ namespace Graphical.Graphs
             var visibleVertices = VisibilityGraph.VisibleVertices(o, baseGraph, null, null, null, false, false, true);
             
             return visibleVertices;
-
         }
 
-        // TODO: Review Merge method as now Ids are not duplicated per Graph
-        public static VisibilityGraph Merge(List<VisibilityGraph> graphs)
+        public static VisibilityGraph Merge(List<VisibilityGraph> vgraphs)
         {
             Graph graph = new Graph();
-            List<Edge> edges = new List<Edge>();
-            foreach (VisibilityGraph g in graphs)
-            {
-                Dictionary<int, int> oldNewIds = new Dictionary<int, int>();
-                foreach (Polygon p in g.baseGraph.polygons.Values)
-                {
-                    int nextId = graph.GetNextId();
-                    oldNewIds.Add(p.Id, nextId);
-                    Polygon polygon = (Polygon)p.Clone();
-                    polygon.Id = nextId;
-                    graph.polygons.Add(nextId, polygon);
-                }               
+            graph.polygons = vgraphs.SelectMany(vg => vg.Polygons).ToDictionary(poly => poly.Id, poly => poly);
 
-                foreach (Edge e in g.edges)
-                {
-                    Vertex start = (Vertex)e.StartVertex.Clone();
-                    Vertex end = (Vertex)e.EndVertex.Clone();
-                    //start.polygonId = oldNewIds[start.polygonId];
-                    //end.polygonId = oldNewIds[end.polygonId];
-                    edges.Add(Edge.ByStartVertexEndVertex(start, end));
-                }
-            }
-            
             VisibilityGraph visibilityGraph = new VisibilityGraph()
             {
-                baseGraph = new Graph(graph.polygons.Values.ToList()),
+                baseGraph = new Graph(graph.Polygons.ToList()),
             };
 
-            foreach(Edge edge in edges)
+            var edges = vgraphs.SelectMany(vg => vg.edges);
+
+            for (int i = 0; i < edges.Count(); i++)
             {
-                visibilityGraph.AddEdge(edge);
+                visibilityGraph.AddEdge(edges.ElementAt(i));
             }
 
             return visibilityGraph;
-
-
         }
         #endregion
 

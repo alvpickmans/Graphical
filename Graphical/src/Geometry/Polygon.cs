@@ -64,11 +64,25 @@ namespace Graphical.Geometry
         #endregion
 
         #region Internal Constructors
-        internal Polygon() : base() { }
+        internal Polygon(bool isBoundary = false) : base() { }
 
-        internal Polygon(bool _isExternal) : base()
+        internal Polygon(List<Vertex> vertices, bool _isExternal = false) : base()
         {
             isBoundary = _isExternal;
+            int vertexCount = vertices.Count;
+            for (var j = 0; j < vertexCount; j++)
+            {
+                int next_index = (j + 1) % vertexCount;
+                Vertex vertex = vertices[j];
+                Vertex next_vertex = vertices[next_index];
+                var edge = new Edge(vertex, next_vertex);
+
+                vertex.Parent = this;
+                edge.Parent = this;
+
+                this.Vertices.Add(vertex);
+                this.Edges.Add(edge);
+            }
         }
         #endregion
 
@@ -81,15 +95,16 @@ namespace Graphical.Geometry
         /// <returns></returns>
         public static Polygon ByVertices(List<Vertex> vertices, bool isExternal = false)
         {
-            Polygon polygon = new Polygon(isExternal);
-            polygon.AddVertexRange(vertices);
-            int vertexCount = vertices.Count;
-            for (var j = 0; j < vertexCount; j++)
+
+            Polygon polygon;
+            // Removing last vertex if is equal to first.
+            if (vertices.First().Equals(vertices.Last()))
             {
-                int next_index = (j + 1) % vertexCount;
-                Vertex vertex = vertices[j];
-                Vertex next_vertex = vertices[next_index];
-                polygon.edges.Add( new Edge(vertex, next_vertex));
+                polygon = new Polygon(vertices.Take(vertices.Count - 1).ToList(), isExternal);
+            }
+            else
+            {
+                polygon = new Polygon(vertices, isExternal);
             }
             return polygon;
         }
@@ -109,7 +124,7 @@ namespace Graphical.Geometry
                         );
                 vertices.Add(vertex);
             }
-            return Polygon.ByVertices(vertices);
+            return new Polygon(vertices);
         }
         #endregion
 
@@ -117,19 +132,7 @@ namespace Graphical.Geometry
         internal void AddVertex(Vertex vertex)
         {
             vertex.Parent = this;
-            this.Children.Add(vertex);
             vertices.Add(vertex);
-        }
-
-        internal void AddVertexRange(IEnumerable<Vertex> vertices)
-        {
-            for(var i = 0; i < vertices.Count(); i++)
-            {
-                var vertex = vertices.ElementAt(i);
-                vertex.Parent = this;
-                this.Children.Add(vertex);
-                this.Vertices.Add(vertex);
-            }
         }
 
         internal Polygon AddVertex(Vertex vertex, Edge intersectinEdge)
@@ -144,7 +147,6 @@ namespace Graphical.Geometry
             // inserting the new vertex at the following index.
             int index = newPolygon.vertices.IndexOf(intersectinEdge.StartVertex);
             newPolygon.vertices.Insert(index + 1, vertex);
-            newPolygon.Children.Insert(index + 1, vertex);
 
             // Rebuilding edges.
             newPolygon.edges.Clear();
@@ -362,10 +364,8 @@ namespace Graphical.Geometry
         /// <returns>Cloned Polygon</returns>
         public object Clone()
         {
-            Polygon newPolygon = new Polygon(this.isBoundary);
-            newPolygon.Id = this.Id;
+            Polygon newPolygon = new Polygon(this.vertices, this.isBoundary);
             newPolygon.edges = new List<Edge>(this.edges);
-            newPolygon.vertices = new List<Vertex>(this.vertices);
             return newPolygon;
         }
 

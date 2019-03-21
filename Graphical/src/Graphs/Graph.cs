@@ -29,11 +29,6 @@ namespace Graphical.Graphs
         internal Dictionary<int, Polygon> polygons = new Dictionary<int, Polygon>();
 
         /// <summary>
-        /// Polygon's Id counter.
-        /// </summary>
-        internal int? pId { get; private set; }
-
-        /// <summary>
         /// Dictionary with vertex as key and values edges associated with the vertex.
         /// </summary>
         internal Dictionary<Vertex, List<Edge>> graph = new Dictionary<Vertex, List<Edge>>();
@@ -62,86 +57,24 @@ namespace Graphical.Graphs
             graphID = Guid.NewGuid();
         }
 
-        public Graph(List<Polygon> gPolygonsSet)
+        public Graph(List<Polygon> polygonList)
         {
             edges = new List<Edge>();
             graphID = Guid.NewGuid();
-            //Setting up Graph instance by adding vertices, edges and polygons
-            foreach(Polygon gPolygon in gPolygonsSet)
+
+            // Adding polygons to Graph
+            for (int i = 0; i < polygonList.Count; i++)
             {
-                List<Vertex> vertices = gPolygon.vertices;
+                var polygon = polygonList[i];
+                this.polygons.Add(polygon.Id, polygon);
 
-                // Clear pre-existing edges in the case this is an updating process.
-                gPolygon.edges.Clear();
-
-                //If there is only one polygon, treat it as boundary
-                if(gPolygonsSet.Count() == 1)
-                {
-                    gPolygon.isBoundary = true;
-                }
-
-                //If first and last point of vertices list are the same, remove last.
-                if (vertices.First().Equals(vertices.Last()) && vertices.Count() > 1)
-                {
-                    vertices = vertices.Take(vertices.Count() - 1).ToList();
-                }
-
-                //For each point, creates vertex and associated edge and adds them
-                //to the polygons Dictionary
-                int vertexCount = vertices.Count();
-
-                // If valid polygon
-                if (vertexCount >= 3)
-                {
-                    int newId = GetNextId();
-                    for (var j = 0; j < vertexCount; j++)
-                    {
-                        int next_index = (j + 1) % vertexCount;
-                        Vertex vertex = vertices[j];
-                        Vertex next_vertex = vertices[next_index];
-                        Edge edge = new Edge(vertex, next_vertex);
-
-                        //If is a valid polygon, add id to vertex and
-                        //edge to vertices dictionary
-                        if (vertexCount > 2)
-                        {
-                            vertex.UserData["polygonId"] = newId;
-                            next_vertex.UserData["polygonId"] = newId;
-                            Polygon gPol = new Polygon();
-                            if (polygons.TryGetValue(newId, out gPol))
-                            {
-                                gPol.edges.Add(edge);
-                            }
-                            else
-                            {
-                                gPolygon.edges.Add(edge);
-                                gPolygon.Id = newId;
-                                polygons.Add(newId, gPolygon);
-                            }
-                        }
-                        AddEdge(edge);
-                    }
-                }
-
+                polygon.Edges.ForEach(edge => this.AddEdge(edge));
             }
         }
 
         #endregion
 
         #region Internal Methods
-
-        internal int GetNextId()
-        {
-            if(this.pId == null)
-            {
-                this.pId = 1;
-            }
-            else
-            {
-                pId++;
-            }
-            return pId.Value;
-        }
 
         internal void ResetEdgesFromPolygons()
         {
