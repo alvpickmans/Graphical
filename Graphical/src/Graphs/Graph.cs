@@ -105,8 +105,8 @@ namespace Graphical.Graphs
                         //edge to vertices dictionary
                         if (vertexCount > 2)
                         {
-                            vertex.polygonId = newId;
-                            next_vertex.polygonId = newId;
+                            vertex.UserData["polygonId"] = newId;
+                            next_vertex.UserData["polygonId"] = newId;
                             gPolygon gPol = new gPolygon();
                             if (polygons.TryGetValue(newId, out gPol))
                             {
@@ -134,7 +134,7 @@ namespace Graphical.Graphs
         {
             if(this.pId == null)
             {
-                this.pId = 0;
+                this.pId = 1;
             }
             else
             {

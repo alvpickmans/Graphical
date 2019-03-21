@@ -135,6 +135,8 @@ namespace Graphical.Graphs
             bool maxVisibility = false)
         {
             #region Initialize variables and sort vertices
+            int centrePolygonId = centre.UserData.GetValueOrDefault<int>("polygonId");
+
             List<gEdge> edges = baseGraph.edges;
             List<Vertex> vertices = baseGraph.vertices;
 
@@ -203,8 +205,10 @@ namespace Graphical.Graphs
                 //Checking if p is visible from p.
                 bool isVisible = false;
                 gPolygon vertexPolygon = null;
-                if (vertex.polygonId >= 0) {
-                    baseGraph.polygons.TryGetValue(vertex.polygonId, out vertexPolygon);
+                int vertexPolygonId = vertex.UserData.GetValueOrDefault<int>("polygonId");
+
+                if (vertexPolygonId >= 0) {
+                    baseGraph.polygons.TryGetValue(vertexPolygonId, out vertexPolygon);
                 }
                 // If centre is on an edge of a inner polygon vertex belongs, check if the centre-vertex edge lies inside
                 // or if on one of vertex's edges.
@@ -277,7 +281,7 @@ namespace Graphical.Graphs
 
                 //If vertex is visible and centre belongs to any polygon, checks
                 //if the visible edge is interior to its polygon
-                if (isVisible && centre.polygonId >= 0 && !baseGraph.GetAdjecentVertices(centre).Contains(vertex))
+                if (isVisible && centrePolygonId >= 0 && !baseGraph.GetAdjecentVertices(centre).Contains(vertex))
                 {
                     if (IsBoundaryVertex(centre, baseGraph) && IsBoundaryVertex(vertex, baseGraph))
                     {
@@ -297,7 +301,7 @@ namespace Graphical.Graphs
                 if (isVisible)
                 {
                     // Check reducedGraph if vertices belongs to different polygons
-                    if (reducedGraph && centre.polygonId != vertex.polygonId) 
+                    if (reducedGraph && centrePolygonId != vertexPolygonId) 
                     {
                         bool isOriginExtreme =  true;
                         bool isTargetExtreme = true;
@@ -306,13 +310,13 @@ namespace Graphical.Graphs
                         // will have the same orientation (both clock or counter-clock wise)
                         
                         // Vertex belongs to a polygon
-                        if (centre.polygonId >= 0 && !IsBoundaryVertex(centre, baseGraph))
+                        if (centrePolygonId >= 0 && !IsBoundaryVertex(centre, baseGraph))
                         {
                             var orientationsOrigin = baseGraph.GetAdjecentVertices(centre).Select(otherVertex => Vertex.Orientation(vertex, centre, otherVertex)).ToList();
                             isOriginExtreme = orientationsOrigin.All(o => o == orientationsOrigin.First());
                         }
 
-                        if(vertex.polygonId >= 0 && !IsBoundaryVertex(vertex, baseGraph))
+                        if(vertexPolygonId >= 0 && !IsBoundaryVertex(vertex, baseGraph))
                         {
                             var orientationsTarget = baseGraph.GetAdjecentVertices(vertex).Select(otherVertex => Vertex.Orientation(centre, vertex, otherVertex)).ToList();
                             isTargetExtreme = orientationsTarget.All(o => o == orientationsTarget.First());
@@ -338,7 +342,7 @@ namespace Graphical.Graphs
                     }
                 }
 
-                if(isVisible && maxVisibility && vertex.polygonId >= 0)
+                if(isVisible && maxVisibility && vertexPolygonId >= 0)
                 {
                     List<Vertex> vertexPairs = baseGraph.GetAdjecentVertices(vertex);
                     int firstOrientation = Vertex.Orientation(centre, vertex, vertexPairs[0]);
@@ -362,7 +366,7 @@ namespace Graphical.Graphs
                             {
                                 projectionVertex = intersection;
                                 gPolygon polygon = null;
-                                baseGraph.polygons.TryGetValue(vertex.polygonId, out polygon);
+                                baseGraph.polygons.TryGetValue(vertexPolygonId, out polygon);
                                 if(polygon != null)
                                 {
                                     // If polygon is internal, don't compute intersection if mid point lies inside the polygon but not on its edges
@@ -464,17 +468,20 @@ namespace Graphical.Graphs
 
         internal static bool EdgeInPolygon(Vertex v1, Vertex v2, Graph graph, double maxDistance)
         {
+            int polygonId1 = v1.UserData.GetValueOrDefault<int>("polygonId");
+            int polygonId2 = v1.UserData.GetValueOrDefault<int>("polygonId");
             //Not on the same polygon
-            if (v1.polygonId != v2.polygonId) { return false; }
+            if (polygonId1 != polygonId2) { return false; }
             //At least one doesn't belong to any polygon
-            if (v1.polygonId == -1 || v2.polygonId == -1) { return false; }
+            if (polygonId1 == -1 || polygonId2 == -1) { return false; }
             Vertex midVertex = Vertex.MidVertex(v1, v2);
-            return graph.polygons[v1.polygonId].ContainsVertex(midVertex);
+            return graph.polygons[polygonId1].ContainsVertex(midVertex);
         }
 
         internal static bool IsBoundaryVertex(Vertex vertex, Graph graph)
         {
-            return (vertex.polygonId < 0) ? false : graph.polygons[vertex.polygonId].isBoundary;
+            int polygonId = vertex.UserData.GetValueOrDefault<int>("polygonId");
+            return (polygonId < 0) ? false : graph.polygons[polygonId].isBoundary;
         }
 
 
@@ -524,20 +531,21 @@ namespace Graphical.Graphs
             VisibilityGraph newVisGraph = (VisibilityGraph)visibilityGraph.Clone();
             List<Vertex> singleVertices = new List<Vertex>();
 
-            foreach (Vertex v in vertices)
+            foreach (Vertex vertex in vertices)
             {
-                if (newVisGraph.Contains(v)) { continue; }
-                gEdge closestEdge = newVisGraph.baseGraph.edges.OrderBy(e => e.DistanceTo(v)).First();
+                if (newVisGraph.Contains(vertex)) { continue; }
+                gEdge closestEdge = newVisGraph.baseGraph.edges.OrderBy(e => e.DistanceTo(vertex)).First();
 
-                if (!closestEdge.DistanceTo(v).AlmostEqualTo(0))
+                if (!closestEdge.DistanceTo(vertex).AlmostEqualTo(0))
                 {
-                    singleVertices.Add(v);
+                    singleVertices.Add(vertex);
                 }
-                else if (v.OnEdge(closestEdge.StartVertex, closestEdge.EndVertex))
+                else if (vertex.OnEdge(closestEdge.StartVertex, closestEdge.EndVertex))
                 {
-                    v.polygonId = closestEdge.StartVertex.polygonId;
-                    newVisGraph.baseGraph.polygons[v.polygonId] = newVisGraph.baseGraph.polygons[v.polygonId].AddVertex(v, closestEdge);
-                    singleVertices.Add(v);
+                    int polygonId = closestEdge.StartVertex.UserData.GetValueOrDefault<int>("polygonId");
+                    vertex.UserData["polygonId"] = polygonId;
+                    newVisGraph.baseGraph.polygons[polygonId] = newVisGraph.baseGraph.polygons[polygonId].AddVertex(vertex, closestEdge);
+                    singleVertices.Add(vertex);
                 }
             }
 

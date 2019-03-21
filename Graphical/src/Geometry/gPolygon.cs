@@ -122,22 +122,22 @@ namespace Graphical.Geometry
         #region Internal Methods
         internal void AddVertex(Vertex vertex)
         {
-            vertex.polygonId = this.id;
+            vertex.UserData["polygonId"] = this.id;
             vertices.Add(vertex);
         }
 
-        internal gPolygon AddVertex(Vertex v, gEdge intersectingEdge)
+        internal gPolygon AddVertex(Vertex vertex, gEdge intersectingEdge)
         {
             //Assumes that vertex v intersects one of polygons edges.
             gPolygon newPolygon = (gPolygon)this.Clone();
 
             // Assign the polygon Id to the new vertex.
-            v.polygonId = this.id;
+            vertex.UserData["polygonId"] = this.id;
 
             // Getting the index of the intersecting edge's start vertex and
             // inserting the new vertex at the following index.
             int index = newPolygon.vertices.IndexOf(intersectingEdge.StartVertex);
-            newPolygon.vertices.Insert(index + 1, v);
+            newPolygon.vertices.Insert(index + 1, vertex);
 
             // Rebuilding edges.
             newPolygon.edges.Clear();

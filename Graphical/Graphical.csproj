@@ -95,6 +95,7 @@
     <Compile Include="src\Core\SweepLine\SweepEvent.cs" />
     <Compile Include="src\Core\SweepLine\EventChainer.cs" />
     <Compile Include="src\Core\SweepLine\SweepLine.cs" />
+    <Compile Include="src\CustomObject\UserData.cs" />
     <Compile Include="src\Extensions\NumericExtensions.cs" />
     <Compile Include="src\Geometry\gBoundingBox.cs" />
     <Compile Include="src\Geometry\gPolygon.cs" />

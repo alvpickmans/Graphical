@@ -16,8 +16,6 @@ namespace Graphical.Geometry
     {
 
         #region Properties
-        public int polygonId { get; set; }
-
         public double X { get; private set; }
         public double Y { get; private set; }
         public double Z { get; private set; }
@@ -25,9 +23,8 @@ namespace Graphical.Geometry
         #endregion
 
         #region Internal/Private Constructors
-        private Vertex(double x, double y, double z = 0, int pId = -1)
+        private Vertex(double x, double y, double z = 0)
         {
-            polygonId = pId;
             X = x.Round();
             Y = y.Round();
             Z = z.Round();
@@ -273,23 +270,12 @@ namespace Graphical.Geometry
         }
 
         /// <summary>
-        /// Customizing the render of Vertex
-        /// </summary>
-        /// <param name="package"></param>
-        /// <param name="parameters"></param>
-        //[IsVisibleInDynamoLibrary(false)]
-        //public void Tessellate(IRenderPackage package, TessellationParameters parameters)
-        //{
-        //    package.AddPointVertex(X, Y, Z);
-        //    package.AddPointVertexColor(255, 0, 0, 255);
-        //}
-
-        /// <summary>
         /// Implementation of Clone method
         /// </summary>
         public object Clone()
         {
-            Vertex newVertex = new Vertex(this.X, this.Y, this.Z, this.polygonId);
+            Vertex newVertex = new Vertex(this.X, this.Y, this.Z);
+            newVertex.UserData = this.UserData;
 
             return newVertex;
         }
