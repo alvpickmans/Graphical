@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Core\SweepLineTests.cs" />
+    <Compile Include="src\CustomObject\UserDataTests.cs" />
     <Compile Include="src\Geometry\gBoundingBoxTests.cs" />
     <Compile Include="src\Geometry\gEdgeTests.cs" />
     <Compile Include="src\Geometry\gPolygonTests.cs" />

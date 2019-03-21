@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GraphicalTests.src.Geometry
+namespace GraphicalTests.Geometry
 {
     [TestFixture]
     public class gBoundingBoxTests

@@ -14,18 +14,21 @@ namespace Graphical
         /// <summary>
         /// Returns the value associated with the key
         /// if exists in the UserData and is of the given Type.
+        /// Returns the default value of the given Type otherwise.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="key"></param>
         /// <returns></returns>
-        public T Get<T>(string key)
+        public T GetValueOrDefault<T>(string key)
         {
             object value;
-            this.TryGetValue(key, out value);
 
-            TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
+            if(!this.TryGetValue(key, out value) || typeof(T) != value.GetType())
+            {
+                return default(T);
+            }
 
-            return (T)converter.ConvertFrom(value);
+            return (T)value;
 
         }
     }
