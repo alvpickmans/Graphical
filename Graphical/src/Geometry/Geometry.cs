@@ -25,7 +25,6 @@ namespace Graphical.Geometry
         private UserData _userData;
 
         private Geometry _parent;
-        private List<Geometry> _children;
         #endregion
 
         #region Public Properties
@@ -61,16 +60,6 @@ namespace Graphical.Geometry
         {
             get => this._parent;
             set => this._parent = value;
-        }
-
-        public List<Geometry> Children
-        {
-            get
-            {
-                if (this._children == null) { this._children = new List<Geometry>(); }
-                return this._children;
-            }
-            set => this._children = value;
         }
         #endregion
 
