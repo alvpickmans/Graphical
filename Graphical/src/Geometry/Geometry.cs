@@ -11,11 +11,20 @@ namespace Graphical.Geometry
     /// </summary>
     public abstract class Geometry
     {
+        #region Static Properties
+        private static int _nextId = 1;
+        #endregion
 
         #region Properties
         private gBoundingBox _boundingBox;
         private UserData _userData;
+
+        private Geometry _parent;
+        private List<Geometry> _children;
         #endregion
+
+        #region Public Properties
+        public int Id { get; set; }
 
         /// <summary>
         /// Geometry's Axis Aligned Bounding Box
@@ -24,7 +33,7 @@ namespace Graphical.Geometry
         {
             get
             {
-                if(_boundingBox == null) { _boundingBox = ComputeBoundingBox(); }
+                if (_boundingBox == null) { _boundingBox = ComputeBoundingBox(); }
                 return _boundingBox;
             }
             set { _boundingBox = value; }
@@ -37,11 +46,35 @@ namespace Graphical.Geometry
         {
             get
             {
-                if(_userData == null) { _userData = new UserData(); }
+                if (_userData == null) { _userData = new UserData(); }
                 return _userData;
             }
             set { _userData = value; }
         }
+
+        public Geometry Parent
+        {
+            get => this._parent;
+            set => this._parent = value;
+        }
+
+        public List<Geometry> Children
+        {
+            get
+            {
+                if (this._children == null) { this._children = new List<Geometry>(); }
+                return this._children;
+            }
+            set => this._children = value;
+        }
+        #endregion
+
+        #region Public Constructor
+        public Geometry()
+        {
+            this.Id = Geometry._nextId++;
+        }
+        #endregion
 
         internal abstract gBoundingBox ComputeBoundingBox();
 
