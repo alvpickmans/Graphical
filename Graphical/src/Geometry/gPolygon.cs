@@ -16,11 +16,6 @@ namespace Graphical.Geometry
         #region Internal Variables
 
         /// <summary>
-        /// Polygon's id
-        /// </summary>
-        internal int id { get; set; }
-
-        /// <summary>
         /// Flag to check polygons role: Internal or Boundary
         /// </summary>
         internal bool isBoundary { get; set; }
@@ -69,11 +64,10 @@ namespace Graphical.Geometry
         #endregion
 
         #region Internal Constructors
-        internal gPolygon() { }
+        internal gPolygon() : base() { }
 
-        internal gPolygon(int _id, bool _isExternal)
+        internal gPolygon(bool _isExternal) : base()
         {
-            id = _id;
             isBoundary = _isExternal;
         }
         #endregion
@@ -87,8 +81,8 @@ namespace Graphical.Geometry
         /// <returns></returns>
         public static gPolygon ByVertices(List<Vertex> vertices, bool isExternal = false)
         {
-            gPolygon polygon = new gPolygon(-1, isExternal);
-            polygon.vertices = vertices;
+            gPolygon polygon = new gPolygon(isExternal);
+            polygon.AddVertexRange(vertices);
             int vertexCount = vertices.Count;
             for (var j = 0; j < vertexCount; j++)
             {
@@ -122,8 +116,20 @@ namespace Graphical.Geometry
         #region Internal Methods
         internal void AddVertex(Vertex vertex)
         {
-            vertex.UserData["polygonId"] = this.id;
+            vertex.Parent = this;
+            this.Children.Add(vertex);
             vertices.Add(vertex);
+        }
+
+        internal void AddVertexRange(IEnumerable<Vertex> vertices)
+        {
+            for(var i = 0; i < vertices.Count(); i++)
+            {
+                var vertex = vertices.ElementAt(i);
+                vertex.Parent = this;
+                this.Children.Add(vertex);
+                this.Vertices.Add(vertex);
+            }
         }
 
         internal gPolygon AddVertex(Vertex vertex, gEdge intersectingEdge)
@@ -132,12 +138,13 @@ namespace Graphical.Geometry
             gPolygon newPolygon = (gPolygon)this.Clone();
 
             // Assign the polygon Id to the new vertex.
-            vertex.UserData["polygonId"] = this.id;
+            vertex.Parent = this;
 
             // Getting the index of the intersecting edge's start vertex and
             // inserting the new vertex at the following index.
             int index = newPolygon.vertices.IndexOf(intersectingEdge.StartVertex);
             newPolygon.vertices.Insert(index + 1, vertex);
+            newPolygon.Children.Insert(index + 1, vertex);
 
             // Rebuilding edges.
             newPolygon.edges.Clear();
@@ -355,7 +362,8 @@ namespace Graphical.Geometry
         /// <returns>Cloned gPolygon</returns>
         public object Clone()
         {
-            gPolygon newPolygon = new gPolygon(this.id, this.isBoundary);
+            gPolygon newPolygon = new gPolygon(this.isBoundary);
+            newPolygon.Id = this.Id;
             newPolygon.edges = new List<gEdge>(this.edges);
             newPolygon.vertices = new List<Vertex>(this.vertices);
             return newPolygon;

@@ -34,7 +34,8 @@ namespace Graphical.Geometry
         #endregion
 
         #region Constructors
-        public gEdge(Vertex start, Vertex end)
+        // TODO: Convert to private constructor
+        public gEdge(Vertex start, Vertex end) : base()
         {
             StartVertex = start;
             EndVertex = end;

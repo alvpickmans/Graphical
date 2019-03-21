@@ -9,10 +9,15 @@ namespace Graphical.Geometry
     /// <summary>
     /// Base abstract class for all spatial geometries
     /// </summary>
-    public abstract class Geometry
+    public abstract class Geometry : IEquatable<Geometry>
     {
         #region Static Properties
         private static int _nextId = 1;
+
+        public static int NextId
+        {
+            get => Geometry._nextId++;
+        }
         #endregion
 
         #region Properties
@@ -72,11 +77,16 @@ namespace Graphical.Geometry
         #region Public Constructor
         public Geometry()
         {
-            this.Id = Geometry._nextId++;
+            this.Id = Geometry.NextId;
         }
         #endregion
 
         internal abstract gBoundingBox ComputeBoundingBox();
 
+        public bool Equals(Geometry other)
+        {
+            return this.GetType() == other.GetType()
+                && this.Id == other.Id;
+        }
     }
 }

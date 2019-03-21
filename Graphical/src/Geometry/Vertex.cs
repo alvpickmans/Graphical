@@ -23,7 +23,7 @@ namespace Graphical.Geometry
         #endregion
 
         #region Internal/Private Constructors
-        private Vertex(double x, double y, double z = 0)
+        private Vertex(double x, double y, double z = 0) : base()
         {
             X = x.Round();
             Y = y.Round();
