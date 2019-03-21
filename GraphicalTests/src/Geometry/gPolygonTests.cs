@@ -75,9 +75,11 @@ namespace Graphical.Geometry.Tests
         public void RegularPolygon()
         {
             var square = gPolygon.ByCenterRadiusAndSides(Vertex.Origin(), 10, 4);
+            var vertex1 = Vertex.ByCoordinates(0, 10, 0);
+            var vertex2 = Vertex.ByCoordinates(10, 0, 0);
 
-            Assert.AreEqual(Vertex.ByCoordinates(0, 10, 0), square.Vertices[0]);
-            Assert.AreEqual(Vertex.ByCoordinates(10, 0, 0), square.Vertices[1]);
+            Assert.IsTrue(vertex1.Equals(square.Vertices[0]));
+            Assert.IsTrue(vertex2.Equals(square.Vertices[1]));
         }
     }
 }

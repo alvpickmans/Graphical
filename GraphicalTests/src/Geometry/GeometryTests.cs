@@ -21,13 +21,14 @@ namespace Graphical.Geometry.Tests
         [Test]
         public void GeometryIdUniqueTest()
         {
-            int id = 0;
+            Vertex vertex = Vertex.Origin();
+            int id = vertex.Id;
             for(var i = 0; i < 100; i++)
             {
-                id = Geometry.NextId;
+                vertex = Vertex.Origin();
             }
 
-            Assert.AreEqual(id, 100);
+            Assert.AreEqual(vertex.Id, id + 100);
         }
 
         [Test]
