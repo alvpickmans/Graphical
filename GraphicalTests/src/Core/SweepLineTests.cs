@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace Graphical.Core.Tests
 {
-    [TestFixture]
+    //[TestFixture]
     public class SweepLineTests
     {
         //[Test]
@@ -24,7 +24,7 @@ namespace Graphical.Core.Tests
 
         }
 
-        [Test]
+        //[Test]
         public void FindIntersectionsTest()
         {
             // Similar example as in http://www.webcitation.org/6ahkPQIsN
@@ -50,7 +50,7 @@ namespace Graphical.Core.Tests
             Assert.AreEqual(4, swLine.GetIntersections().Count);
         }
 
-        [Test]
+        //[Test]
         public void FindIntersectionsNotHorizontalTest()
         {
             Vertex a1 = Vertex.ByCoordinates(0, 0, 0);
@@ -77,7 +77,7 @@ namespace Graphical.Core.Tests
             //Assert.AreEqual(2, swLine.Intersections.Count);
         }
 
-        [Test]
+        //[Test]
         public void IntersectionCoincidentLinesTest()
         {
             Vertex a1 = Vertex.ByCoordinates(0, 0);
@@ -130,7 +130,7 @@ namespace Graphical.Core.Tests
             Assert.AreEqual(1, slContaining.GetIntersections().Count);
         }
 
-        [Test]
+        //[Test]
         public void ComplexPolygonBoolean()
         {
             var clip = gPolygon.ByVertices(new List<Vertex>()
@@ -161,7 +161,7 @@ namespace Graphical.Core.Tests
 
         }
 
-        [Test]
+        //[Test]
         public void NotIntersectingPolygons()
         {
             var clip = gPolygon.ByVertices(new List<Vertex>()
