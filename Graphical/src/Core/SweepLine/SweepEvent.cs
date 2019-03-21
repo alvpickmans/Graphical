@@ -33,7 +33,7 @@ namespace Graphical.Core
         /// <summary>
         /// Edge associated with the event
         /// </summary>
-        public gEdge Edge { get; set; }
+        public Edge Edge { get; set; }
 
         /// <summary>
         /// Determines if SweepEvent comes first on a left to right direction
@@ -65,7 +65,7 @@ namespace Graphical.Core
         /// </summary>
         /// <param name="vertex"></param>
         /// <param name="edge"></param>
-        public SweepEvent(Vertex vertex, gEdge edge)
+        public SweepEvent(Vertex vertex, Edge edge)
         {
             this.Vertex = vertex;
             this.Edge = edge;
@@ -78,7 +78,7 @@ namespace Graphical.Core
         /// <param name="newPairVertex"></param>
         public void UpdatePairVertex(Vertex newPairVertex)
         {
-            this.Edge = gEdge.ByStartVertexEndVertex(this.Vertex, newPairVertex);
+            this.Edge = Edge.ByStartVertexEndVertex(this.Vertex, newPairVertex);
             this.Pair = new SweepEvent(newPairVertex, this.Edge)
             {
                 Pair = this,

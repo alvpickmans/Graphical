@@ -26,7 +26,7 @@ namespace Graphical.Graphs
         /// <summary>
         /// Polygons dictionary with their Id as dictionary key
         /// </summary>
-        internal Dictionary<int, gPolygon> polygons = new Dictionary<int, gPolygon>();
+        internal Dictionary<int, Polygon> polygons = new Dictionary<int, Polygon>();
 
         /// <summary>
         /// Polygon's Id counter.
@@ -36,7 +36,7 @@ namespace Graphical.Graphs
         /// <summary>
         /// Dictionary with vertex as key and values edges associated with the vertex.
         /// </summary>
-        internal Dictionary<Vertex, List<gEdge>> graph = new Dictionary<Vertex, List<gEdge>>();
+        internal Dictionary<Vertex, List<Edge>> graph = new Dictionary<Vertex, List<Edge>>();
 
         /// <summary>
         /// Graph's vertices
@@ -46,9 +46,9 @@ namespace Graphical.Graphs
         /// <summary>
         /// Graph's edges
         /// </summary>
-        public List<gEdge> edges { get; internal set; }
+        public List<Edge> edges { get; internal set; }
 
-        public List<gPolygon> Polygons
+        public List<Polygon> Polygons
         {
             get { return polygons.Values.ToList(); }
         }
@@ -58,16 +58,16 @@ namespace Graphical.Graphs
         #region Internal Constructors
         public Graph()
         {
-            edges = new List<gEdge>();
+            edges = new List<Edge>();
             graphID = Guid.NewGuid();
         }
 
-        public Graph(List<gPolygon> gPolygonsSet)
+        public Graph(List<Polygon> gPolygonsSet)
         {
-            edges = new List<gEdge>();
+            edges = new List<Edge>();
             graphID = Guid.NewGuid();
             //Setting up Graph instance by adding vertices, edges and polygons
-            foreach(gPolygon gPolygon in gPolygonsSet)
+            foreach(Polygon gPolygon in gPolygonsSet)
             {
                 List<Vertex> vertices = gPolygon.vertices;
 
@@ -99,7 +99,7 @@ namespace Graphical.Graphs
                         int next_index = (j + 1) % vertexCount;
                         Vertex vertex = vertices[j];
                         Vertex next_vertex = vertices[next_index];
-                        gEdge edge = new gEdge(vertex, next_vertex);
+                        Edge edge = new Edge(vertex, next_vertex);
 
                         //If is a valid polygon, add id to vertex and
                         //edge to vertices dictionary
@@ -107,7 +107,7 @@ namespace Graphical.Graphs
                         {
                             vertex.UserData["polygonId"] = newId;
                             next_vertex.UserData["polygonId"] = newId;
-                            gPolygon gPol = new gPolygon();
+                            Polygon gPol = new Polygon();
                             if (polygons.TryGetValue(newId, out gPol))
                             {
                                 gPol.edges.Add(edge);
@@ -148,9 +148,9 @@ namespace Graphical.Graphs
             this.edges.Clear();
             this.graph.Clear();
 
-            foreach(gPolygon polygon in polygons.Values)
+            foreach(Polygon polygon in polygons.Values)
             {
-                foreach(gEdge edge in polygon.edges)
+                foreach(Edge edge in polygon.edges)
                 {
                     this.AddEdge(edge);
                 }
@@ -176,21 +176,21 @@ namespace Graphical.Graphs
         /// </summary>
         /// <param name="edge"></param>
         /// <returns></returns>
-        public bool Contains(gEdge edge)
+        public bool Contains(Edge edge)
         {
             return edges.Contains(edge);
         }
 
-        public List<gEdge> GetVertexEdges(Vertex vertex)
+        public List<Edge> GetVertexEdges(Vertex vertex)
         {
-            List<gEdge> edgesList = new List<gEdge>();
+            List<Edge> edgesList = new List<Edge>();
             if(graph.TryGetValue(vertex, out edgesList))
             {
                 return edgesList;
             }else
             {
-                //graph.Add(vertex, new List<gEdge>());
-                return new List<gEdge>();
+                //graph.Add(vertex, new List<Edge>());
+                return new List<Edge>();
             }
         }
 
@@ -203,17 +203,17 @@ namespace Graphical.Graphs
         /// Add edge to the analisys graph
         /// </summary>
         /// <param name="edge">New edge</param>
-        public void AddEdge(gEdge edge)
+        public void AddEdge(Edge edge)
         {
-            List<gEdge> startEdgesList = new List<gEdge>();
-            List<gEdge> endEdgesList = new List<gEdge>();
+            List<Edge> startEdgesList = new List<Edge>();
+            List<Edge> endEdgesList = new List<Edge>();
             if (graph.TryGetValue(edge.StartVertex, out startEdgesList))
             {
                 if (!startEdgesList.Contains(edge)) { startEdgesList.Add(edge); }
             }
             else
             {
-                graph.Add(edge.StartVertex, new List<gEdge>() { edge });
+                graph.Add(edge.StartVertex, new List<Edge>() { edge });
             }
 
             if (graph.TryGetValue(edge.EndVertex, out endEdgesList))
@@ -222,7 +222,7 @@ namespace Graphical.Graphs
             }
             else
             {
-                graph.Add(edge.EndVertex, new List<gEdge>() { edge });
+                graph.Add(edge.EndVertex, new List<Edge>() { edge });
             }
             
             if (!edges.Contains(edge)) { edges.Add(edge); }
@@ -241,12 +241,12 @@ namespace Graphical.Graphs
                 if( computedVertices.Contains(v) || graph[v].Count > 2) { continue; }
 
                 computedVertices.Add(v);
-                gPolygon polygon = new gPolygon( false);
+                Polygon polygon = new Polygon( false);
                 
                 polygon.AddVertex(v);
-                foreach(gEdge edge in GetVertexEdges(v))
+                foreach(Edge edge in GetVertexEdges(v))
                 {
-                    gEdge currentEdge = edge;
+                    Edge currentEdge = edge;
                     Vertex currentVertex = edge.GetVertexPair(v);
                     while (!polygon.vertices.Contains(currentVertex) || !computedVertices.Contains(currentVertex))
                     {
@@ -325,7 +325,7 @@ namespace Graphical.Graphs
         //    {
         //        v.Tessellate(package, parameters);
         //    }
-        //    foreach(gEdge e in edges)
+        //    foreach(Edge e in edges)
         //    {
         //        e.Tessellate(package, parameters);
         //    }
@@ -339,14 +339,14 @@ namespace Graphical.Graphs
         {
             Graph newGraph = new Graph()
             {
-                graph = new Dictionary<Vertex, List<gEdge>>(),
-                edges = new List<gEdge>(this.edges),
-                polygons = new Dictionary<int, gPolygon>(this.polygons)
+                graph = new Dictionary<Vertex, List<Edge>>(),
+                edges = new List<Edge>(this.edges),
+                polygons = new Dictionary<int, Polygon>(this.polygons)
             };
 
             foreach(var item in this.graph)
             {
-                newGraph.graph.Add(item.Key, new List<gEdge>(item.Value));
+                newGraph.graph.Add(item.Key, new List<Edge>(item.Value));
             }
 
             return newGraph;

@@ -49,14 +49,14 @@ namespace Graphical
 
                 if (vertex.Equals(destination)) { break; }
 
-                List<gEdge> edges = new List<gEdge>();
+                List<Edge> edges = new List<Edge>();
                 edges.AddRange(graph.GetVertexEdges(vertex));
                 if(tempGraph != null && tempGraph.edges.Any())
                 {
                     edges.AddRange(tempGraph.GetVertexEdges(vertex));
                 }
 
-                foreach(gEdge e in edges)
+                foreach(Edge e in edges)
                 {
                     Vertex w = e.GetVertexPair(vertex);
                     double newLength = minDistance + e.Length;
@@ -76,7 +76,7 @@ namespace Graphical
             while (dest != origin)
             {
                 Vertex parent = ParentVertices[dest];
-                path.AddEdge(new gEdge(parent, dest));
+                path.AddEdge(new Edge(parent, dest));
                 dest = parent;
             }
             // Reversing edges list so they will be sorted from origin to target

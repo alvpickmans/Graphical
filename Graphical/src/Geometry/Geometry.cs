@@ -21,7 +21,7 @@ namespace Graphical.Geometry
         #endregion
 
         #region Properties
-        private gBoundingBox _boundingBox;
+        private BoundingBox _boundingBox;
         private UserData _userData;
 
         private Geometry _parent;
@@ -34,7 +34,7 @@ namespace Graphical.Geometry
         /// <summary>
         /// Geometry's Axis Aligned Bounding Box
         /// </summary>
-        public gBoundingBox BoundingBox
+        public BoundingBox BoundingBox
         {
             get
             {
@@ -81,7 +81,7 @@ namespace Graphical.Geometry
         }
         #endregion
 
-        internal abstract gBoundingBox ComputeBoundingBox();
+        internal abstract BoundingBox ComputeBoundingBox();
 
         public bool Equals(Geometry other)
         {

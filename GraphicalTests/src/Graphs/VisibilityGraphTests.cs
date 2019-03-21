@@ -20,13 +20,13 @@ namespace Graphical.Graphs.Tests
             var b = Vertex.ByCoordinates(0, 20, 0);
             var c = Vertex.ByCoordinates(-20, 0, 0);
             var d = Vertex.ByCoordinates(0, -20, 0);
-            var edges = new List<gEdge> {
-                gEdge.ByStartVertexEndVertex(a, b),
-                gEdge.ByStartVertexEndVertex(b, c),
-                gEdge.ByStartVertexEndVertex(c, d),
-                gEdge.ByStartVertexEndVertex(d, a)
+            var edges = new List<Edge> {
+                Edge.ByStartVertexEndVertex(a, b),
+                Edge.ByStartVertexEndVertex(b, c),
+                Edge.ByStartVertexEndVertex(c, d),
+                Edge.ByStartVertexEndVertex(d, a)
             };
-            var pol = gPolygon.ByVertices(new List<Vertex>() { a, b, c, d }, false);
+            var pol = Polygon.ByVertices(new List<Vertex>() { a, b, c, d }, false);
             
 
             bool inside = pol.ContainsVertex(origin);
@@ -48,8 +48,8 @@ namespace Graphical.Graphs.Tests
             var i = Vertex.ByCoordinates(h.X, f.Y);
             var j = Vertex.ByCoordinates(i.X, a.Y);
 
-            gPolygon polygon = gPolygon.ByVertices(new List<Vertex>() { a, b, c, d, e, f, g, h, i, j }, true);
-            Graph baseGraph = new Graph(new List<gPolygon>() { polygon });
+            Polygon polygon = Polygon.ByVertices(new List<Vertex>() { a, b, c, d, e, f, g, h, i, j }, true);
+            Graph baseGraph = new Graph(new List<Polygon>() { polygon });
             List<Vertex> vertices = VisibilityGraph.VertexVisibility(i, baseGraph);
 
             Assert.NotNull(vertices);
@@ -67,8 +67,8 @@ namespace Graphical.Graphs.Tests
             var g = Vertex.ByCoordinates(f.X, d.Y + 10);
             var h = Vertex.ByCoordinates(a.X, g.Y);
 
-            gPolygon polygon = gPolygon.ByVertices(new List<Vertex>() { a, b, c, d, e, f, g, h}, true);
-            Graph baseGraph = new Graph(new List<gPolygon>() { polygon });
+            Polygon polygon = Polygon.ByVertices(new List<Vertex>() { a, b, c, d, e, f, g, h}, true);
+            Graph baseGraph = new Graph(new List<Polygon>() { polygon });
 
             List<Vertex> vertices = VisibilityGraph.VertexVisibility(b, baseGraph);
 

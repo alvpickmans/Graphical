@@ -80,11 +80,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Core\SweepLineTests.cs" />
     <Compile Include="src\CustomObject\UserDataTests.cs" />
-    <Compile Include="src\Geometry\gBoundingBoxTests.cs" />
-    <Compile Include="src\Geometry\gEdgeTests.cs" />
-    <Compile Include="src\Geometry\gPolygonTests.cs" />
-    <Compile Include="src\Geometry\gVectorTests.cs" />
-    <Compile Include="src\Geometry\gVertexTests.cs" />
+    <Compile Include="src\Geometry\BoundingBoxTests.cs" />
+    <Compile Include="src\Geometry\EdgeTests.cs" />
+    <Compile Include="src\Geometry\PolygonTests.cs" />
+    <Compile Include="src\Geometry\VectorTests.cs" />
+    <Compile Include="src\Geometry\VertexTests.cs" />
     <Compile Include="src\Extensions\NumericTests.cs" />
     <Compile Include="src\DataStructures\BinaryHeapTests.cs" />
     <Compile Include="src\DataStructures\HeapItemTests.cs" />

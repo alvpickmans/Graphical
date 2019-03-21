@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Graphical.Geometry.Tests
 {
     [TestFixture]
-    public class gVertexTests
+    public class VertexTests
     {
         [Test]
         public void OnEdgeTest()

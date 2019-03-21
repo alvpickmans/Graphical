@@ -13,7 +13,7 @@ namespace Graphical.Geometry
     /// <summary>
     /// Representation of Edges on a graph
     /// </summary>
-    public class gEdge : Geometry
+    public class Edge : Geometry
     {
         #region Variables
         /// <summary>
@@ -29,41 +29,41 @@ namespace Graphical.Geometry
 
         public double Length { get; private set; }
 
-        public gVector Direction { get; private set; }
+        public Vector Direction { get; private set; }
 
         #endregion
 
         #region Constructors
         // TODO: Convert to private constructor
-        public gEdge(Vertex start, Vertex end) : base()
+        public Edge(Vertex start, Vertex end) : base()
         {
             StartVertex = start;
             EndVertex = end;
             Length = StartVertex.DistanceTo(EndVertex);
-            Direction = gVector.ByTwoVertices(StartVertex, EndVertex);
+            Direction = Vector.ByTwoVertices(StartVertex, EndVertex);
         }
 
         /// <summary>
-        /// gEdge constructor by start and end vertices
+        /// Edge constructor by start and end vertices
         /// </summary>
         /// <param name="start">Start vertex</param>
         /// <param name="end">End Vertex</param>
         /// <returns name="edge">edge</returns>
-        public static gEdge ByStartVertexEndVertex(Vertex start, Vertex end)
+        public static Edge ByStartVertexEndVertex(Vertex start, Vertex end)
         {
-            return new gEdge(start, end);
+            return new Edge(start, end);
         }
 
         /// <summary>
-        /// gEdge constructor by line
+        /// Edge constructor by line
         /// </summary>
         /// <param name="line">line</param>
         /// <returns name="edge">edge</returns>
-        //public static gEdge ByLine(Line line)
+        //public static Edge ByLine(Line line)
         //{
         //    Vertex start = Vertex.ByCoordinates(line.StartPoint.X, line.StartPoint.Y, line.StartPoint.Z);
         //    Vertex end = Vertex.ByCoordinates(line.EndPoint.X, line.EndPoint.Y, line.EndPoint.Z);
-        //    return new gEdge(start, end);
+        //    return new Edge(start, end);
         //}
         #endregion
 
@@ -78,7 +78,7 @@ namespace Graphical.Geometry
         }
 
         /// <summary>
-        /// Method to return the other end vertex of the gEdge
+        /// Method to return the other end vertex of the Edge
         /// </summary>
         /// <param name="vertex"></param>
         /// <returns></returns>
@@ -87,17 +87,17 @@ namespace Graphical.Geometry
             return (StartVertex.Equals(vertex)) ? EndVertex : StartVertex;
         }
 
-        public bool IsCoplanarTo(gEdge edge)
+        public bool IsCoplanarTo(Edge edge)
         {
             // http://mathworld.wolfram.com/Coplanar.html
-            gVector a = this.Direction;
-            gVector b = edge.Direction;
-            gVector c = gVector.ByTwoVertices(this.StartVertex, edge.StartVertex);
+            Vector a = this.Direction;
+            Vector b = edge.Direction;
+            Vector c = Vector.ByTwoVertices(this.StartVertex, edge.StartVertex);
 
             return c.Dot(a.Cross(b)) == 0;
         }
 
-        public Geometry Intersection(gEdge other)
+        public Geometry Intersection(Edge other)
         {
             // http://mathworld.wolfram.com/Line-LineIntersection.html
             if (!this.BoundingBox.Intersects(other.BoundingBox)) { return null; }
@@ -124,7 +124,7 @@ namespace Graphical.Geometry
                         other.EndVertex
                     };
                     var sorted = vertices.OrderBy(v => v.Y).ThenBy(v => v.X).ThenBy(v => v.Z).ToList();
-                    return gEdge.ByStartVertexEndVertex(sorted[1], sorted[2]);
+                    return Edge.ByStartVertexEndVertex(sorted[1], sorted[2]);
                 }
                 // Not intersecting
                 else
@@ -139,7 +139,7 @@ namespace Graphical.Geometry
 
 
             // No coincident nor same extremes
-            var c = gVector.ByTwoVertices(this.StartVertex, other.StartVertex);
+            var c = Vector.ByTwoVertices(this.StartVertex, other.StartVertex);
             var cxb = c.Cross(b);
             var axb = a.Cross(b);
             var dot = cxb.Dot(axb);
@@ -176,7 +176,7 @@ namespace Graphical.Geometry
             return intersection;
         }
 
-        public bool Intersects(gEdge edge)
+        public bool Intersects(Edge edge)
         {
             if(this.StartVertex.OnEdge(edge) || this.EndVertex.OnEdge(edge))
             {
@@ -193,7 +193,7 @@ namespace Graphical.Geometry
             return vertex.DistanceTo(this);
         }
 
-        public double DistanceTo(gEdge edge)
+        public double DistanceTo(Edge edge)
         {
             // http://mathworld.wolfram.com/Line-LineDistance.html
             if (this.IsCoplanarTo(edge))
@@ -209,8 +209,8 @@ namespace Graphical.Geometry
             {
                 var a = this.Direction;
                 var b = edge.Direction;
-                var c = gVector.ByTwoVertices(this.StartVertex, edge.StartVertex);
-                gVector cross = a.Cross(b);
+                var c = Vector.ByTwoVertices(this.StartVertex, edge.StartVertex);
+                Vector cross = a.Cross(b);
                 double numerator = c.Dot(cross);
                 double denominator = cross.Length;
                 return Math.Abs(numerator) / Math.Abs(denominator);
@@ -231,7 +231,7 @@ namespace Graphical.Geometry
         {
             if (obj == null || GetType() != obj.GetType()) { return false; }
 
-            gEdge e= (gEdge)obj;
+            Edge e= (Edge)obj;
             if (StartVertex.Equals(e.StartVertex) && EndVertex.Equals(e.EndVertex)) { return true; }
             if (StartVertex.Equals(e.EndVertex) && EndVertex.Equals(e.StartVertex)) { return true; }
             return false;
@@ -254,12 +254,12 @@ namespace Graphical.Geometry
         /// <returns></returns>
         public override string ToString()
         {
-            return String.Format("gEdge(StartVertex: {0}, EndVertex: {1})", StartVertex, EndVertex);
+            return String.Format("Edge(StartVertex: {0}, EndVertex: {1})", StartVertex, EndVertex);
         }
 
-        internal override gBoundingBox ComputeBoundingBox()
+        internal override BoundingBox ComputeBoundingBox()
         {
-            return gBoundingBox.ByMinVertexMaxVertex(StartVertex, EndVertex);
+            return BoundingBox.ByMinVertexMaxVertex(StartVertex, EndVertex);
         }
 
         #endregion

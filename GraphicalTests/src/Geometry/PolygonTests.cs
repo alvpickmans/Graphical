@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace Graphical.Geometry.Tests
 {
     [TestFixture]
-    public class gPolygonTests
+    public class PolygonTests
     {
         [Test]
         public void IsPlanarTest()
@@ -23,13 +23,13 @@ namespace Graphical.Geometry.Tests
             var g = Vertex.ByCoordinates(10, 0, 0);
             var h = Vertex.ByCoordinates(5, 0, 10);
 
-            gPolygon pol1 = gPolygon.ByVertices(new List<Vertex>() { a, b, c, d });
-            gPolygon pol2 = gPolygon.ByVertices(new List<Vertex>() { a, e, f });
-            gPolygon triangleXZPlane = gPolygon.ByVertices(new List<Vertex>() { a, g, h });
+            Polygon pol1 = Polygon.ByVertices(new List<Vertex>() { a, b, c, d });
+            Polygon pol2 = Polygon.ByVertices(new List<Vertex>() { a, e, f });
+            Polygon triangleXZPlane = Polygon.ByVertices(new List<Vertex>() { a, g, h });
 
-            Assert.IsTrue(gPolygon.IsPlanar(pol1));
-            Assert.IsTrue(gPolygon.IsPlanar(pol2));
-            Assert.IsTrue(gPolygon.IsPlanar(triangleXZPlane));
+            Assert.IsTrue(Polygon.IsPlanar(pol1));
+            Assert.IsTrue(Polygon.IsPlanar(pol2));
+            Assert.IsTrue(Polygon.IsPlanar(triangleXZPlane));
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace Graphical.Geometry.Tests
             var vtx2 = Vertex.ByCoordinates(5, 5);
             var vtx3 = Vertex.ByCoordinates(10, 5);
             var vtx4 = Vertex.ByCoordinates(0, 15);
-            gPolygon pol1 = gPolygon.ByVertices(new List<Vertex>() { a, b, c, d, e });
+            Polygon pol1 = Polygon.ByVertices(new List<Vertex>() { a, b, c, d, e });
 
             Assert.IsTrue(pol1.ContainsVertex(vtx1));
             Assert.IsTrue(pol1.ContainsVertex(vtx2));
@@ -63,18 +63,18 @@ namespace Graphical.Geometry.Tests
             var vtx2 = Vertex.ByCoordinates(5, 5);
             var vtx3 = Vertex.ByCoordinates(10, 5);
             var vtx4 = Vertex.ByCoordinates(5, 15);
-            gPolygon pol1 = gPolygon.ByVertices(new List<Vertex>() { a, b, c, d });
+            Polygon pol1 = Polygon.ByVertices(new List<Vertex>() { a, b, c, d });
 
-            Assert.IsTrue(pol1.ContainsEdge(gEdge.ByStartVertexEndVertex(vtx1, vtx2)));
-            Assert.IsTrue(pol1.ContainsEdge(gEdge.ByStartVertexEndVertex(vtx1, vtx3)));
-            Assert.IsFalse(pol1.ContainsEdge(gEdge.ByStartVertexEndVertex(vtx1, vtx4)));
+            Assert.IsTrue(pol1.ContainsEdge(Edge.ByStartVertexEndVertex(vtx1, vtx2)));
+            Assert.IsTrue(pol1.ContainsEdge(Edge.ByStartVertexEndVertex(vtx1, vtx3)));
+            Assert.IsFalse(pol1.ContainsEdge(Edge.ByStartVertexEndVertex(vtx1, vtx4)));
 
         }
 
         [Test]
         public void RegularPolygon()
         {
-            var square = gPolygon.ByCenterRadiusAndSides(Vertex.Origin(), 10, 4);
+            var square = Polygon.ByCenterRadiusAndSides(Vertex.Origin(), 10, 4);
             var vertex1 = Vertex.ByCoordinates(0, 10, 0);
             var vertex2 = Vertex.ByCoordinates(10, 0, 0);
 

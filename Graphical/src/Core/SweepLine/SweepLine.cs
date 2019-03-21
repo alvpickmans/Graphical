@@ -50,8 +50,8 @@ namespace Graphical.Core
         internal List<SweepEvent> eventsList;
         internal List<SweepEvent> activeEvents;
         internal IComparer<SweepEvent> verticalAscEventsComparer = new SortEventsVerticalAscendingComparer();
-        internal gPolygon subject;
-        internal gPolygon clip;
+        internal Polygon subject;
+        internal Polygon clip;
         #endregion
 
         #region Public Properties
@@ -71,7 +71,7 @@ namespace Graphical.Core
         #endregion
 
         #region Internal Constructors
-        internal SweepLine (List<gEdge> edges, SweepLineType type)
+        internal SweepLine (List<Edge> edges, SweepLineType type)
         {
             this.sweepLineType = type;
             this.eventsList = new List<SweepEvent>(edges.Count * 2);
@@ -80,7 +80,7 @@ namespace Graphical.Core
             edges.ForEach(e => this.AddNewEvent(e));
         }
         // TODO: Seems that Q gets corrupted somehow. Check with Tests
-        internal SweepLine (gPolygon subject, gPolygon clip, SweepLineType type)
+        internal SweepLine (Polygon subject, Polygon clip, SweepLineType type)
         {
             this.sweepLineType = type;
             this.subject = subject;
@@ -96,11 +96,11 @@ namespace Graphical.Core
 
         #region Public Constructors
         /// <summary>
-        /// SweepLine constructor by a list of gEdges
+        /// SweepLine constructor by a list of Edges
         /// </summary>
         /// <param name="edges"></param>
         /// <returns>SweepLine</returns>
-        public static SweepLine ByEdges(List<gEdge> edges)
+        public static SweepLine ByEdges(List<Edge> edges)
         {
             return new SweepLine(edges, SweepLineType.Intersects);
         }
@@ -110,14 +110,14 @@ namespace Graphical.Core
         /// </summary>
         /// <param name="polygons"></param>
         /// <returns>SweepLine</returns>
-        public static SweepLine ByPolygons(List<gPolygon> polygons)
+        public static SweepLine ByPolygons(List<Polygon> polygons)
         {
             return new SweepLine(
                 polygons.SelectMany(p => p.Edges).ToList(),
                 SweepLineType.Intersects);
         }
 
-        public static SweepLine BySubjectClipPolygons(gPolygon subject, gPolygon clip)
+        public static SweepLine BySubjectClipPolygons(Polygon subject, Polygon clip)
         {
             return new SweepLine(subject, clip, SweepLineType.Boolean);
         }
@@ -126,7 +126,7 @@ namespace Graphical.Core
 
         #region Internal Methods
 
-        private void AddNewEvent(gEdge edge, PolygonType polType = PolygonType.None)
+        private void AddNewEvent(Edge edge, PolygonType polType = PolygonType.None)
         {
             SweepEvent swStart = new SweepEvent(edge.StartVertex, edge)
             {
@@ -240,10 +240,10 @@ namespace Graphical.Core
             return tempIntersections;
         }
 
-        internal List<gPolygon> ComputeBooleanOperation(BooleanType boolType)
+        internal List<Polygon> ComputeBooleanOperation(BooleanType boolType)
         {
             EventChainer chain = new EventChainer(boolType);
-            List<gPolygon> computedPolygons = new List<gPolygon>();
+            List<Polygon> computedPolygons = new List<Polygon>();
 
             this.eventsQ = new MinPriorityQ<SweepEvent>(this.eventsList.Capacity);
             this.eventsQ.AddRange(this.eventsList);
@@ -351,10 +351,10 @@ namespace Graphical.Core
                 }
             }
             #endregion
-            #region Is gEdge
-            else if (intersection is gEdge)
+            #region Is Edge
+            else if (intersection is Edge)
             {
-                gEdge e = intersection as gEdge;
+                Edge e = intersection as Edge;
 
                 // On Case 3 below, last half of prev event is added as intersection,
                 // and on next loop it will be case 1 with the same edge, so this avoids duplicates

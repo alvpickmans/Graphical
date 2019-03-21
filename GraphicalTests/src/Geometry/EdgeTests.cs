@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Graphical.Geometry.Tests
 {
     [TestFixture]
-    public class gEdgeTests
+    public class EdgeTests
     {
         //[Test]
         public void ByStartVertexEndVertexTest()
@@ -36,9 +36,9 @@ namespace Graphical.Geometry.Tests
             Vertex v2 = Vertex.ByCoordinates(0, 10, 0);
             Vertex v3 = Vertex.ByCoordinates(10, 10, 10);
             Vertex v4 = Vertex.ByCoordinates(-10, 10, 10);
-            var a = gEdge.ByStartVertexEndVertex(v1, v2); // Vertical y axis
-            var b = gEdge.ByStartVertexEndVertex(v1, v3); // angled coincident on origin
-            var c = gEdge.ByStartVertexEndVertex(v3, v4); // parallel to xy plane
+            var a = Edge.ByStartVertexEndVertex(v1, v2); // Vertical y axis
+            var b = Edge.ByStartVertexEndVertex(v1, v3); // angled coincident on origin
+            var c = Edge.ByStartVertexEndVertex(v3, v4); // parallel to xy plane
 
             Assert.IsTrue(a.IsCoplanarTo(b));
             Assert.IsFalse(a.IsCoplanarTo(c));
@@ -61,34 +61,34 @@ namespace Graphical.Geometry.Tests
             Vertex e2 = Vertex.ByCoordinates(10, 10, 0);
             Vertex f1 = a1;
             Vertex f2 = b1;
-            var a = gEdge.ByStartVertexEndVertex(a1, a2); 
-            var b = gEdge.ByStartVertexEndVertex(b1, b2); 
-            var c = gEdge.ByStartVertexEndVertex(c1, c2);
-            var d = gEdge.ByStartVertexEndVertex(d1, d2);
-            var e = gEdge.ByStartVertexEndVertex(e1, e2);
-            var f = gEdge.ByStartVertexEndVertex(f1, f2);
-            var g = gEdge.ByStartVertexEndVertex(a1, e1);
-            var h = gEdge.ByStartVertexEndVertex(b1, Vertex.ByCoordinates(2.5, 5, 0));
-            var xaligned = gEdge.ByStartVertexEndVertex(a1, Vertex.ByCoordinates(114.750, 0, 0));
-            var xCoincident = gEdge.ByStartVertexEndVertex(e1, b1);
+            var a = Edge.ByStartVertexEndVertex(a1, a2); 
+            var b = Edge.ByStartVertexEndVertex(b1, b2); 
+            var c = Edge.ByStartVertexEndVertex(c1, c2);
+            var d = Edge.ByStartVertexEndVertex(d1, d2);
+            var e = Edge.ByStartVertexEndVertex(e1, e2);
+            var f = Edge.ByStartVertexEndVertex(f1, f2);
+            var g = Edge.ByStartVertexEndVertex(a1, e1);
+            var h = Edge.ByStartVertexEndVertex(b1, Vertex.ByCoordinates(2.5, 5, 0));
+            var xaligned = Edge.ByStartVertexEndVertex(a1, Vertex.ByCoordinates(114.750, 0, 0));
+            var xCoincident = Edge.ByStartVertexEndVertex(e1, b1);
 
-            var side = gEdge.ByStartVertexEndVertex(
+            var side = Edge.ByStartVertexEndVertex(
                     Vertex.ByCoordinates(-17.950, 31.090, 0) , Vertex.ByCoordinates(-7.650, 48.930,0)
                 );
-            var rayEdge = gEdge.ByStartVertexEndVertex(
+            var rayEdge = Edge.ByStartVertexEndVertex(
                     Vertex.ByCoordinates(-49.544, 39.031, 0), Vertex.ByCoordinates(5827.960, 39.031, 0)
                 );
 
-            var vertical = gEdge.ByStartVertexEndVertex(a1, b1);
-            var otherRay = gEdge.ByStartVertexEndVertex(
+            var vertical = Edge.ByStartVertexEndVertex(a1, b1);
+            var otherRay = Edge.ByStartVertexEndVertex(
                     Vertex.ByCoordinates(0, 5, 0), Vertex.ByCoordinates(15, 5, 0)
                 );
 
-            var coincidentProjection1 = gEdge.ByStartVertexEndVertex(
+            var coincidentProjection1 = Edge.ByStartVertexEndVertex(
                     Vertex.ByCoordinates(35, 30),
                     Vertex.ByCoordinates(13.571429, 17.142857)
                 );
-            var coincidentProjection2 = gEdge.ByStartVertexEndVertex(
+            var coincidentProjection2 = Edge.ByStartVertexEndVertex(
                     Vertex.ByCoordinates(17, 28),
                     Vertex.ByCoordinates(8, 25.5)
                 );

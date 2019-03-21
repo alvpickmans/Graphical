@@ -155,29 +155,29 @@ namespace Graphical.Geometry
             return Math.Sqrt(Math.Pow(vertex.X - X, 2) + Math.Pow(vertex.Y - Y, 2) + Math.Pow(vertex.Z - Z, 2));
         }
 
-        public double DistanceTo(gEdge edge)
+        public double DistanceTo(Edge edge)
         {
             // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
-            gVector v1 = gVector.ByTwoVertices(this, edge.StartVertex);
-            gVector v2 = gVector.ByTwoVertices(this, edge.EndVertex);
-            gVector numerator = v1.Cross(v2);
-            gVector denominator = gVector.ByTwoVertices(edge.EndVertex, edge.StartVertex);
+            Vector v1 = Vector.ByTwoVertices(this, edge.StartVertex);
+            Vector v2 = Vector.ByTwoVertices(this, edge.EndVertex);
+            Vector numerator = v1.Cross(v2);
+            Vector denominator = Vector.ByTwoVertices(edge.EndVertex, edge.StartVertex);
             return numerator.Length / denominator.Length;
         }
         
-        public Vertex Translate(gVector vector)
+        public Vertex Translate(Vector vector)
         {
             return Vertex.ByCoordinates(this.X + vector.X, this.Y + vector.Y, this.Z + vector.Z);
         }
 
-        public Vertex Translate(gVector vector, double distance)
+        public Vertex Translate(Vector vector, double distance)
         {
-            gVector normalized = vector.Normalized();
-            gVector distVector = normalized * distance;
+            Vector normalized = vector.Normalized();
+            Vector distVector = normalized * distance;
             return this.Translate(distVector);
         }
 
-        public bool OnEdge(gEdge edge)
+        public bool OnEdge(Edge edge)
         {
             return this.OnEdge(edge.StartVertex, edge.EndVertex);
         }
@@ -186,9 +186,9 @@ namespace Graphical.Geometry
         {
             if(this.Equals(start) || this.Equals(end)) { return true; }
             // https://www.lucidarme.me/check-if-a-point-belongs-on-a-line-segment/
-            gVector startEnd = gVector.ByTwoVertices(start, end);
-            gVector startMid = gVector.ByTwoVertices(start, this);
-            gVector endMid = gVector.ByTwoVertices(this, end);
+            Vector startEnd = Vector.ByTwoVertices(start, end);
+            Vector startMid = Vector.ByTwoVertices(start, this);
+            Vector endMid = Vector.ByTwoVertices(this, end);
             if (!startMid.IsParallelTo(endMid)){ return false; } // Not aligned
             double dotAC = startEnd.Dot(startMid);
             double dotAB = startEnd.Dot(startEnd);
@@ -205,11 +205,11 @@ namespace Graphical.Geometry
             // https://math.stackexchange.com/questions/1330357/show-that-four-points-are-coplanar
             if (!vertices.Any()) { throw new ArgumentOutOfRangeException("vertices", "Vertices list cannot be empty"); }
             if (vertices.Count <= 3) { return true; }
-            gVector ab = gVector.ByTwoVertices(vertices[0], vertices[1]);
-            gVector ac = gVector.ByTwoVertices(vertices[0], vertices[2]);
-            gVector cross = ab.Cross(ac);
+            Vector ab = Vector.ByTwoVertices(vertices[0], vertices[1]);
+            Vector ac = Vector.ByTwoVertices(vertices[0], vertices[2]);
+            Vector cross = ab.Cross(ac);
 
-            return vertices.Skip(3).All(vtx => gVector.ByTwoVertices(vertices[0], vtx).Dot(cross).AlmostEqualTo(0));
+            return vertices.Skip(3).All(vtx => Vector.ByTwoVertices(vertices[0], vtx).Dot(cross).AlmostEqualTo(0));
         }
 
         internal static bool OnEdgeProjection(Vertex start, Vertex point, Vertex end, string plane = "xy")
@@ -280,9 +280,9 @@ namespace Graphical.Geometry
             return newVertex;
         }
 
-        internal override gBoundingBox ComputeBoundingBox()
+        internal override BoundingBox ComputeBoundingBox()
         {
-            return gBoundingBox.ByMinVertexMaxVertex(this, this);
+            return BoundingBox.ByMinVertexMaxVertex(this, this);
         }
 
 

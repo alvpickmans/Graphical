@@ -37,12 +37,12 @@ namespace Graphical.Core.Tests
             Vertex d1 = Vertex.ByCoordinates(3, 9);
             Vertex d2 = Vertex.ByCoordinates(10, 2);
 
-            List<gEdge> edges = new List<gEdge>()
+            List<Edge> edges = new List<Edge>()
             {
-                gEdge.ByStartVertexEndVertex(a1, a2),
-                gEdge.ByStartVertexEndVertex(b1, b2),
-                gEdge.ByStartVertexEndVertex(c1, c2),
-                gEdge.ByStartVertexEndVertex(d1, d2)
+                Edge.ByStartVertexEndVertex(a1, a2),
+                Edge.ByStartVertexEndVertex(b1, b2),
+                Edge.ByStartVertexEndVertex(c1, c2),
+                Edge.ByStartVertexEndVertex(d1, d2)
             };
 
             SweepLine swLine = SweepLine.ByEdges(edges);
@@ -62,13 +62,13 @@ namespace Graphical.Core.Tests
             //Vertex d1 = Vertex.ByCoordinates(0, 10, 0);
             //Vertex d2 = Vertex.ByCoordinates(0, 0, 10);
 
-            List<gEdge> edges = new List<gEdge>()
+            List<Edge> edges = new List<Edge>()
             {
-                gEdge.ByStartVertexEndVertex(a1, a2),
-                gEdge.ByStartVertexEndVertex(b1, b2)
+                Edge.ByStartVertexEndVertex(a1, a2),
+                Edge.ByStartVertexEndVertex(b1, b2)
                 // Error when trying non coplanar lines and intersecting on extremes.
-                //gEdge.ByStartVertexEndVertex(c1, c2),
-                //gEdge.ByStartVertexEndVertex(d1, d2)
+                //Edge.ByStartVertexEndVertex(c1, c2),
+                //Edge.ByStartVertexEndVertex(d1, d2)
             };
 
             SweepLine swLine = SweepLine.ByEdges(edges);
@@ -89,42 +89,42 @@ namespace Graphical.Core.Tests
             Vertex d1 = Vertex.ByCoordinates(3, 9);
             Vertex d2 = Vertex.ByCoordinates(10, 2);
 
-            List<gEdge> sameEdges = new List<gEdge>()
+            List<Edge> sameEdges = new List<Edge>()
             {
-                gEdge.ByStartVertexEndVertex(a1, a2),
-                gEdge.ByStartVertexEndVertex(a2, a1)
+                Edge.ByStartVertexEndVertex(a1, a2),
+                Edge.ByStartVertexEndVertex(a2, a1)
             };
             SweepLine slSameEdges = SweepLine.ByEdges(sameEdges);
             Assert.AreEqual(1, slSameEdges.GetIntersections().Count);
 
-            List<gEdge> sameStart = new List<gEdge>()
+            List<Edge> sameStart = new List<Edge>()
             {
-                gEdge.ByStartVertexEndVertex(a1, a2),
-                gEdge.ByStartVertexEndVertex(b1, a1)
+                Edge.ByStartVertexEndVertex(a1, a2),
+                Edge.ByStartVertexEndVertex(b1, a1)
             };
             SweepLine slSameStart = SweepLine.ByEdges(sameStart);
             Assert.AreEqual(1, slSameStart.GetIntersections().Count);
 
-            List<gEdge> sameEnd = new List<gEdge>()
+            List<Edge> sameEnd = new List<Edge>()
             {
-                gEdge.ByStartVertexEndVertex(a1, a2),
-                gEdge.ByStartVertexEndVertex(a2, b1)
+                Edge.ByStartVertexEndVertex(a1, a2),
+                Edge.ByStartVertexEndVertex(a2, b1)
             };
             SweepLine slSameEnd = SweepLine.ByEdges(sameEnd);
             Assert.AreEqual(1, slSameEnd.GetIntersections().Count);
 
-            List<gEdge> overlapping = new List<gEdge>()
+            List<Edge> overlapping = new List<Edge>()
             {
-                gEdge.ByStartVertexEndVertex(a1, a2),
-                gEdge.ByStartVertexEndVertex(b2, b1)
+                Edge.ByStartVertexEndVertex(a1, a2),
+                Edge.ByStartVertexEndVertex(b2, b1)
             };
             SweepLine slOverlapping = SweepLine.ByEdges(overlapping);
             Assert.AreEqual(1, slOverlapping.GetIntersections().Count);
 
-            List<gEdge> containing = new List<gEdge>()
+            List<Edge> containing = new List<Edge>()
             {
-                gEdge.ByStartVertexEndVertex(a1, b2),
-                gEdge.ByStartVertexEndVertex(a2, b1)
+                Edge.ByStartVertexEndVertex(a1, b2),
+                Edge.ByStartVertexEndVertex(a2, b1)
             };
             SweepLine slContaining = SweepLine.ByEdges(containing);
             Assert.AreEqual(1, slContaining.GetIntersections().Count);
@@ -133,7 +133,7 @@ namespace Graphical.Core.Tests
         //[Test]
         public void ComplexPolygonBoolean()
         {
-            var clip = gPolygon.ByVertices(new List<Vertex>()
+            var clip = Polygon.ByVertices(new List<Vertex>()
             {
                 Vertex.ByCoordinates(5, 25),
                 Vertex.ByCoordinates(5, 30),
@@ -142,7 +142,7 @@ namespace Graphical.Core.Tests
                 Vertex.ByCoordinates(20, 10),
                 Vertex.ByCoordinates(17, 27)
             });
-            var subject = gPolygon.ByVertices(new List<Vertex>()
+            var subject = Polygon.ByVertices(new List<Vertex>()
             {
                 Vertex.ByCoordinates(5, 12),
                 Vertex.ByCoordinates(35, 30),
@@ -164,14 +164,14 @@ namespace Graphical.Core.Tests
         //[Test]
         public void NotIntersectingPolygons()
         {
-            var clip = gPolygon.ByVertices(new List<Vertex>()
+            var clip = Polygon.ByVertices(new List<Vertex>()
             {
                 Vertex.ByCoordinates(0, 0),
                 Vertex.ByCoordinates(0, 10),
                 Vertex.ByCoordinates(15, 5),
                 Vertex.ByCoordinates(15, 0)
             });
-            var subject = gPolygon.ByVertices(new List<Vertex>()
+            var subject = Polygon.ByVertices(new List<Vertex>()
             {
                 Vertex.ByCoordinates(0, 12.5),
                 Vertex.ByCoordinates(0, 20),
