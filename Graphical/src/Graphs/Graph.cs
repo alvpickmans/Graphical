@@ -115,7 +115,7 @@ namespace Graphical.Graphs
                             else
                             {
                                 gPolygon.edges.Add(edge);
-                                gPolygon.id = newId;
+                                gPolygon.Id = newId;
                                 polygons.Add(newId, gPolygon);
                             }
                         }
@@ -241,7 +241,7 @@ namespace Graphical.Graphs
                 if( computedVertices.Contains(v) || graph[v].Count > 2) { continue; }
 
                 computedVertices.Add(v);
-                gPolygon polygon = new gPolygon(GetNextId(), false);
+                gPolygon polygon = new gPolygon( false);
                 
                 polygon.AddVertex(v);
                 foreach(gEdge edge in GetVertexEdges(v))
@@ -304,7 +304,7 @@ namespace Graphical.Graphs
                         polygon.edges.Add(currentEdge);
                     }
                 }
-                this.polygons.Add(polygon.id, polygon);
+                this.polygons.Add(polygon.Id, polygon);
             }
         }
 
