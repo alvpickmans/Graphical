@@ -201,7 +201,7 @@ namespace Graphical.Core
             return false;
         }
 
-        // TODO: Check no coplanar edges.
+        // TODO: Check no coplanar Edges.
         public List<Geometry.Geometry> GetIntersections()
         {
             activeEvents = new List<SweepEvent>();
@@ -248,7 +248,7 @@ namespace Graphical.Core
             this.eventsQ = new MinPriorityQ<SweepEvent>(this.eventsList.Capacity);
             this.eventsQ.AddRange(this.eventsList);
 
-            // If one of the polygons is empty
+            // If one of the _polygonsDict is empty
             if (subject.Edges.Count * clip.Edges.Count == 0)
             {
                 if(boolType == BooleanType.Differenece)
@@ -336,7 +336,7 @@ namespace Graphical.Core
             if (intersection is Vertex)
             {
                 Vertex v = intersection as Vertex;
-                // Intersection is between extremes vertices
+                // Intersection is between extremes Vertices
                 foreach (SweepEvent sw in new List<SweepEvent>() { next, prev })
                 {
                     if (!sw.Edge.Contains(v))
@@ -444,7 +444,7 @@ namespace Graphical.Core
                 next.IsInside = false;
                 next.InOut = false;
             }
-            // They intersect on the event's vertices
+            // They intersect on the event's Vertices
             else if (next.polygonType == prev.polygonType)
             {
                 next.IsInside = prev.IsInside;

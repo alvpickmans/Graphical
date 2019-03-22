@@ -16,57 +16,61 @@ namespace Graphical.Graphs
     /// </summary>
     public class Graph : ICloneable
     {
-        #region Variables
+        #region Private Properties
 
         /// <summary>
         /// GUID to verify uniqueness of graph when cloned
         /// </summary>
-        internal Guid graphID { get; private set; }
+        internal Guid _graphID { get; private set; }
 
         /// <summary>
         /// Polygons dictionary with their Id as dictionary key
         /// </summary>
-        internal Dictionary<int, Polygon> polygons = new Dictionary<int, Polygon>();
+        internal Dictionary<int, Polygon> _polygonsDict = new Dictionary<int, Polygon>();
 
         /// <summary>
-        /// Dictionary with vertex as key and values edges associated with the vertex.
+        /// Dictionary with vertex as key and values Edges associated with the vertex.
         /// </summary>
-        internal Dictionary<Vertex, List<Edge>> graph = new Dictionary<Vertex, List<Edge>>();
+        internal Dictionary<Vertex, List<Edge>> _vertexEdgesDict = new Dictionary<Vertex, List<Edge>>();
+
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
-        /// Graph's vertices
+        /// Graph's Vertices
         /// </summary>
-        public List<Vertex> vertices { get { return graph.Keys.ToList(); } }
+        public List<Vertex> Vertices { get { return _vertexEdgesDict.Keys.ToList(); } }
 
         /// <summary>
-        /// Graph's edges
+        /// Graph's Edges
         /// </summary>
-        public List<Edge> edges { get; internal set; }
+        public List<Edge> Edges { get; internal set; }
 
         public List<Polygon> Polygons
         {
-            get { return polygons.Values.ToList(); }
+            get { return _polygonsDict.Values.ToList(); }
         }
 
         #endregion
 
-        #region Internal Constructors
+        #region Public Constructors
         public Graph()
         {
-            edges = new List<Edge>();
-            graphID = Guid.NewGuid();
+            Edges = new List<Edge>();
+            _graphID = Guid.NewGuid();
         }
 
         public Graph(List<Polygon> polygonList)
         {
-            edges = new List<Edge>();
-            graphID = Guid.NewGuid();
+            Edges = new List<Edge>();
+            _graphID = Guid.NewGuid();
 
-            // Adding polygons to Graph
+            // Adding _polygonsDict to Graph
             for (int i = 0; i < polygonList.Count; i++)
             {
                 var polygon = polygonList[i];
-                this.polygons.Add(polygon.Id, polygon);
+                this._polygonsDict.Add(polygon.Id, polygon);
 
                 polygon.Edges.ForEach(edge => this.AddEdge(edge));
             }
@@ -78,10 +82,10 @@ namespace Graphical.Graphs
 
         internal void ResetEdgesFromPolygons()
         {
-            this.edges.Clear();
-            this.graph.Clear();
+            this.Edges.Clear();
+            this._vertexEdgesDict.Clear();
 
-            foreach(Polygon polygon in polygons.Values)
+            foreach(Polygon polygon in _polygonsDict.Values)
             {
                 foreach(Edge edge in polygon.edges)
                 {
@@ -101,23 +105,23 @@ namespace Graphical.Graphs
         /// <returns></returns>
         public bool Contains(Vertex vertex)
         {
-            return graph.ContainsKey(vertex);
+            return _vertexEdgesDict.ContainsKey(vertex);
         }
 
         /// <summary>
-        /// Contains method for edges in graph
+        /// Contains method for Edges in graph
         /// </summary>
         /// <param name="edge"></param>
         /// <returns></returns>
         public bool Contains(Edge edge)
         {
-            return edges.Contains(edge);
+            return Edges.Contains(edge);
         }
 
         public List<Edge> GetVertexEdges(Vertex vertex)
         {
             List<Edge> edgesList = new List<Edge>();
-            if(graph.TryGetValue(vertex, out edgesList))
+            if(_vertexEdgesDict.TryGetValue(vertex, out edgesList))
             {
                 return edgesList;
             }else
@@ -129,7 +133,7 @@ namespace Graphical.Graphs
 
         public List<Vertex> GetAdjecentVertices(Vertex v)
         {
-            return graph[v].Select(edge => edge.GetVertexPair(v)).ToList();
+            return _vertexEdgesDict[v].Select(edge => edge.GetVertexPair(v)).ToList();
         }
 
         /// <summary>
@@ -140,38 +144,38 @@ namespace Graphical.Graphs
         {
             List<Edge> startEdgesList = new List<Edge>();
             List<Edge> endEdgesList = new List<Edge>();
-            if (graph.TryGetValue(edge.StartVertex, out startEdgesList))
+            if (_vertexEdgesDict.TryGetValue(edge.StartVertex, out startEdgesList))
             {
                 if (!startEdgesList.Contains(edge)) { startEdgesList.Add(edge); }
             }
             else
             {
-                graph.Add(edge.StartVertex, new List<Edge>() { edge });
+                _vertexEdgesDict.Add(edge.StartVertex, new List<Edge>() { edge });
             }
 
-            if (graph.TryGetValue(edge.EndVertex, out endEdgesList))
+            if (_vertexEdgesDict.TryGetValue(edge.EndVertex, out endEdgesList))
             {
                 if (!endEdgesList.Contains(edge)) { endEdgesList.Add(edge); }
             }
             else
             {
-                graph.Add(edge.EndVertex, new List<Edge>() { edge });
+                _vertexEdgesDict.Add(edge.EndVertex, new List<Edge>() { edge });
             }
             
-            if (!edges.Contains(edge)) { edges.Add(edge); }
+            if (!Edges.Contains(edge)) { Edges.Add(edge); }
         }
 
         /// <summary>
-        /// Computes edges and creates polygons from those connected by vertices.
+        /// Computes Edges and creates _polygonsDict from those connected by Vertices.
         /// </summary>
         public void BuildPolygons()
         {
             var computedVertices = new List<Vertex>();
             
-            foreach(Vertex v in vertices)
+            foreach(Vertex v in Vertices)
             {
                 // If already belongs to a polygon or is not a polygon vertex or already computed
-                if( computedVertices.Contains(v) || graph[v].Count > 2) { continue; }
+                if( computedVertices.Contains(v) || _vertexEdgesDict[v].Count > 2) { continue; }
 
                 computedVertices.Add(v);
                 Polygon polygon = new Polygon( false);
@@ -186,13 +190,13 @@ namespace Graphical.Graphs
                         polygon.AddVertex(currentVertex);
                         polygon.edges.Add(currentEdge);
 
-                        var connectedEdges = graph[currentVertex];
+                        var connectedEdges = _vertexEdgesDict[currentVertex];
                         //It is extreme vertex, polygon not closed
                         if(connectedEdges.Count < 2)
                         {
                             break;
                         }
-                        // If just two edges, select the one that is not current nextEdge
+                        // If just two Edges, select the one that is not current nextEdge
                         else if(connectedEdges.Count == 2)
                         {
                             currentEdge = connectedEdges[0].Equals(currentEdge) ? connectedEdges[1] : connectedEdges[0];
@@ -209,7 +213,7 @@ namespace Graphical.Graphs
                             {
                                 currentEdge = edgesWithVertexAlreadyInPolygon.First();
                             }
-                            // If two, it means that is a intersection with two previous edges computed,
+                            // If two, it means that is a intersection with two previous Edges computed,
                             // so set the next to the one that is not parallel to current
                             else if(edgesWithVertexAlreadyInPolygon.Count == 2)
                             {
@@ -227,7 +231,7 @@ namespace Graphical.Graphs
                         }
                         else
                         {
-                            throw new Exception("WARNING. Something unexepected happend with the polygons...");
+                            throw new Exception("WARNING. Something unexepected happend with the _polygonsDict...");
                         }
                         computedVertices.Add(currentVertex);
                         currentVertex = currentEdge.GetVertexPair(currentVertex);
@@ -237,7 +241,7 @@ namespace Graphical.Graphs
                         polygon.edges.Add(currentEdge);
                     }
                 }
-                this.polygons.Add(polygon.Id, polygon);
+                this._polygonsDict.Add(polygon.Id, polygon);
             }
         }
 
@@ -254,11 +258,11 @@ namespace Graphical.Graphs
         //[IsVisibleInDynamoLibrary(false)]
         //public void Tessellate(IRenderPackage package, TessellationParameters parameters)
         //{
-        //    foreach(Vertex v in vertices)
+        //    foreach(Vertex v in Vertices)
         //    {
         //        v.Tessellate(package, parameters);
         //    }
-        //    foreach(Edge e in edges)
+        //    foreach(Edge e in Edges)
         //    {
         //        e.Tessellate(package, parameters);
         //    }
@@ -272,14 +276,14 @@ namespace Graphical.Graphs
         {
             Graph newGraph = new Graph()
             {
-                graph = new Dictionary<Vertex, List<Edge>>(),
-                edges = new List<Edge>(this.edges),
-                polygons = new Dictionary<int, Polygon>(this.polygons)
+                _vertexEdgesDict = new Dictionary<Vertex, List<Edge>>(),
+                Edges = new List<Edge>(this.Edges),
+                _polygonsDict = new Dictionary<int, Polygon>(this._polygonsDict)
             };
 
-            foreach(var item in this.graph)
+            foreach(var item in this._vertexEdgesDict)
             {
-                newGraph.graph.Add(item.Key, new List<Edge>(item.Value));
+                newGraph._vertexEdgesDict.Add(item.Key, new List<Edge>(item.Value));
             }
 
             return newGraph;

@@ -16,12 +16,12 @@ namespace Graphical.Geometry
         #region Internal Variables
 
         /// <summary>
-        /// Flag to check polygons role: Internal or Boundary
+        /// Flag to check _polygonsDict role: Internal or Boundary
         /// </summary>
         internal bool isBoundary { get; set; }
 
         /// <summary>
-        /// Polygon's edges
+        /// Polygon's Edges
         /// </summary>
         internal List<Edge> edges = new List<Edge>();
 
@@ -33,7 +33,7 @@ namespace Graphical.Geometry
 
         #region Public Variables
         /// <summary>
-        /// Polygon's vertices
+        /// Polygon's Vertices
         /// </summary>
         public List<Vertex> Vertices
         {
@@ -41,7 +41,7 @@ namespace Graphical.Geometry
         }
 
         /// <summary>
-        /// Polygon's edges
+        /// Polygon's Edges
         /// </summary>
         public List<Edge> Edges
         {
@@ -88,7 +88,7 @@ namespace Graphical.Geometry
 
         #region Public Constructos
         /// <summary>
-        /// Creates a new Polygon by a list of ordered vertices.
+        /// Creates a new Polygon by a list of ordered Vertices.
         /// </summary>
         /// <param name="vertices"></param>
         /// <param name="isExternal"></param>
@@ -137,7 +137,7 @@ namespace Graphical.Geometry
 
         internal Polygon AddVertex(Vertex vertex, Edge intersectinEdge)
         {
-            //Assumes that vertex v intersects one of polygons edges.
+            //Assumes that vertex v intersects one of _polygonsDict Edges.
             Polygon newPolygon = (Polygon)this.Clone();
 
             // Assign the polygon Id to the new vertex.
@@ -148,7 +148,7 @@ namespace Graphical.Geometry
             int index = newPolygon.vertices.IndexOf(intersectinEdge.StartVertex);
             newPolygon.vertices.Insert(index + 1, vertex);
 
-            // Rebuilding edges.
+            // Rebuilding Edges.
             newPolygon.edges.Clear();
             int verticesCount = newPolygon.vertices.Count;
             for (var i = 0; i < verticesCount; i++)
@@ -226,14 +226,14 @@ namespace Graphical.Geometry
 
         /// <summary>
         /// Determines if a Edge is inside the Polygon by comparing
-        /// it's start, end and mid vertices.
-        /// Note: Prone to error if polygon has edges intersecting the edge not at mid vertex?
+        /// it's start, end and mid Vertices.
+        /// Note: Prone to error if polygon has Edges intersecting the edge not at mid vertex?
         /// </summary>
         /// <param name="edge"></param>
         /// <returns></returns>
         public bool ContainsEdge(Edge edge)
         {
-            // TODO: Check if edge intersects polygon in vertices different than start/end.
+            // TODO: Check if edge intersects polygon in Vertices different than start/end.
             return this.ContainsVertex(edge.StartVertex)
                 && this.ContainsVertex(edge.EndVertex)
                 && this.ContainsVertex(Vertex.MidVertex(edge.StartVertex, edge.EndVertex));
@@ -263,7 +263,7 @@ namespace Graphical.Geometry
         }
 
         /// <summary>
-        /// Determines if two polygons are intersecting
+        /// Determines if two _polygonsDict are intersecting
         /// </summary>
         /// <param name="polygon"></param>
         /// <returns></returns>

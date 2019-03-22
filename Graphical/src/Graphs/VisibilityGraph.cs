@@ -32,7 +32,7 @@ namespace Graphical.Graphs
         {
             baseGraph = _baseGraph;
 
-            List<Edge> resultEdges = VisibilityAnalysis(baseGraph, baseGraph.vertices, reducedGraph, halfScan);
+            List<Edge> resultEdges = VisibilityAnalysis(baseGraph, baseGraph.Vertices, reducedGraph, halfScan);
 
             foreach (Edge edge in resultEdges)
             {
@@ -46,7 +46,7 @@ namespace Graphical.Graphs
         public static List<Vertex> VertexVisibility(Vertex origin, Graph baseGraph)
         {
             Vertex o = origin;
-            if(baseGraph.Contains(origin)) { o = baseGraph.vertices[baseGraph.vertices.IndexOf(origin)]; }
+            if(baseGraph.Contains(origin)) { o = baseGraph.Vertices[baseGraph.Vertices.IndexOf(origin)]; }
             var visibleVertices = VisibilityGraph.VisibleVertices(o, baseGraph, null, null, null, false, false, true);
             
             return visibleVertices;
@@ -55,14 +55,14 @@ namespace Graphical.Graphs
         public static VisibilityGraph Merge(List<VisibilityGraph> vgraphs)
         {
             Graph graph = new Graph();
-            graph.polygons = vgraphs.SelectMany(vg => vg.Polygons).ToDictionary(poly => poly.Id, poly => poly);
+            graph._polygonsDict = vgraphs.SelectMany(vg => vg.Polygons).ToDictionary(poly => poly.Id, poly => poly);
 
             VisibilityGraph visibilityGraph = new VisibilityGraph()
             {
                 baseGraph = new Graph(graph.Polygons.ToList()),
             };
 
-            var edges = vgraphs.SelectMany(vg => vg.edges);
+            var edges = vgraphs.SelectMany(vg => vg.Edges);
 
             for (int i = 0; i < edges.Count(); i++)
             {
@@ -101,7 +101,7 @@ namespace Graphical.Graphs
         /// <param name="destination"></param>
         /// <param name="singleVertices"></param>
         /// <param name="scan"></param>
-        /// <returns name="visibleVertices">List of vertices visible from the analysed vertex</returns>
+        /// <returns name="visibleVertices">List of Vertices visible from the analysed vertex</returns>
         public static List<Vertex> VisibleVertices(
             Vertex centre,
             Graph baseGraph,
@@ -113,8 +113,8 @@ namespace Graphical.Graphs
             bool maxVisibility = false)
         {
             #region Initialize variables and sort vertices
-            List<Edge> edges = baseGraph.edges;
-            List<Vertex> vertices = baseGraph.vertices;
+            List<Edge> edges = baseGraph.Edges;
+            List<Vertex> vertices = baseGraph.Vertices;
 
 
             if (origin != null) { vertices.Add(origin); }
@@ -124,13 +124,13 @@ namespace Graphical.Graphs
 
             Vertex maxVertex = vertices.OrderByDescending(v => v.DistanceTo(centre)).First();
             double maxDistance = centre.DistanceTo(maxVertex) * 1.5;
-            //vertices = vertices.OrderBy(v => Point.RadAngle(centre.point, v.point)).ThenBy(v => centre.DistanceTo(v)).ToList();
+            //Vertices = Vertices.OrderBy(v => Point.RadAngle(centre.point, v.point)).ThenBy(v => centre.DistanceTo(v)).ToList();
             vertices = Vertex.OrderByRadianAndDistance(vertices, centre);
 
             #endregion
 
             #region Initialize openEdges
-            //Initialize openEdges with any intersection edges on the half line 
+            //Initialize openEdges with any intersection Edges on the half line 
             //from centre to maxDistance on the XAxis
             List<EdgeKey> openEdges = new List<EdgeKey>();
             double xMax = Math.Abs(centre.X) + 1.5 * maxDistance;
@@ -156,12 +156,12 @@ namespace Graphical.Graphs
             {
                 Vertex vertex = vertices[i];
                 if (vertex.Equals(centre) || vertex.Equals(prev)) { continue; }// v == to centre or to previous when updating graph
-                //Check only half of vertices as eventually they will become 'v'
+                //Check only half of Vertices as eventually they will become 'v'
                 if (halfScan && Vertex.RadAngle(centre, vertex) > Math.PI) { break; }
-                //Removing clock wise edges incident on v
-                if (openEdges.Count > 0 && baseGraph.graph.ContainsKey(vertex))
+                //Removing clock wise Edges incident on v
+                if (openEdges.Count > 0 && baseGraph._vertexEdgesDict.ContainsKey(vertex))
                 {
-                    foreach (Edge edge in baseGraph.graph[vertex])
+                    foreach (Edge edge in baseGraph._vertexEdgesDict[vertex])
                     {
                         int orientation = Vertex.Orientation(centre, vertex, edge.GetVertexPair(vertex));
 
@@ -183,15 +183,15 @@ namespace Graphical.Graphs
                 Polygon vertexPolygon = null;
 
                 if (vertex.Parent is Polygon) {
-                    baseGraph.polygons.TryGetValue(vertex.Parent.Id, out vertexPolygon);
+                    baseGraph._polygonsDict.TryGetValue(vertex.Parent.Id, out vertexPolygon);
                 }
                 // If centre is on an edge of a inner polygon vertex belongs, check if the centre-vertex edge lies inside
-                // or if on one of vertex's edges.
+                // or if on one of vertex's Edges.
                 if (vertexPolygon != null && !vertexPolygon.isBoundary && vertexPolygon.ContainsVertex(centre))
                 {
                     Vertex mid = Vertex.MidVertex(centre, vertex);
                     // If mid is on any edge of vertex, is visible, otherwise not.
-                    foreach(Edge edge in baseGraph.graph[vertex])
+                    foreach(Edge edge in baseGraph._vertexEdgesDict[vertex])
                     {
                         if (mid.OnEdge(edge))
                         {
@@ -200,7 +200,7 @@ namespace Graphical.Graphs
                         }
                     }
                 }
-                //No collinear vertices
+                //No collinear Vertices
                 else if (prev == null || Vertex.Orientation(centre, prev, vertex) != 0 || !prev.OnEdge(centre, vertex))
                 {
                     
@@ -220,12 +220,12 @@ namespace Graphical.Graphs
                         isVisible = true;
                     }
                 }
-                //For collinear vertices, if previous was not visible, vertex is not either
+                //For collinear Vertices, if previous was not visible, vertex is not either
                 else if (!prevVisible)
                 {
                     isVisible = false;
                 }
-                //For collinear vertices, if prev was visible need to check that
+                //For collinear Vertices, if prev was visible need to check that
                 //the edge from prev to vertex does not intersect with any open edge
                 else
                 {
@@ -275,14 +275,14 @@ namespace Graphical.Graphs
 
                 if (isVisible)
                 {
-                    // Check reducedGraph if vertices belongs to different polygons
+                    // Check reducedGraph if Vertices belongs to different _polygonsDict
                     // TODO: Implement IEquatable to all geometry types. Below might fail if no parent
                     if (reducedGraph && centre.Parent != vertex.Parent) 
                     {
                         bool isOriginExtreme =  true;
                         bool isTargetExtreme = true;
                         // For reduced graphs, it is checked if the edge is extrem or not.
-                        // For an edge to be extreme, the edges coincident at the start and end vertex
+                        // For an edge to be extreme, the Edges coincident at the start and end vertex
                         // will have the same orientation (both clock or counter-clock wise)
                         
                         // Vertex belongs to a polygon
@@ -308,7 +308,7 @@ namespace Graphical.Graphs
 
                 if (baseGraph.Contains(vertex))
                 {
-                    foreach (Edge e in baseGraph.graph[vertex])
+                    foreach (Edge e in baseGraph._vertexEdgesDict[vertex])
                     {
                         if (!centre.OnEdge(e) && Vertex.Orientation(centre, vertex, e.GetVertexPair(vertex)) == 1)
                         {
@@ -325,7 +325,7 @@ namespace Graphical.Graphs
                     int secondOrientation = Vertex.Orientation(centre, vertex, vertexPairs[1]);
                     bool isColinear = false;
 
-                    //if both edges lie on the same side of the centre-vertex edge or one of them is colinear or centre is contained on any of the edges
+                    //if both Edges lie on the same side of the centre-vertex edge or one of them is colinear or centre is contained on any of the Edges
                     if(firstOrientation == secondOrientation || firstOrientation == 0 || secondOrientation == 0)
                     {
                         Vertex rayVertex = vertex.Translate(Vector.ByTwoVertices(centre, vertex), maxDistance);
@@ -343,9 +343,9 @@ namespace Graphical.Graphs
                                 projectionVertex = intersection;
                                 Polygon polygon;
                                 
-                                if(baseGraph.polygons.TryGetValue(vertex.Parent.Id, out polygon))
+                                if(baseGraph._polygonsDict.TryGetValue(vertex.Parent.Id, out polygon))
                                 {
-                                    // If polygon is internal, don't compute intersection if mid point lies inside the polygon but not on its edges
+                                    // If polygon is internal, don't compute intersection if mid point lies inside the polygon but not on its Edges
                                     Vertex mid = Vertex.MidVertex(vertex, intersection);
                                     bool containsEdge = Vertex.Orientation(centre, vertex, mid) != 0  && polygon.ContainsVertex(mid);
                                     if (!polygon.isBoundary && containsEdge)
@@ -358,7 +358,7 @@ namespace Graphical.Graphs
                         }
                         if(projectionVertex != null)
                         {
-                            // if edges are before rayEdge, projection Vertex goes after vertex
+                            // if Edges are before rayEdge, projection Vertex goes after vertex
                             if(firstOrientation == -1 || secondOrientation == -1)
                             {
                                 visibleVertices.Add(projectionVertex);
@@ -449,13 +449,13 @@ namespace Graphical.Graphs
             //At least one doesn't belong to any polygon
             if (!(v1.Parent is Polygon) || !(v2.Parent is Polygon) ) { return false; }
             Vertex midVertex = Vertex.MidVertex(v1, v2);
-            return graph.polygons[v1.Parent.Id].ContainsVertex(midVertex);
+            return graph._polygonsDict[v1.Parent.Id].ContainsVertex(midVertex);
         }
 
         internal static bool IsBoundaryVertex(Vertex vertex, Graph graph)
         {
             int polygonId = vertex.Parent.Id;
-            return (polygonId < 0) ? false : graph.polygons[polygonId].isBoundary;
+            return (polygonId < 0) ? false : graph._polygonsDict[polygonId].isBoundary;
         }
 
 
@@ -471,7 +471,7 @@ namespace Graphical.Graphs
         public static VisibilityGraph AddEdges(VisibilityGraph visibilityGraph, List<Edge> edges)
         {
             //TODO: implement Dynamo' Trace 
-            if (edges == null) { throw new NullReferenceException("edges"); }
+            if (edges == null) { throw new NullReferenceException("Edges"); }
             List<Vertex> singleVertices = new List<Vertex>();
 
             foreach (Edge e in edges)
@@ -500,7 +500,7 @@ namespace Graphical.Graphs
         public static VisibilityGraph AddVertices(VisibilityGraph visibilityGraph, List<Vertex> vertices, bool reducedGraph = true)
         {
             //TODO: Seems that original graph gets updated as well
-            if (vertices == null) { throw new NullReferenceException("vertices"); }
+            if (vertices == null) { throw new NullReferenceException("Vertices"); }
 
             VisibilityGraph newVisGraph = (VisibilityGraph)visibilityGraph.Clone();
             List<Vertex> singleVertices = new List<Vertex>();
@@ -508,7 +508,7 @@ namespace Graphical.Graphs
             foreach (Vertex vertex in vertices)
             {
                 if (newVisGraph.Contains(vertex)) { continue; }
-                Edge closestEdge = newVisGraph.baseGraph.edges.OrderBy(e => e.DistanceTo(vertex)).First();
+                Edge closestEdge = newVisGraph.baseGraph.Edges.OrderBy(e => e.DistanceTo(vertex)).First();
 
                 if (!closestEdge.DistanceTo(vertex).AlmostEqualTo(0))
                 {
@@ -517,7 +517,7 @@ namespace Graphical.Graphs
                 else if (vertex.OnEdge(closestEdge.StartVertex, closestEdge.EndVertex))
                 {
                     int polygonId = closestEdge.StartVertex.Parent.Id;
-                    newVisGraph.baseGraph.polygons[polygonId] = newVisGraph.baseGraph.polygons[polygonId].AddVertex(vertex, closestEdge);
+                    newVisGraph.baseGraph._polygonsDict[polygonId] = newVisGraph.baseGraph._polygonsDict[polygonId].AddVertex(vertex, closestEdge);
                     singleVertices.Add(vertex);
                 }
             }
@@ -576,9 +576,9 @@ namespace Graphical.Graphs
         public List<double> ConnectivityFactor()
         {
             List<int> connected = new List<int>();
-            foreach(Edge edge in edges)
+            foreach(Edge edge in Edges)
             {
-                connected.Add(graph[edge.StartVertex].Count + graph[edge.EndVertex].Count());
+                connected.Add(_vertexEdgesDict[edge.StartVertex].Count + _vertexEdgesDict[edge.EndVertex].Count());
             }
             int min = connected.Min();
             int max = connected.Max();
@@ -594,15 +594,15 @@ namespace Graphical.Graphs
         {
             VisibilityGraph newGraph = new VisibilityGraph()
             {
-                graph = new Dictionary<Vertex, List<Edge>>(),
-                edges = new List<Edge>(this.edges),
-                polygons = new Dictionary<int, Polygon>(this.polygons),
+                _vertexEdgesDict = new Dictionary<Vertex, List<Edge>>(),
+                Edges = new List<Edge>(this.Edges),
+                _polygonsDict = new Dictionary<int, Polygon>(this._polygonsDict),
                 baseGraph = (Graph)this.baseGraph.Clone()
             };
 
-            foreach (var item in this.graph)
+            foreach (var item in this._vertexEdgesDict)
             {
-                newGraph.graph.Add(item.Key, new List<Edge>(item.Value));
+                newGraph._vertexEdgesDict.Add(item.Key, new List<Edge>(item.Value));
             }
 
             return newGraph;

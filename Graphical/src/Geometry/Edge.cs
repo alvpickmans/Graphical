@@ -44,7 +44,7 @@ namespace Graphical.Geometry
         }
 
         /// <summary>
-        /// Edge constructor by start and end vertices
+        /// Edge constructor by start and end Vertices
         /// </summary>
         /// <param name="start">Start vertex</param>
         /// <param name="end">End Vertex</param>
@@ -133,7 +133,7 @@ namespace Graphical.Geometry
                 }
             }
 
-            // No parallels but intersecting on one of the extreme vertices
+            // No parallels but intersecting on one of the extreme Vertices
             if (other.Contains(this.StartVertex)) { return this.StartVertex; }
             else if (other.Contains(this.EndVertex)) { return this.EndVertex; }
 

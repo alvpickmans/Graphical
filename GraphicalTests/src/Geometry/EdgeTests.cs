@@ -94,7 +94,7 @@ namespace Graphical.Geometry.Tests
                 );
 
             Geometry ab = a.Intersection(b); // Intersecting
-            Geometry ac = a.Intersection(c); // Skew edges
+            Geometry ac = a.Intersection(c); // Skew Edges
             Geometry ad = a.Intersection(d); // Coplanar but not intersecting
             Geometry ef = e.Intersection(f); // Coplanar and parallel
             Geometry gh = g.Intersection(h); // Coplanar, not intersecting and second edge shorter than first

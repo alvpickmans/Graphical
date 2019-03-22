@@ -45,7 +45,7 @@ namespace Graphical.Geometry
 
         #region Public Constructors
         /// <summary>
-        /// Creates a new Bounding Box from a minimum and maximum vertices
+        /// Creates a new Bounding Box from a minimum and maximum Vertices
         /// </summary>
         /// <param name="min"></param>
         /// <param name="max"></param>

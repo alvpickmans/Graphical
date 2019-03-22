@@ -49,7 +49,7 @@ namespace Graphical.Geometry
         }
 
         /// <summary>
-        /// Returns the vertex in between two vertices.
+        /// Returns the vertex in between two Vertices.
         /// </summary>
         /// <param name="v1"></param>
         /// <param name="v2"></param>
@@ -110,7 +110,7 @@ namespace Graphical.Geometry
 
             if (onYAxis && onXAxis) { return 0; }
 
-            if (onYAxis)// both vertices on Y axis
+            if (onYAxis)// both Vertices on Y axis
             {
                 if (dy < 0)//vertex below X axis
                 {
@@ -121,7 +121,7 @@ namespace Graphical.Geometry
                     return Math.PI / 2;
                 }
             }
-            if (onXAxis)// both vertices on X Axis
+            if (onXAxis)// both Vertices on X Axis
             {
                 if (dx < 0)// vertex on the left of Y axis
                 {
@@ -196,14 +196,14 @@ namespace Graphical.Geometry
         }
 
         /// <summary>
-        /// Checks if a list of vertices are coplanar. True for three or less vertices.
+        /// Checks if a list of Vertices are coplanar. True for three or less Vertices.
         /// </summary>
         /// <param name="vertices"></param>
         /// <returns>Boolean</returns>
         public static bool Coplanar(List<Vertex> vertices)
         {
             // https://math.stackexchange.com/questions/1330357/show-that-four-points-are-coplanar
-            if (!vertices.Any()) { throw new ArgumentOutOfRangeException("vertices", "Vertices list cannot be empty"); }
+            if (!vertices.Any()) { throw new ArgumentOutOfRangeException("Vertices", "Vertices list cannot be empty"); }
             if (vertices.Count <= 3) { return true; }
             Vector ab = Vector.ByTwoVertices(vertices[0], vertices[1]);
             Vector ac = Vector.ByTwoVertices(vertices[0], vertices[2]);

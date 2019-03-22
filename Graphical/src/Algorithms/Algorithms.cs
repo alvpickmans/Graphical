@@ -17,7 +17,7 @@ namespace Graphical
             MinPriorityQ<Vertex, double> Q = new MinPriorityQ<Vertex, double>();
             bool originInGraph = false;
 
-            foreach(Vertex v in graph.vertices)
+            foreach(Vertex v in graph.Vertices)
             {
                 if (v.Equals(origin))
                 {
@@ -30,7 +30,7 @@ namespace Graphical
                 }
             }
 
-            //If tempGraph is not null, means graph doesn't contain origin and/or destination vertices.
+            //If tempGraph is not null, means graph doesn't contain origin and/or destination Vertices.
             if (!originInGraph)
             {
                 Q.Add(origin, 0);
@@ -51,7 +51,7 @@ namespace Graphical
 
                 List<Edge> edges = new List<Edge>();
                 edges.AddRange(graph.GetVertexEdges(vertex));
-                if(tempGraph != null && tempGraph.edges.Any())
+                if(tempGraph != null && tempGraph.Edges.Any())
                 {
                     edges.AddRange(tempGraph.GetVertexEdges(vertex));
                 }
@@ -79,8 +79,8 @@ namespace Graphical
                 path.AddEdge(new Edge(parent, dest));
                 dest = parent;
             }
-            // Reversing edges list so they will be sorted from origin to target
-            path.edges.Reverse();
+            // Reversing Edges list so they will be sorted from origin to target
+            path.Edges.Reverse();
             return path;
             
         }
