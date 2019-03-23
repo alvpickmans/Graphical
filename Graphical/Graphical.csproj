@@ -102,6 +102,7 @@
     <Compile Include="src\DataStructures\PriorityQ.cs" />
     <Compile Include="src\Geometry\Polygon.cs" />
     <Compile Include="src\Geometry\Vector.cs" />
+    <Compile Include="src\Graphs\EdgeKey.cs" />
     <Compile Include="src\Graphs\Graph.cs" />
     <Compile Include="src\Geometry\Vertex.cs" />
     <Compile Include="src\Geometry\Edge.cs" />

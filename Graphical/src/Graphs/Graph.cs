@@ -8,8 +8,7 @@ using Graphical.Geometry;
 #endregion
 
 namespace Graphical.Graphs
-{
-    
+{    
     /// <summary>
     /// Representation of a Graph.
     /// Graph contains a Dictionary where
@@ -47,6 +46,9 @@ namespace Graphical.Graphs
         /// </summary>
         public List<Edge> Edges { get; internal set; }
 
+        /// <summary>
+        /// Graph's Polygons
+        /// </summary>
         public List<Polygon> Polygons
         {
             get { return _polygonsDict.Values.ToList(); }
