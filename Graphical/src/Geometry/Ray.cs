@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Graphical.Extensions;
-using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Graphical.Geometry
 {
@@ -90,60 +89,77 @@ namespace Graphical.Geometry
         #endregion
 
         #region Public Methods
-
-        public Vertex Intersection(Edge edge)
+        /// <summary>
+        /// Checks if the given Vertex is contained on the Ray.
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <returns></returns>
+        public bool Contains(Vertex vertex)
         {
-            if (this.Direction.IsParallelTo(edge.Direction)) { return null; }
+            // If the Vector from Ray's origin to the given
+            // vertex is parallel to Ray's Direction, return true.
+            var vector = Vector.ByTwoVertices(this.Origin, vertex);
 
-            // Ray weigth equation
-            // R(t) = (1-t)C + t*P
-            double t;
-            double m;
-            var Cx = this.Origin.X;
-            var Cy = this.Origin.Y;
-            var Cz = this.Origin.Z;
-            var Px = this.Direction.X + Cx;
-            var Py = this.Direction.Y + Cy;
-            var Pz = this.Direction.Z + Cz;
+            if (!this.Direction.IsParallelTo(vector)) { return false; }
 
-            // Edge equations, with origin O(x, y, z) and direction d(a, b, c)
-            // I(m) = O + m*d
+            // Need to check if point falls on the visible path of Ray.
+            // Vertex = Origin + t * Direction; t = (V-O)/D
+            // If t < 0, it doesn't
 
-            var eqMatrix = DenseMatrix.OfArray(new double[2, 2]{
-                { edge.Direction.X, Cx - Px},
-                { edge.Direction.Y, Cy - Py}
-            });
-
-            var resultMatrix = DenseMatrix.OfArray(new double[2,1]
+            double t = Double.PositiveInfinity;
+            if(this.Direction.X != 0) { t = (vertex.X - this.Origin.X) / this.Direction.X; }
+            else if (this.Direction.Y != 0) { t = (vertex.Y - this.Origin.Y) / this.Direction.Y; }
+            else if (this.Direction.Z != 0) { t = (vertex.Z - this.Origin.Z) / this.Direction.Z; }
+            else
             {
-                {Cx - edge.StartVertex.X },{ Cy - edge.StartVertex.Y }
-            });
-
-            var inverse = eqMatrix.Inverse();
-
-            var solution = inverse * resultMatrix;
-
-            m = solution.At(0, 0);
-            t = solution.At(1, 0);
-
-            var z = edge.StartVertex.Z + m * edge.Direction.Z;
-
-            if(!z.AlmostEqualTo((1-t)*Cz + t * Pz))
-            {
-                return null;
+                throw new Exception("Something when wrong, contact Author");
             }
 
-            if(m.AlmostEqualTo(0)) { return edge.StartVertex; }
-            else if (m.AlmostEqualTo(1)) { return edge.EndVertex; }
-            else if(m > 0 && m < 1)
-            {
-                double x = edge.StartVertex.X + m * edge.Direction.X;
-                double y = edge.StartVertex.Y + m * edge.Direction.Y;
+            return t > 0 && !t.AlmostEqualTo(0);
+        }
 
-                return Vertex.ByCoordinates(x, y, z);
+
+        public Geometry Intersection(Edge edge)
+        {
+            // If no coplanar, cannot intersect
+            if(!edge.IsCoplanarTo(this.Origin, this.Direction)) { return null; }
+
+            // Intersection can be an Edge or null
+            if(this.Direction.IsParallelTo(edge.Direction)){
+
+                bool containsStart = this.Contains(edge.StartVertex);
+                bool containsEnd = this.Contains(edge.EndVertex);
+
+                if(!containsStart && !containsEnd)
+                {
+                    return null;
+                }
+                else if (containsStart) {
+                    return Edge.ByStartVertexEndVertex(edge.StartVertex, this.Origin);
+                }
+                else
+                {
+                    return Edge.ByStartVertexEndVertex(this.Origin, edge.EndVertex);
+                }
+
             }
 
-            return null;
+            // No coincident nor same extremes
+            var b = this.Direction;
+            var a = edge.Direction;
+            var c = Vector.ByTwoVertices(edge.StartVertex, this.Origin);
+            var cxb = c.Cross(b);
+            var axb = a.Cross(b);
+            var dot = cxb.Dot(axb);
+
+            double t = (dot) / Math.Pow(axb.Length, 2);
+
+            if (t < 0 && !t.AlmostEqualTo(0)) { return null; }
+            if (t > 1 && !t.AlmostEqualTo(1)) { return null; }
+
+            return edge.StartVertex.Translate(edge.Direction.Scale(t));
+
+
         }
         #endregion
     }

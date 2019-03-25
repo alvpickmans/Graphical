@@ -55,16 +55,17 @@ namespace Graphical.Geometry
         }
 
         /// <summary>
-        /// Edge constructor by line
+        /// Edge constructor by an array of coordinates
         /// </summary>
-        /// <param name="line">line</param>
+        /// <param name="coordinates"></param>
         /// <returns name="edge">edge</returns>
-        //public static Edge ByLine(Line line)
-        //{
-        //    Vertex start = Vertex.ByCoordinates(line.StartPoint.X, line.StartPoint.Y, line.StartPoint.Z);
-        //    Vertex end = Vertex.ByCoordinates(line.EndPoint.X, line.EndPoint.Y, line.EndPoint.Z);
-        //    return new Edge(start, end);
-        //}
+        public static Edge ByCoordinatesArray(double[] coordinates)
+        {
+            if(coordinates.Count() != 6) { throw new Exception("Not 6 coordinates provided"); }
+            Vertex start = Vertex.ByCoordinates(coordinates[0], coordinates[1], coordinates[2]);
+            Vertex end = Vertex.ByCoordinates(coordinates[3], coordinates[4], coordinates[5]);
+            return new Edge(start, end);
+        }
         #endregion
 
         /// <summary>
@@ -89,12 +90,17 @@ namespace Graphical.Geometry
 
         public bool IsCoplanarTo(Edge edge)
         {
-            // http://mathworld.wolfram.com/Coplanar.html
-            Vector a = this.Direction;
-            Vector b = edge.Direction;
-            Vector c = Vector.ByTwoVertices(this.StartVertex, edge.StartVertex);
+            return this.IsCoplanarTo(edge.StartVertex, edge.Direction);
+        }
 
-            return c.Dot(a.Cross(b)) == 0;
+        public bool IsCoplanarTo(Vertex vertex, Vector direction)
+        {
+            // http://mathworld.wolfram.com/Coplanar.html
+            var a = this.Direction;
+            var b = direction;
+            var c = Vector.ByTwoVertices(this.StartVertex, vertex);
+
+            return c.Dot(a.Cross(b)).AlmostEqualTo(0);
         }
 
         public Geometry Intersection(Edge other)
