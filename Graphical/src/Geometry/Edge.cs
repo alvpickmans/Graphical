@@ -37,9 +37,13 @@ namespace Graphical.Geometry
         // TODO: Convert to private constructor
         public Edge(Vertex start, Vertex end) : base()
         {
+            if (start.Equals(end))
+            {
+                throw new Exception("Edge cannot be created with Vertex with same coordinates");
+            }
             StartVertex = start;
             EndVertex = end;
-            Length = StartVertex.DistanceTo(EndVertex);
+            Length = start.DistanceTo(end);
             Direction = Vector.ByTwoVertices(StartVertex, EndVertex);
         }
 
