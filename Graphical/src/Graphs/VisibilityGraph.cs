@@ -100,7 +100,7 @@ namespace Graphical.Graphs
         /// <param name="origin"></param>
         /// <param name="destination"></param>
         /// <param name="singleVertices"></param>
-        /// <param name="scan"></param>
+        /// <param name="halfScan"></param>
         /// <returns name="visibleVertices">List of Vertices visible from the analysed vertex</returns>
         public static List<Vertex> VisibleVertices(
             Vertex centre,
@@ -122,9 +122,6 @@ namespace Graphical.Graphs
             if (singleVertices != null) { vertices.AddRange(singleVertices); }
 
 
-            Vertex maxVertex = vertices.OrderByDescending(v => v.DistanceTo(centre)).First();
-            double maxDistance = centre.DistanceTo(maxVertex) * 1.5;
-            //Vertices = Vertices.OrderBy(v => Point.RadAngle(centre.point, v.point)).ThenBy(v => centre.DistanceTo(v)).ToList();
             vertices = Vertex.OrderByRadianAndDistance(vertices, centre);
 
             #endregion
@@ -133,16 +130,15 @@ namespace Graphical.Graphs
             //Initialize openEdges with any intersection Edges on the half line 
             //from centre to maxDistance on the XAxis
             List<EdgeKey> openEdges = new List<EdgeKey>();
-            double xMax = Math.Abs(centre.X) + 1.5 * maxDistance;
-            Edge halfEdge = Edge.ByStartVertexEndVertex(centre, Vertex.ByCoordinates(xMax, centre.Y, centre.Z));
+            Ray ray = Ray.XAxis(centre);
             foreach (Edge e in edges)
             {
                 if (centre.OnEdge(e)) { continue; }
-                if (halfEdge.Intersects(e))
+                if (ray.Intersection(e) is Geometry.Geometry intersection)
                 {
-                    if (e.StartVertex.OnEdge(halfEdge)) { continue; }
-                    if (e.EndVertex.OnEdge(halfEdge)) { continue; }
-                    EdgeKey k = new EdgeKey(halfEdge, e);
+                    if (ray.Contains(e.StartVertex)) { continue; }
+                    if (ray.Contains(e.EndVertex)) { continue; }
+                    EdgeKey k = new EdgeKey(ray, e);
                     openEdges.AddItemSorted(k);
                 }
             }
@@ -241,7 +237,7 @@ namespace Graphical.Graphs
                     }
                     // If visible (doesn't intersect any open edge) and edge 'prev-vertex'
                     // is in any polygon, vertex is visible if it belongs to a external boundary
-                    if (isVisible && EdgeInPolygon(prev, vertex, baseGraph, maxDistance))
+                    if (isVisible && EdgeInPolygon(prev, vertex, baseGraph))
                     {
                         isVisible = IsBoundaryVertex(vertex, baseGraph);
                     }
@@ -260,11 +256,11 @@ namespace Graphical.Graphs
                 {
                     if (IsBoundaryVertex(centre, baseGraph) && IsBoundaryVertex(vertex, baseGraph))
                     {
-                        isVisible = EdgeInPolygon(centre, vertex, baseGraph, maxDistance);
+                        isVisible = EdgeInPolygon(centre, vertex, baseGraph);
                     }
                     else
                     {
-                        isVisible = !EdgeInPolygon(centre, vertex, baseGraph, maxDistance);
+                        isVisible = !EdgeInPolygon(centre, vertex, baseGraph);
                     }
                 }
 
@@ -328,8 +324,7 @@ namespace Graphical.Graphs
                     //if both Edges lie on the same side of the centre-vertex edge or one of them is colinear or centre is contained on any of the Edges
                     if(firstOrientation == secondOrientation || firstOrientation == 0 || secondOrientation == 0)
                     {
-                        Vertex rayVertex = vertex.Translate(Vector.ByTwoVertices(centre, vertex), maxDistance);
-                        Edge rayEdge = Edge.ByStartVertexEndVertex(centre, rayVertex);
+                        Ray rayEdge = Ray.ByTwoVertices(centre, vertex);
                         Vertex projectionVertex = null;
 
                         // if both orientation are not on the same side, means that one of them is colinear
@@ -442,7 +437,7 @@ namespace Graphical.Graphs
 
         }
 
-        internal static bool EdgeInPolygon(Vertex v1, Vertex v2, Graph graph, double maxDistance)
+        internal static bool EdgeInPolygon(Vertex v1, Vertex v2, Graph graph)
         {
             //Not on the same polygon
             if (v1.Parent.Id != v2.Parent.Id) { return false; }

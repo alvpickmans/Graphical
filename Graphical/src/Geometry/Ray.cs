@@ -157,9 +157,25 @@ namespace Graphical.Geometry
             if (t < 0 && !t.AlmostEqualTo(0)) { return null; }
             if (t > 1 && !t.AlmostEqualTo(1)) { return null; }
 
-            return edge.StartVertex.Translate(edge.Direction.Scale(t));
+            var intersection = edge.StartVertex.Translate(edge.Direction.Scale(t));
+            return this.Contains(intersection) ? intersection : null;
 
+        }
+        #endregion
 
+        #region Override Methods
+        /// <summary>
+        /// Override of GetHashCode method
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            return this.Origin.GetHashCode() ^ this.Direction.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return String.Format("Ray(Origin: {0}, Direction: {1})", Origin.ToString(), Direction.ToString());
         }
         #endregion
     }

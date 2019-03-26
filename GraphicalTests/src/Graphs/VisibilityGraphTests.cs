@@ -59,20 +59,19 @@ namespace Graphical.Graphs.Tests
         public void VisibilityFromPointColinearVerticesYAxis()
         {
             var a = Vertex.ByCoordinates(0, 0);
-            var b = Vertex.ByCoordinates(a.X + 20, a.Y);
-            var c = Vertex.ByCoordinates(b.X, b.Y + 10);
-            var d = Vertex.ByCoordinates(c.X - 10, c.Y);
-            var e = Vertex.ByCoordinates(d.X, d.Y + 10);
-            var f = Vertex.ByCoordinates(c.X, e.Y);
-            var g = Vertex.ByCoordinates(f.X, d.Y + 10);
-            var h = Vertex.ByCoordinates(a.X, g.Y);
+            var b = Vertex.ByCoordinates(a.X + 20, a.Y);// 20, 0
+            var c = Vertex.ByCoordinates(b.X, b.Y + 10);// 20, 10
+            var d = Vertex.ByCoordinates(c.X - 10, c.Y);// 10, 10
+            var e = Vertex.ByCoordinates(d.X, d.Y + 10);// 10, 20
+            var f = Vertex.ByCoordinates(c.X, e.Y); // 20, 20
+            var g = Vertex.ByCoordinates(a.X, d.Y + 10);//0, 20
 
-            Polygon polygon = Polygon.ByVertices(new List<Vertex>() { a, b, c, d, e, f, g, h}, true);
+            Polygon polygon = Polygon.ByVertices(new List<Vertex>() { a, b, c, d, e, f, g}, true);
             Graph baseGraph = new Graph(new List<Polygon>() { polygon });
 
             List<Vertex> vertices = VisibilityGraph.VertexVisibility(b, baseGraph);
 
-            Assert.NotNull(vertices);
+            Assert.AreEqual(5, vertices.Count);
         }
 
     }
