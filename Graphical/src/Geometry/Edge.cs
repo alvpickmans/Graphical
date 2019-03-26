@@ -33,9 +33,9 @@ namespace Graphical.Geometry
 
         #endregion
 
-        #region Constructors
-        // TODO: Convert to private constructor
-        public Edge(Vertex start, Vertex end) : base()
+
+        #region Private Constructor
+        private Edge(Vertex start, Vertex end) : base()
         {
             if (start.Equals(end))
             {
@@ -45,8 +45,10 @@ namespace Graphical.Geometry
             EndVertex = end;
             Length = start.DistanceTo(end);
             Direction = Vector.ByTwoVertices(StartVertex, EndVertex);
-        }
+        } 
+        #endregion
 
+        #region Public Constructors
         /// <summary>
         /// Edge constructor by start and end Vertices
         /// </summary>

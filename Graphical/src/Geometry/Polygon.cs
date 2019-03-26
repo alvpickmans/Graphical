@@ -75,7 +75,7 @@ namespace Graphical.Geometry
                 int next_index = (j + 1) % vertexCount;
                 Vertex vertex = vertices[j];
                 Vertex next_vertex = vertices[next_index];
-                var edge = new Edge(vertex, next_vertex);
+                var edge = Edge.ByStartVertexEndVertex(vertex, next_vertex);
 
                 vertex.Parent = this;
                 edge.Parent = this;
@@ -154,7 +154,7 @@ namespace Graphical.Geometry
             for (var i = 0; i < verticesCount; i++)
             {
                 int nextIndex = (i + 1) % verticesCount;
-                newPolygon.edges.Add(new Edge(newPolygon.vertices[i], newPolygon.vertices[nextIndex]));
+                newPolygon.edges.Add(Edge.ByStartVertexEndVertex(newPolygon.vertices[i], newPolygon.vertices[nextIndex]));
             }
 
             return newPolygon;

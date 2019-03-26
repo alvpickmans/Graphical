@@ -83,7 +83,7 @@ namespace Graphical.Graphs
             {
                 foreach (Vertex v2 in VisibleVertices(v, baseGraph, null, null, null, halfScan, reducedGraph))
                 {
-                    Edge newEdge = new Edge(v, v2);
+                    Edge newEdge = Edge.ByStartVertexEndVertex(v, v2);
                     if (!visibleEdges.Contains(newEdge)) { visibleEdges.Add(newEdge); }
                 }
             }
@@ -211,7 +211,7 @@ namespace Graphical.Graphs
                             isVisible = true;
                         }
                     }
-                    else if (vertex.OnEdge(openEdges.First().Edge) || !openEdges.First().Edge.Intersects(new Edge(centre, vertex))) //TODO: Change this intersection to Edge.Intersects
+                    else if (vertex.OnEdge(openEdges.First().Edge) || !openEdges.First().Edge.Intersects(Edge.ByStartVertexEndVertex(centre, vertex))) //TODO: Change this intersection to Edge.Intersects
                     {
                         isVisible = true;
                     }
@@ -523,7 +523,7 @@ namespace Graphical.Graphs
             {
                 foreach (Vertex v in VisibleVertices(centre, newVisGraph.baseGraph, null, null, singleVertices, false, reducedGraph))
                 {
-                    newVisGraph.AddEdge(new Edge(centre, v));
+                    newVisGraph.AddEdge(Edge.ByStartVertexEndVertex(centre, v));
                 }
             }
 
@@ -551,14 +551,14 @@ namespace Graphical.Graphs
                 {
                     foreach (Vertex v in VisibleVertices(origin, visibilityGraph.baseGraph, null, gD, null, false, true))
                     {
-                        tempGraph.AddEdge(new Edge(origin, v));
+                        tempGraph.AddEdge(Edge.ByStartVertexEndVertex(origin, v));
                     }
                 }
                 if (!containsDestination)
                 {
                     foreach (Vertex v in VisibleVertices(destination, visibilityGraph.baseGraph, gO, null, null, false, true))
                     {
-                        tempGraph.AddEdge(new Edge(destination, v));
+                        tempGraph.AddEdge(Edge.ByStartVertexEndVertex(destination, v));
                     }
                 }
                 shortest = Algorithms.Dijkstra(visibilityGraph, origin, destination, tempGraph);

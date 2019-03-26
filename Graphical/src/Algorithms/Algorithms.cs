@@ -76,7 +76,7 @@ namespace Graphical
             while (dest != origin)
             {
                 Vertex parent = ParentVertices[dest];
-                path.AddEdge(new Edge(parent, dest));
+                path.AddEdge(Edge.ByStartVertexEndVertex(parent, dest));
                 dest = parent;
             }
             // Reversing Edges list so they will be sorted from origin to target
