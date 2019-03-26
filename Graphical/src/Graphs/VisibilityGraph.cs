@@ -127,8 +127,7 @@ namespace Graphical.Graphs
             #endregion
 
             #region Initialize openEdges
-            //Initialize openEdges with any intersection Edges on the half line 
-            //from centre to maxDistance on the XAxis
+            //Initialize openEdges with any intersecting Edge with a XAxis Ray from the centre
             List<EdgeKey> openEdges = new List<EdgeKey>();
             Ray ray = Ray.XAxis(centre);
             foreach (Edge e in edges)
@@ -138,7 +137,7 @@ namespace Graphical.Graphs
                 {
                     if (ray.Contains(e.StartVertex)) { continue; }
                     if (ray.Contains(e.EndVertex)) { continue; }
-                    EdgeKey k = new EdgeKey(ray, e);
+                    EdgeKey k = EdgeKey.ByRayAndEdge(ray, e);
                     openEdges.AddItemSorted(k);
                 }
             }
@@ -163,7 +162,7 @@ namespace Graphical.Graphs
 
                         if (orientation == -1)
                         {
-                            EdgeKey k = new EdgeKey(centre, vertex, edge);
+                            EdgeKey k = EdgeKey.ByOriginVertexAndEdge(centre, vertex, edge);
                             int index = openEdges.BisectIndex(k) - 1;
                             index = (index < 0) ? openEdges.Count - 1 : index;
                             if (openEdges.Count > 0 && openEdges.ElementAt(index).Equals(k))
@@ -308,7 +307,7 @@ namespace Graphical.Graphs
                     {
                         if (!centre.OnEdge(e) && Vertex.Orientation(centre, vertex, e.GetVertexPair(vertex)) == 1)
                         {
-                            EdgeKey k = new EdgeKey(centre, vertex, e);
+                            EdgeKey k = EdgeKey.ByOriginVertexAndEdge(centre, vertex, e);
                             openEdges.AddItemSorted(k);
                         }
                     }

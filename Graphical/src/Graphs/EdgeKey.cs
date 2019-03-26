@@ -16,16 +16,21 @@ namespace Graphical.Graphs
         internal Edge Edge { get; private set; }
         internal Ray Ray { get; private set; }
 
-        internal EdgeKey(Ray ray, Edge e)
+        private EdgeKey(Ray ray, Edge edge)
         {
             Ray = ray;
-            Edge = e;
+            Edge = edge;
         }
 
-        internal EdgeKey(Vertex centre, Vertex end, Edge e)
+
+        public static EdgeKey ByRayAndEdge(Ray ray, Edge edge)
         {
-            Edge = e;
-            Ray = Ray.ByTwoVertices(centre, end);
+            return new EdgeKey(ray, edge);
+        }
+
+        public static EdgeKey ByOriginVertexAndEdge(Vertex centre, Vertex end, Edge edge)
+        {
+            return new EdgeKey(Ray.ByTwoVertices(centre, end), edge);
         }
 
         public double DistanceToIntersection(Edge edge)
