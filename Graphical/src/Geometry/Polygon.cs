@@ -173,7 +173,7 @@ namespace Graphical.Geometry
         /// </returns>
         internal double IsLeft(Edge edge, Vertex vertex)
         {
-            return (edge.EndVertex.X - edge.StartVertex.X) * (vertex.Y - edge.StartVertex.X) - (edge.EndVertex.Y - edge.StartVertex.Y) * (vertex.X - edge.StartVertex.X);
+            return (edge.EndVertex.X - edge.StartVertex.X) * (vertex.Y - edge.StartVertex.Y) - (edge.EndVertex.Y - edge.StartVertex.Y) * (vertex.X - edge.StartVertex.X);
         }
         #endregion
 
