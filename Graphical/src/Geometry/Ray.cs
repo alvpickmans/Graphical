@@ -161,6 +161,11 @@ namespace Graphical.Geometry
             return this.Contains(intersection) ? intersection : null;
 
         }
+
+        public bool Intersects(Edge edge)
+        {
+            return this.Intersection(edge) is Geometry;
+        }
         #endregion
 
         #region Override Methods
