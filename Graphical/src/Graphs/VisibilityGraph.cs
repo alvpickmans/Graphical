@@ -129,15 +129,15 @@ namespace Graphical.Graphs
             #region Initialize openEdges
             //Initialize openEdges with any intersecting Edge with a XAxis Ray from the centre
             List<EdgeKey> openEdges = new List<EdgeKey>();
-            Ray ray = Ray.XAxis(centre);
+            Ray sweepRay = Ray.XAxis(centre);
             foreach (Edge e in edges)
             {
                 if (centre.OnEdge(e)) { continue; }
-                if (ray.Intersection(e) is Geometry.Geometry intersection)
+                if (sweepRay.Intersects(e))
                 {
-                    if (ray.Contains(e.StartVertex)) { continue; }
-                    if (ray.Contains(e.EndVertex)) { continue; }
-                    EdgeKey k = EdgeKey.ByRayAndEdge(ray, e);
+                    if (sweepRay.Contains(e.StartVertex)) { continue; }
+                    if (sweepRay.Contains(e.EndVertex)) { continue; }
+                    EdgeKey k = EdgeKey.ByRayAndEdge(sweepRay, e);
                     openEdges.AddItemSorted(k);
                 }
             }
@@ -153,6 +153,10 @@ namespace Graphical.Graphs
                 if (vertex.Equals(centre) || vertex.Equals(prev)) { continue; }// v == to centre or to previous when updating graph
                 //Check only half of Vertices as eventually they will become 'v'
                 if (halfScan && Vertex.RadAngle(centre, vertex) > Math.PI) { break; }
+
+                // Update Ray to new vertex;
+                sweepRay = Ray.ByTwoVertices(centre, vertex);
+
                 //Removing clock wise Edges incident on v
                 if (openEdges.Count > 0 && baseGraph._vertexEdgesDict.ContainsKey(vertex))
                 {
@@ -162,7 +166,7 @@ namespace Graphical.Graphs
 
                         if (orientation == -1)
                         {
-                            EdgeKey k = EdgeKey.ByOriginVertexAndEdge(centre, vertex, edge);
+                            EdgeKey k = EdgeKey.ByRayAndEdge(sweepRay, edge);
                             int index = openEdges.BisectIndex(k) - 1;
                             index = (index < 0) ? openEdges.Count - 1 : index;
                             if (openEdges.Count > 0 && openEdges.ElementAt(index).Equals(k))
@@ -196,7 +200,7 @@ namespace Graphical.Graphs
                     }
                 }
                 //No collinear Vertices
-                else if (prev == null || Vertex.Orientation(centre, prev, vertex) != 0 || !prev.OnEdge(centre, vertex))
+                else if (prev == null || !prev.OnEdge(centre, vertex))
                 {
                     
                     if (openEdges.Count == 0)
@@ -210,7 +214,7 @@ namespace Graphical.Graphs
                             isVisible = true;
                         }
                     }
-                    else if (vertex.OnEdge(openEdges.First().Edge) || !openEdges.First().Edge.Intersects(Edge.ByStartVertexEndVertex(centre, vertex))) //TODO: Change this intersection to Edge.Intersects
+                    else if (vertex.OnEdge(openEdges.First().Edge) || !openEdges.First().Edge.Intersects(Edge.ByStartVertexEndVertex(centre, vertex)))
                     {
                         isVisible = true;
                     }
@@ -271,7 +275,7 @@ namespace Graphical.Graphs
                 if (isVisible)
                 {
                     // Check reducedGraph if Vertices belongs to different _polygonsDict
-                    // TODO: Implement IEquatable to all geometry types. Below might fail if no parent
+                    // TODO: If using ConvexHull, most of this could be removed.
                     if (reducedGraph && centre.Parent != vertex.Parent) 
                     {
                         bool isOriginExtreme =  true;
@@ -307,7 +311,7 @@ namespace Graphical.Graphs
                     {
                         if (!centre.OnEdge(e) && Vertex.Orientation(centre, vertex, e.GetVertexPair(vertex)) == 1)
                         {
-                            EdgeKey k = EdgeKey.ByOriginVertexAndEdge(centre, vertex, e);
+                            EdgeKey k = EdgeKey.ByRayAndEdge(sweepRay, e);
                             openEdges.AddItemSorted(k);
                         }
                     }
@@ -323,7 +327,6 @@ namespace Graphical.Graphs
                     //if both Edges lie on the same side of the centre-vertex edge or one of them is colinear or centre is contained on any of the Edges
                     if(firstOrientation == secondOrientation || firstOrientation == 0 || secondOrientation == 0)
                     {
-                        Ray rayEdge = Ray.ByTwoVertices(centre, vertex);
                         Vertex projectionVertex = null;
 
                         // if both orientation are not on the same side, means that one of them is colinear
@@ -331,7 +334,7 @@ namespace Graphical.Graphs
 
                         foreach(EdgeKey ek in openEdges)
                         {
-                            Vertex intersection = rayEdge.Intersection(ek.Edge) as Vertex;
+                            Vertex intersection = sweepRay.Intersection(ek.Edge) as Vertex;
                             if(intersection != null &&!intersection.Equals(vertex))
                             {
                                 projectionVertex = intersection;
@@ -376,7 +379,7 @@ namespace Graphical.Graphs
         internal static bool EdgeIntersect(Edge halfEdge, Edge edge)
         {
             //For simplicity, it only takes into acount the 2d projection to the xy plane,
-            //so the result will be based on a porjection even if points have z values.
+            //so the result will be based on a projection even if points have z values.
             bool intersects = EdgeIntersectProjection(
                 halfEdge.StartVertex,
                 halfEdge.EndVertex,
@@ -448,8 +451,11 @@ namespace Graphical.Graphs
 
         internal static bool IsBoundaryVertex(Vertex vertex, Graph graph)
         {
-            int polygonId = vertex.Parent.Id;
-            return (polygonId < 0) ? false : graph._polygonsDict[polygonId].isBoundary;
+            if(vertex.Parent is Polygon parent)
+            {
+                return (parent.Id <= 0) ? false : graph._polygonsDict[parent.Id].isBoundary;
+            }
+            return false;
         }
 
 
