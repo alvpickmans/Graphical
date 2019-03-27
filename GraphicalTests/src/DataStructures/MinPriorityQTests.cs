@@ -28,20 +28,20 @@ namespace Graphical.DataStructures.Tests
             //Assert.AreEqual(10, minQ.Size);
             //Assert.AreEqual(10, minQ.HeapIndices.Count);
 
-            var a1 = gVertex.ByCoordinates(0, 0);
-            var a2 = gVertex.ByCoordinates(10, 10);
-            var b1 = gVertex.ByCoordinates(0, 10);
-            var b2 = gVertex.ByCoordinates(10, 0);
+            var a1 = Vertex.ByCoordinates(0, 0);
+            var a2 = Vertex.ByCoordinates(10, 10);
+            var b1 = Vertex.ByCoordinates(0, 10);
+            var b2 = Vertex.ByCoordinates(10, 0);
 
-            List<gEdge> edges = new List<gEdge>()
+            List<Edge> edges = new List<Edge>()
             {
-                gEdge.ByStartVertexEndVertex(a1, a2),
-                gEdge.ByStartVertexEndVertex(b1,b2)
+                Edge.ByStartVertexEndVertex(a1, a2),
+                Edge.ByStartVertexEndVertex(b1,b2)
             };
 
             var EventsQ = new MinPriorityQ<SweepEvent>(edges.Count * 2);
 
-            foreach (gEdge e in edges)
+            foreach (Edge e in edges)
             {
                 var sw1 = new SweepEvent(e.StartVertex, e);
                 var sw2 = new SweepEvent(e.EndVertex, e);

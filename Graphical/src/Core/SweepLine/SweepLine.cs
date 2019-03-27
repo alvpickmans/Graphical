@@ -50,8 +50,8 @@ namespace Graphical.Core
         internal List<SweepEvent> eventsList;
         internal List<SweepEvent> activeEvents;
         internal IComparer<SweepEvent> verticalAscEventsComparer = new SortEventsVerticalAscendingComparer();
-        internal gPolygon subject;
-        internal gPolygon clip;
+        internal Polygon subject;
+        internal Polygon clip;
         #endregion
 
         #region Public Properties
@@ -71,7 +71,7 @@ namespace Graphical.Core
         #endregion
 
         #region Internal Constructors
-        internal SweepLine (List<gEdge> edges, SweepLineType type)
+        internal SweepLine (List<Edge> edges, SweepLineType type)
         {
             this.sweepLineType = type;
             this.eventsList = new List<SweepEvent>(edges.Count * 2);
@@ -80,7 +80,7 @@ namespace Graphical.Core
             edges.ForEach(e => this.AddNewEvent(e));
         }
         // TODO: Seems that Q gets corrupted somehow. Check with Tests
-        internal SweepLine (gPolygon subject, gPolygon clip, SweepLineType type)
+        internal SweepLine (Polygon subject, Polygon clip, SweepLineType type)
         {
             this.sweepLineType = type;
             this.subject = subject;
@@ -96,11 +96,11 @@ namespace Graphical.Core
 
         #region Public Constructors
         /// <summary>
-        /// SweepLine constructor by a list of gEdges
+        /// SweepLine constructor by a list of Edges
         /// </summary>
         /// <param name="edges"></param>
         /// <returns>SweepLine</returns>
-        public static SweepLine ByEdges(List<gEdge> edges)
+        public static SweepLine ByEdges(List<Edge> edges)
         {
             return new SweepLine(edges, SweepLineType.Intersects);
         }
@@ -110,14 +110,14 @@ namespace Graphical.Core
         /// </summary>
         /// <param name="polygons"></param>
         /// <returns>SweepLine</returns>
-        public static SweepLine ByPolygons(List<gPolygon> polygons)
+        public static SweepLine ByPolygons(List<Polygon> polygons)
         {
             return new SweepLine(
                 polygons.SelectMany(p => p.Edges).ToList(),
                 SweepLineType.Intersects);
         }
 
-        public static SweepLine BySubjectClipPolygons(gPolygon subject, gPolygon clip)
+        public static SweepLine BySubjectClipPolygons(Polygon subject, Polygon clip)
         {
             return new SweepLine(subject, clip, SweepLineType.Boolean);
         }
@@ -126,7 +126,7 @@ namespace Graphical.Core
 
         #region Internal Methods
 
-        private void AddNewEvent(gEdge edge, PolygonType polType = PolygonType.None)
+        private void AddNewEvent(Edge edge, PolygonType polType = PolygonType.None)
         {
             SweepEvent swStart = new SweepEvent(edge.StartVertex, edge)
             {
@@ -201,11 +201,11 @@ namespace Graphical.Core
             return false;
         }
 
-        // TODO: Check no coplanar edges.
-        public List<gBase> GetIntersections()
+        // TODO: Check no coplanar Edges.
+        public List<Geometry.Geometry> GetIntersections()
         {
             activeEvents = new List<SweepEvent>();
-            List<gBase> tempIntersections = new List<gBase>();
+            List<Geometry.Geometry> tempIntersections = new List<Geometry.Geometry>();
             this.eventsQ = new MinPriorityQ<SweepEvent>(this.eventsList.Capacity);
             this.eventsQ.AddRange(this.eventsList);
 
@@ -240,15 +240,15 @@ namespace Graphical.Core
             return tempIntersections;
         }
 
-        internal List<gPolygon> ComputeBooleanOperation(BooleanType boolType)
+        internal List<Polygon> ComputeBooleanOperation(BooleanType boolType)
         {
             EventChainer chain = new EventChainer(boolType);
-            List<gPolygon> computedPolygons = new List<gPolygon>();
+            List<Polygon> computedPolygons = new List<Polygon>();
 
             this.eventsQ = new MinPriorityQ<SweepEvent>(this.eventsList.Capacity);
             this.eventsQ.AddRange(this.eventsList);
 
-            // If one of the polygons is empty
+            // If one of the _polygonsDict is empty
             if (subject.Edges.Count * clip.Edges.Count == 0)
             {
                 if(boolType == BooleanType.Differenece)
@@ -311,7 +311,7 @@ namespace Graphical.Core
             return computedPolygons;
         }
 
-        internal void UpdateEventPair(SweepEvent swEvent, gVertex newVertexPair)
+        internal void UpdateEventPair(SweepEvent swEvent, Vertex newVertexPair)
         {
             var pairEvent = swEvent.Pair;
             int index = eventsQ.IndexOf(pairEvent);
@@ -328,15 +328,15 @@ namespace Graphical.Core
             eventsQ.Add(pairEvent.Pair);
         }
 
-        internal void ProcessIntersection(SweepEvent next, SweepEvent prev, List<gBase> intersections = null)
+        internal void ProcessIntersection(SweepEvent next, SweepEvent prev, List<Geometry.Geometry> intersections = null)
         {
-            gBase intersection = next.Edge.Intersection(prev.Edge);
+            Geometry.Geometry intersection = next.Edge.Intersection(prev.Edge);
             bool inserted = false;
             #region Is gVertex
-            if (intersection is gVertex)
+            if (intersection is Vertex)
             {
-                gVertex v = intersection as gVertex;
-                // Intersection is between extremes vertices
+                Vertex v = intersection as Vertex;
+                // Intersection is between extremes Vertices
                 foreach (SweepEvent sw in new List<SweepEvent>() { next, prev })
                 {
                     if (!sw.Edge.Contains(v))
@@ -351,10 +351,10 @@ namespace Graphical.Core
                 }
             }
             #endregion
-            #region Is gEdge
-            else if (intersection is gEdge)
+            #region Is Edge
+            else if (intersection is Edge)
             {
-                gEdge e = intersection as gEdge;
+                Edge e = intersection as Edge;
 
                 // On Case 3 below, last half of prev event is added as intersection,
                 // and on next loop it will be case 1 with the same edge, so this avoids duplicates
@@ -381,7 +381,7 @@ namespace Graphical.Core
                 else if (prev.Vertex.Equals(next.Vertex))
                 {
                     // TODO: check this is true in all cases
-                    gVertex dividingVtx = prev.Pair.Vertex;
+                    Vertex dividingVtx = prev.Pair.Vertex;
                     UpdateEventPair(next, dividingVtx);
                 }
                 // Case 3: same end point, next will be always shorter
@@ -391,7 +391,7 @@ namespace Graphical.Core
                 else if (prev.Pair.Vertex.Equals(next.Pair.Vertex))
                 {
                     // TODO: check this is true in all cases
-                    gVertex dividingVtx = next.Vertex;
+                    Vertex dividingVtx = next.Vertex;
                     UpdateEventPair(prev, dividingVtx);
                 }
                 // Case 4: events overlap
@@ -400,8 +400,8 @@ namespace Graphical.Core
                 else if (prev < next && prev.Pair < next.Pair)
                 {
                     // TODO: check this is true in all cases
-                    gVertex prevDividingVtx = next.Vertex;
-                    gVertex nextDividingVtx = prev.Pair.Vertex;
+                    Vertex prevDividingVtx = next.Vertex;
+                    Vertex nextDividingVtx = prev.Pair.Vertex;
 
                     UpdateEventPair(prev, prevDividingVtx);
                     UpdateEventPair(next, nextDividingVtx);
@@ -412,8 +412,8 @@ namespace Graphical.Core
                 else if (prev < next && prev.Pair > next.Pair)
                 {
                     next.Label = SweepEventLabel.NoContributing;
-                    gVertex dividingVtx = next.Vertex;
-                    gVertex pairDividingVtx = next.Pair.Vertex;
+                    Vertex dividingVtx = next.Vertex;
+                    Vertex pairDividingVtx = next.Pair.Vertex;
 
                     // Storing reference to prevPair before updating it
                     var prevPair = prev.Pair;
@@ -444,7 +444,7 @@ namespace Graphical.Core
                 next.IsInside = false;
                 next.InOut = false;
             }
-            // They intersect on the event's vertices
+            // They intersect on the event's Vertices
             else if (next.polygonType == prev.polygonType)
             {
                 next.IsInside = prev.IsInside;

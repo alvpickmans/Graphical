@@ -12,12 +12,12 @@ namespace Graphical
     public static class Algorithms
     {
         
-        public static Graph Dijkstra(Graph graph, gVertex origin, gVertex destination, Graph tempGraph = null)
+        public static Graph Dijkstra(Graph graph, Vertex origin, Vertex destination, Graph tempGraph = null)
         {
-            MinPriorityQ<gVertex, double> Q = new MinPriorityQ<gVertex, double>();
+            MinPriorityQ<Vertex, double> Q = new MinPriorityQ<Vertex, double>();
             bool originInGraph = false;
 
-            foreach(gVertex v in graph.vertices)
+            foreach(Vertex v in graph.Vertices)
             {
                 if (v.Equals(origin))
                 {
@@ -30,7 +30,7 @@ namespace Graphical
                 }
             }
 
-            //If tempGraph is not null, means graph doesn't contain origin and/or destination vertices.
+            //If tempGraph is not null, means graph doesn't contain origin and/or destination Vertices.
             if (!originInGraph)
             {
                 Q.Add(origin, 0);
@@ -38,27 +38,27 @@ namespace Graphical
 
             if (!graph.Contains(destination)) { Q.Add(destination, Double.PositiveInfinity); }
 
-            Dictionary<gVertex, gVertex> ParentVertices = new Dictionary<gVertex, gVertex>();
-            List<gVertex> S = new List<gVertex>();
+            Dictionary<Vertex, Vertex> ParentVertices = new Dictionary<Vertex, Vertex>();
+            List<Vertex> S = new List<Vertex>();
 
             while (Q.Size > 0)
             {
                 double minDistance = Q.PeekValue();
-                gVertex vertex = Q.Take();
+                Vertex vertex = Q.Take();
                 S.Add(vertex);
 
                 if (vertex.Equals(destination)) { break; }
 
-                List<gEdge> edges = new List<gEdge>();
+                List<Edge> edges = new List<Edge>();
                 edges.AddRange(graph.GetVertexEdges(vertex));
-                if(tempGraph != null && tempGraph.edges.Any())
+                if(tempGraph != null && tempGraph.Edges.Any())
                 {
                     edges.AddRange(tempGraph.GetVertexEdges(vertex));
                 }
 
-                foreach(gEdge e in edges)
+                foreach(Edge e in edges)
                 {
-                    gVertex w = e.GetVertexPair(vertex);
+                    Vertex w = e.GetVertexPair(vertex);
                     double newLength = minDistance + e.Length;
                     
                     if(!S.Contains(w) && newLength < Q.GetValue(w))
@@ -72,15 +72,15 @@ namespace Graphical
             }
 
             Graph path = new Graph();
-            gVertex dest = destination;
+            Vertex dest = destination;
             while (dest != origin)
             {
-                gVertex parent = ParentVertices[dest];
-                path.AddEdge(new gEdge(parent, dest));
+                Vertex parent = ParentVertices[dest];
+                path.AddEdge(Edge.ByStartVertexEndVertex(parent, dest));
                 dest = parent;
             }
-            // Reversing edges list so they will be sorted from origin to target
-            path.edges.Reverse();
+            // Reversing Edges list so they will be sorted from origin to target
+            path.Edges.Reverse();
             return path;
             
         }

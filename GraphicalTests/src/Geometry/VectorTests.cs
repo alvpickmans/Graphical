@@ -10,12 +10,12 @@ using Graphical.Extensions;
 namespace Graphical.Geometry.Tests
 {
     [TestFixture]
-    public class gVectorTests
+    public class VectorTests
     {
         [Test]
         public void ByCoordinatesTest()
         {
-            gVector v = gVector.ByCoordinates(0, 4, 3);
+            Vector v = Vector.ByCoordinates(0, 4, 3);
             Assert.AreEqual(0, v.X);
             Assert.AreEqual(4, v.Y);
             Assert.AreEqual(3, v.Z);
@@ -25,9 +25,9 @@ namespace Graphical.Geometry.Tests
         [Test]
         public void ByTwoVerticesTest()
         {
-            gVertex vertex1 = gVertex.ByCoordinates(10, 10, 10);
-            gVertex vertex2 = gVertex.ByCoordinates(10, 14, 13);
-            gVector v = gVector.ByTwoVertices(vertex1, vertex2);
+            Vertex vertex1 = Vertex.ByCoordinates(10, 10, 10);
+            Vertex vertex2 = Vertex.ByCoordinates(10, 14, 13);
+            Vector v = Vector.ByTwoVertices(vertex1, vertex2);
             Assert.AreEqual(0, v.X);
             Assert.AreEqual(4, v.Y);
             Assert.AreEqual(3, v.Z);
@@ -52,9 +52,9 @@ namespace Graphical.Geometry.Tests
             var v1 = vectors[0];
             var v2 = vectors[1];
             var v3 = vectors[2];
-            var v4 = gVector.ByCoordinates(-10, 0, 0);
-            var v5 = gVector.ByCoordinates(10, 0.00001, 0);
-            var v6 = gVector.ByCoordinates(10, 0.0000001, 0);
+            var v4 = Vector.ByCoordinates(-10, 0, 0);
+            var v5 = Vector.ByCoordinates(10, 0.00001, 0);
+            var v6 = Vector.ByCoordinates(10, 0.0000001, 0);
             Assert.IsTrue(v1.Angle(v2).AlmostEqualTo(45.0));
             Assert.IsTrue(v1.Angle(v3).AlmostEqualTo(90.0));
             Assert.IsFalse(v4.Angle(v5).AlmostEqualTo(180.0)); // Floating point threshold
@@ -68,7 +68,7 @@ namespace Graphical.Geometry.Tests
             var vectors = TestVectorPair();
             var v1 = vectors[0];
             var v2 = vectors[1];
-            var v3 = gVector.ByCoordinates(34, 100, 43.2);
+            var v3 = Vector.ByCoordinates(34, 100, 43.2);
             var cross12 = v1.Cross(v2);
             var cross13 = v1.Cross(v3);
 
@@ -85,19 +85,19 @@ namespace Graphical.Geometry.Tests
         [Test]
         public void IsParallelToTest()
         {
-            var a = gVector.ByTwoVertices(gVertex.ByCoordinates(0, 0, 0), gVertex.ByCoordinates(0, 10, 10));
-            var b = gVector.ByTwoVertices(gVertex.ByCoordinates(10, 0, 0), gVertex.ByCoordinates(10, 10, 10));
-            var c = gVector.ByCoordinates(5, 15, 10);
+            var a = Vector.ByTwoVertices(Vertex.ByCoordinates(0, 0, 0), Vertex.ByCoordinates(0, 10, 10));
+            var b = Vector.ByTwoVertices(Vertex.ByCoordinates(10, 0, 0), Vertex.ByCoordinates(10, 10, 10));
+            var c = Vector.ByCoordinates(5, 15, 10);
             Assert.IsTrue(a.IsParallelTo(b));
             Assert.IsFalse(a.IsParallelTo(c));
         }
 
-        public gVector[] TestVectorPair()
+        public Vector[] TestVectorPair()
         {
-            var a = gVector.ByCoordinates(0, 10, 10);
-            var b = gVector.ByCoordinates(0, 10, 0);
-            var c = gVector.ByCoordinates(0, 10, -10);
-            return new gVector[] { a, b, c };
+            var a = Vector.ByCoordinates(0, 10, 10);
+            var b = Vector.ByCoordinates(0, 10, 0);
+            var c = Vector.ByCoordinates(0, 10, -10);
+            return new Vector[] { a, b, c };
         }
 
     }

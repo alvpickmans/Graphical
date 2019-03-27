@@ -28,7 +28,7 @@ namespace Graphical.Core
             }
         }
 
-        public List<gPolygon> GetPolygons()
+        public List<Polygon> GetPolygons()
         {
             graph.BuildPolygons();
             return graph.Polygons;
