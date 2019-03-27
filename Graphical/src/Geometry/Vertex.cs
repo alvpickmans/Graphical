@@ -212,17 +212,97 @@ namespace Graphical.Geometry
 
             return vertices.Skip(3).All(vtx => Vector.ByTwoVertices(vertices[0], vtx).Dot(cross).AlmostEqualTo(0));
         }
+
+        /// <summary>
+        /// TODO: Implement Colinear vertices.
+        /// http://mathworld.wolfram.com/Collinear.html
+        /// </summary>
+        /// <param name="vertices"></param>
+        /// <returns></returns>
+        public static bool Colinear(List<Vertex> vertices)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static List<Vertex> ConvexHull(List<Vertex> vertices)
+        {
+            var verticesCount = vertices.Count();
+            //If less than 3, cannot be created
+            if(verticesCount < 3)
+            {
+                throw new ArgumentOutOfRangeException("vertices", verticesCount, "No ConvexHull can be created with less than 3 vertices");
+            }
+
+            // TODO: Check if they are colinear
+            //if (Vertex.Colinear(vertices))
+            //{
+            //    throw new ArgumentException("Vertices are colinear", "vertices");
+            //}
+
+            Vertex minVertex = Vertex.MinimumVertex(vertices);
+            List<Vertex> sorted = Vertex.OrderByRadianAndDistance(vertices, minVertex);
+
+            Stack<Vertex> stack = new Stack<Vertex>();
+
+            // Adding fist vertex to stack.
+            stack.Push(minVertex);
+            //First vertex on sorted should be the minVertex itself
+            // so just skip it.
+            for (int i = 1; i < verticesCount; i++)
+            {
+                int nextIndex = (i + 1) % verticesCount;
+                var vertex = sorted[i];
+                var nextVertex = sorted[nextIndex];
+
+                double vertexAngle = Vertex.RadAngle(minVertex, vertex);
+                double nextVertexAngle = Vertex.RadAngle(minVertex, nextVertex);
+
+                // If the angle is same as next, skip as we'll only use the fartest 
+                // vertex with same angle.
+                if (vertexAngle.AlmostEqualTo(nextVertexAngle)) { continue; }
+
+                // If stack is still less than 3, keep adding.
+                if(stack.Count < 3)
+                {
+                    stack.Push(vertex);
+                }
+                else
+                {
+                    // While it is not a left turn, remove top on stack
+                    while(Vertex.Orientation(GetNextToTop<Vertex>(stack), stack.Peek(), vertex) != 1)
+                    {
+                        stack.Pop();
+                    }
+                    stack.Push(vertex);
+                }
+
+            }
+
+            return stack.Reverse().ToList();
+        }
         #endregion
+
+        private static T GetNextToTop<T>(Stack<T> stack)
+        {
+            var top = stack.Pop();
+            var next = stack.Peek();
+            stack.Push(top);
+            return next;
+        }
 
         /// <summary>
         /// TODO: To be reviewed
+        /// Returns the orientation of vertices p1-p2-p3
+        /// 0 => Vertices are colinear
+        /// 1 => Counterclock-wise, left turn
+        /// -1 => Clock-wise, right turn
         /// </summary>
-        /// <param name="v1"></param>
+        /// <param name="p1"></param>
         /// <param name="p2"></param>
         /// <param name="p3"></param>
         /// <param name="plane"></param>
         /// <returns></returns>
-        internal static int Orientation(Vertex v1, Vertex p2, Vertex p3, string plane = "xy")
+        internal static int Orientation(Vertex p1, Vertex p2, Vertex p3, string plane = "xy")
         {
             // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
             // for details of below formula.
@@ -230,13 +310,13 @@ namespace Graphical.Geometry
             switch (plane)
             {
                 case "xy":
-                    value = (p2.X - v1.X) * (p3.Y - p2.Y) - (p2.Y - v1.Y) * (p3.X - p2.X);
+                    value = (p2.X - p1.X) * (p3.Y - p2.Y) - (p2.Y - p1.Y) * (p3.X - p2.X);
                     break;
                 case "xz":
-                    value = (p2.X - v1.X) * (p3.Z - p2.Z) - (p2.Z - v1.Z) * (p3.X - p2.X);
+                    value = (p2.X - p1.X) * (p3.Z - p2.Z) - (p2.Z - p1.Z) * (p3.X - p2.X);
                     break;
                 case "yz":
-                    value = (p2.Y - v1.Y) * (p3.Z - p2.Z) - (p2.Z - v1.Z) * (p3.Y - p2.Y);
+                    value = (p2.Y - p1.Y) * (p3.Z - p2.Z) - (p2.Z - p1.Z) * (p3.Y - p2.Y);
                     break;
                 default:
                     throw new Exception("Plane not defined");

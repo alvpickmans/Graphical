@@ -46,5 +46,25 @@ namespace Graphical.Geometry.Tests
             Assert.IsFalse(Vertex.Coplanar(new List<Vertex>() { c, d, e, f}));
         }
         
+        [Test]
+        public void ConvexHullTest()
+        {
+            var a = Vertex.ByCoordinates(1, 1);
+            var b = Vertex.ByCoordinates(1, 3);
+            var c = Vertex.ByCoordinates(2, 2);
+            var d = Vertex.ByCoordinates(2, 3);
+            var e = Vertex.ByCoordinates(3, 2);
+            var f = Vertex.ByCoordinates(3, 0);
+            var g = Vertex.ByCoordinates(4, 1);
+            var h = Vertex.ByCoordinates(4, 3);
+            var i = Vertex.ByCoordinates(5, 1);
+            var j = Vertex.ByCoordinates(5, 4);
+            var k = Vertex.ByCoordinates(6, 2);
+
+            var convexHull = Vertex.ConvexHull(new List<Vertex>() { a, b, c, d, e, f, g, h, i, j, k });
+
+            Assert.AreEqual(6, convexHull.Count);
+        }
+
     }
 }
