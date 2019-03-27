@@ -22,13 +22,13 @@ namespace Graphical.Graphs
 
         #endregion
 
-        #region Internal Constructors
-        internal VisibilityGraph() : base()
+        #region Private Constructors
+        private VisibilityGraph() : base()
         {
             baseGraph = new Graph();
         }
 
-        public VisibilityGraph(Graph _baseGraph, bool reducedGraph, bool halfScan = true) : base()
+        private VisibilityGraph(Graph _baseGraph, bool reducedGraph, bool halfScan = true) : base()
         {
             baseGraph = _baseGraph;
 
@@ -73,9 +73,9 @@ namespace Graphical.Graphs
         }
         #endregion
 
-        #region Internal Methods
+        #region Private Methods
 
-        internal List<Edge> VisibilityAnalysis(Graph baseGraph, List<Vertex> vertices, bool reducedGraph, bool halfScan)
+        private List<Edge> VisibilityAnalysis(Graph baseGraph, List<Vertex> vertices, bool reducedGraph, bool halfScan)
         {
             List<Edge> visibleEdges = new List<Edge>();
 
@@ -102,7 +102,7 @@ namespace Graphical.Graphs
         /// <param name="singleVertices"></param>
         /// <param name="halfScan"></param>
         /// <returns name="visibleVertices">List of Vertices visible from the analysed vertex</returns>
-        public static List<Vertex> VisibleVertices(
+        private static List<Vertex> VisibleVertices(
             Vertex centre,
             Graph baseGraph,
             Vertex origin = null,
@@ -376,7 +376,7 @@ namespace Graphical.Graphs
             return visibleVertices;
         }
 
-        internal static bool EdgeIntersect(Edge halfEdge, Edge edge)
+        private static bool EdgeIntersect(Edge halfEdge, Edge edge)
         {
             //For simplicity, it only takes into acount the 2d projection to the xy plane,
             //so the result will be based on a projection even if points have z values.
@@ -390,7 +390,7 @@ namespace Graphical.Graphs
             return intersects;
         }
 
-        internal static bool EdgeIntersect(Vertex start, Vertex end, Edge edge)
+        private static bool EdgeIntersect(Vertex start, Vertex end, Edge edge)
         {
             //For simplicity, it only takes into acount the 2d projection to the xy plane,
             //so the result will be based on a porjection even if points have z values.
@@ -404,7 +404,7 @@ namespace Graphical.Graphs
             return intersects;
         }
 
-        internal static bool EdgeIntersectProjection(
+        private static bool EdgeIntersectProjection(
             Vertex p1,
             Vertex q1,
             Vertex p2,
@@ -439,7 +439,7 @@ namespace Graphical.Graphs
 
         }
 
-        internal static bool EdgeInPolygon(Vertex v1, Vertex v2, Graph graph)
+        private static bool EdgeInPolygon(Vertex v1, Vertex v2, Graph graph)
         {
             //Not on the same polygon
             if (v1.Parent.Id != v2.Parent.Id) { return false; }
@@ -449,7 +449,7 @@ namespace Graphical.Graphs
             return graph._polygonsDict[v1.Parent.Id].ContainsVertex(midVertex);
         }
 
-        internal static bool IsBoundaryVertex(Vertex vertex, Graph graph)
+        private static bool IsBoundaryVertex(Vertex vertex, Graph graph)
         {
             if(vertex.Parent is Polygon parent)
             {
