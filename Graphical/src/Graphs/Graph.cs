@@ -18,11 +18,6 @@ namespace Graphical.Graphs
         #region Private Properties
 
         /// <summary>
-        /// GUID to verify uniqueness of graph when cloned
-        /// </summary>
-        internal Guid _graphID { get; private set; }
-
-        /// <summary>
         /// Polygons dictionary with their Id as dictionary key
         /// </summary>
         internal Dictionary<int, Polygon> _polygonsDict = new Dictionary<int, Polygon>();
@@ -60,13 +55,11 @@ namespace Graphical.Graphs
         public Graph()
         {
             Edges = new List<Edge>();
-            _graphID = Guid.NewGuid();
         }
 
         public Graph(List<Polygon> polygonList)
         {
             Edges = new List<Edge>();
-            _graphID = Guid.NewGuid();
 
             // Adding _polygonsDict to Graph
             for (int i = 0; i < polygonList.Count; i++)
