@@ -16,8 +16,19 @@ namespace Graphical.Geometry
     {
 
         #region Properties
+        /// <summary>
+        /// X Coordinate
+        /// </summary>
         public double X { get; private set; }
+
+        /// <summary>
+        /// Y Coordinate
+        /// </summary>
         public double Y { get; private set; }
+
+        /// <summary>
+        /// Z Coordinate
+        /// </summary>
         public double Z { get; private set; }
 
         #endregion
@@ -29,11 +40,7 @@ namespace Graphical.Geometry
             Y = y.Round();
             Z = z.Round();
         }
-
-        internal static Vertex ByCoordinatesArray(double[] array)
-        {
-            return new Vertex(array[0], array[1], array[3]);
-        }
+        
         #endregion
         #region Public Constructors
         /// <summary>
@@ -49,6 +56,20 @@ namespace Graphical.Geometry
         }
 
         /// <summary>
+        /// Vertex constructor by a array of 3 coordinates
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static Vertex ByCoordinatesArray(double[] array)
+        {
+            if(array.Count() != 3)
+            {
+                throw new ArgumentOutOfRangeException("array", array.Count(), "Number of coordinates provided must be 3");
+            }
+            return new Vertex(array[0], array[1], array[2]);
+        }
+
+        /// <summary>
         /// Returns the vertex in between two Vertices.
         /// </summary>
         /// <param name="v1"></param>
@@ -60,20 +81,148 @@ namespace Graphical.Geometry
             return new Vertex(x, y, z);
         }
 
+        /// <summary>
+        /// Returns the Origin vertex at 0, 0, 0;
+        /// </summary>
+        /// <returns></returns>
         public static Vertex Origin()
         {
             return new Vertex(0, 0, 0);
         }
         #endregion
-                
-        public static List<Vertex> OrderByRadianAndDistance (List<Vertex> vertices, Vertex centre = null)
+
+        #region Public Methods
+        /// <summary>
+        /// Returns the Minimum VErtex from a set of vertices,
+        /// being this with the minimum Y, X and then Z coordinates.
+        /// </summary>
+        /// <param name="vertices"></param>
+        /// <returns></returns>
+        public static Vertex MinimumVertex(List<Vertex> vertices)
         {
-            if(centre == null) { centre = Vertex.MinimumVertex(vertices); }
-            return vertices.OrderBy(v => RadAngle(centre, v)).ThenBy(v => centre.DistanceTo(v)).ToList();
-            
+            return vertices.OrderBy(v => v.Y).ThenBy(v => v.X).ThenBy(v => v.Z).ToList().First();
         }
 
-        public static int Orientation(Vertex v1, Vertex p2, Vertex p3, string plane = "xy")
+        /// <summary>
+        /// Sorts a list of vertices by their polar angle  and distance
+        /// around a centre point. At equal angle, closest vertex comes first.
+        /// If centre is not provided, the Minimum Vertex of the set will be used as Centre.
+        /// </summary>
+        /// <param name="vertices">Vertices to sort</param>
+        /// <param name="centre">Centre</param>
+        /// <returns></returns>
+        public static List<Vertex> OrderByRadianAndDistance(List<Vertex> vertices, Vertex centre = null)
+        {
+            if (centre == null) { centre = Vertex.MinimumVertex(vertices); }
+            return vertices.OrderBy(v => RadAngle(centre, v)).ThenBy(v => centre.DistanceTo(v)).ToList();
+
+        }
+
+        /// <summary>
+        /// Euclidean distance to another Vertex
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <returns></returns>
+        public double DistanceTo(Vertex vertex)
+        {
+            return Math.Sqrt(Math.Pow(vertex.X - X, 2) + Math.Pow(vertex.Y - Y, 2) + Math.Pow(vertex.Z - Z, 2));
+        }
+
+        /// <summary>
+        /// Euclidean minimum distance to an Edge
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public double DistanceTo(Edge edge)
+        {
+            // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
+            Vector v1 = Vector.ByTwoVertices(this, edge.StartVertex);
+            Vector v2 = Vector.ByTwoVertices(this, edge.EndVertex);
+            Vector numerator = v1.Cross(v2);
+            Vector denominator = Vector.ByTwoVertices(edge.EndVertex, edge.StartVertex);
+            return numerator.Length / denominator.Length;
+        }
+
+        /// <summary>
+        /// Translates a Vertex by a given Vector
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <returns></returns>
+        public Vertex Translate(Vector vector)
+        {
+            return Vertex.ByCoordinates(this.X + vector.X, this.Y + vector.Y, this.Z + vector.Z);
+        }
+
+        /// <summary>
+        /// Translates a Vertex by a given Vector and distance
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <param name="distance"></param>
+        /// <returns></returns>
+        public Vertex Translate(Vector vector, double distance)
+        {
+            Vector normalized = vector.Normalized();
+            Vector distVector = normalized * distance;
+            return this.Translate(distVector);
+        }
+
+        /// <summary>
+        /// Determines if the Vertex is contained a given Edge.
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public bool OnEdge(Edge edge)
+        {
+            return this.OnEdge(edge.StartVertex, edge.EndVertex);
+        }
+
+        /// <summary>
+        /// Determines if the Vertex is contained on an
+        /// Edge defined by a start and end vertices
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public bool OnEdge(Vertex start, Vertex end)
+        {
+            if (this.Equals(start) || this.Equals(end)) { return true; }
+            // https://www.lucidarme.me/check-if-a-point-belongs-on-a-line-segment/
+            Vector startEnd = Vector.ByTwoVertices(start, end);
+            Vector startMid = Vector.ByTwoVertices(start, this);
+            Vector endMid = Vector.ByTwoVertices(this, end);
+            if (!startMid.IsParallelTo(endMid)) { return false; } // Not aligned
+            double dotAC = startEnd.Dot(startMid);
+            double dotAB = startEnd.Dot(startEnd);
+            return 0 <= dotAC && dotAC <= dotAB;
+        }
+
+        /// <summary>
+        /// Checks if a list of Vertices are coplanar. True for three or less Vertices.
+        /// </summary>
+        /// <param name="vertices"></param>
+        /// <returns>Boolean</returns>
+        public static bool Coplanar(List<Vertex> vertices)
+        {
+            // https://math.stackexchange.com/questions/1330357/show-that-four-points-are-coplanar
+            if (!vertices.Any()) { throw new ArgumentOutOfRangeException("Vertices", "Vertices list cannot be empty"); }
+            if (vertices.Count <= 3) { return true; }
+            Vector ab = Vector.ByTwoVertices(vertices[0], vertices[1]);
+            Vector ac = Vector.ByTwoVertices(vertices[0], vertices[2]);
+            Vector cross = ab.Cross(ac);
+
+            return vertices.Skip(3).All(vtx => Vector.ByTwoVertices(vertices[0], vtx).Dot(cross).AlmostEqualTo(0));
+        }
+        #endregion
+
+        /// <summary>
+        /// TODO: To be reviewed
+        /// </summary>
+        /// <param name="v1"></param>
+        /// <param name="p2"></param>
+        /// <param name="p3"></param>
+        /// <param name="plane"></param>
+        /// <returns></returns>
+        internal static int Orientation(Vertex v1, Vertex p2, Vertex p3, string plane = "xy")
         {
             // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
             // for details of below formula.
@@ -98,7 +247,14 @@ namespace Graphical.Geometry
             return (value > 0) ? 1 : -1; //Counter clock or clock wise
         }
 
-        public static double RadAngle(Vertex centre, Vertex vertex)
+
+        /// <summary>
+        /// TODO: To be reviewed
+        /// </summary>
+        /// <param name="centre"></param>
+        /// <param name="vertex"></param>
+        /// <returns></returns>
+        internal static double RadAngle(Vertex centre, Vertex vertex)
         {
             //Rad angles http://math.rice.edu/~pcmi/sphere/drg_txt.html
             double dx = vertex.X - centre.X;
@@ -137,79 +293,20 @@ namespace Graphical.Geometry
             return Math.Atan(dy / dx);
         }
 
-        public static double ArcRadAngle (Vertex centre, Vertex start, Vertex end)
+
+        /// <summary>
+        /// TODO: To be reviewed
+        /// </summary>
+        /// <param name="centre"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        internal static double ArcRadAngle (Vertex centre, Vertex start, Vertex end)
         {
             double a = Math.Pow((end.X - centre.X), 2) + Math.Pow((end.Y - centre.Y), 2);
             double b = Math.Pow((end.X - start.X), 2) + Math.Pow((end.Y - start.Y), 2);
             double c = Math.Pow((centre.X - start.X), 2) + Math.Pow((centre.Y - start.Y), 2);
             return Math.Acos((a + c - b) / (2 * Math.Sqrt(a) * Math.Sqrt(c)));
-        }
-
-        internal static Vertex MinimumVertex(List<Vertex> vertices)
-        {
-            return vertices.OrderBy(v => v.Y).ThenBy(v => v.X).ThenBy(v => v.Z).ToList().First();
-        }
-
-        public double DistanceTo(Vertex vertex)
-        {
-            return Math.Sqrt(Math.Pow(vertex.X - X, 2) + Math.Pow(vertex.Y - Y, 2) + Math.Pow(vertex.Z - Z, 2));
-        }
-
-        public double DistanceTo(Edge edge)
-        {
-            // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
-            Vector v1 = Vector.ByTwoVertices(this, edge.StartVertex);
-            Vector v2 = Vector.ByTwoVertices(this, edge.EndVertex);
-            Vector numerator = v1.Cross(v2);
-            Vector denominator = Vector.ByTwoVertices(edge.EndVertex, edge.StartVertex);
-            return numerator.Length / denominator.Length;
-        }
-        
-        public Vertex Translate(Vector vector)
-        {
-            return Vertex.ByCoordinates(this.X + vector.X, this.Y + vector.Y, this.Z + vector.Z);
-        }
-
-        public Vertex Translate(Vector vector, double distance)
-        {
-            Vector normalized = vector.Normalized();
-            Vector distVector = normalized * distance;
-            return this.Translate(distVector);
-        }
-
-        public bool OnEdge(Edge edge)
-        {
-            return this.OnEdge(edge.StartVertex, edge.EndVertex);
-        }
-
-        public bool OnEdge(Vertex start, Vertex end)
-        {
-            if(this.Equals(start) || this.Equals(end)) { return true; }
-            // https://www.lucidarme.me/check-if-a-point-belongs-on-a-line-segment/
-            Vector startEnd = Vector.ByTwoVertices(start, end);
-            Vector startMid = Vector.ByTwoVertices(start, this);
-            Vector endMid = Vector.ByTwoVertices(this, end);
-            if (!startMid.IsParallelTo(endMid)){ return false; } // Not aligned
-            double dotAC = startEnd.Dot(startMid);
-            double dotAB = startEnd.Dot(startEnd);
-            return 0 <= dotAC && dotAC <= dotAB;
-        }
-
-        /// <summary>
-        /// Checks if a list of Vertices are coplanar. True for three or less Vertices.
-        /// </summary>
-        /// <param name="vertices"></param>
-        /// <returns>Boolean</returns>
-        public static bool Coplanar(List<Vertex> vertices)
-        {
-            // https://math.stackexchange.com/questions/1330357/show-that-four-points-are-coplanar
-            if (!vertices.Any()) { throw new ArgumentOutOfRangeException("Vertices", "Vertices list cannot be empty"); }
-            if (vertices.Count <= 3) { return true; }
-            Vector ab = Vector.ByTwoVertices(vertices[0], vertices[1]);
-            Vector ac = Vector.ByTwoVertices(vertices[0], vertices[2]);
-            Vector cross = ab.Cross(ac);
-
-            return vertices.Skip(3).All(vtx => Vector.ByTwoVertices(vertices[0], vtx).Dot(cross).AlmostEqualTo(0));
         }
 
         internal static bool OnEdgeProjection(Vertex start, Vertex point, Vertex end, string plane = "xy")
