@@ -334,7 +334,7 @@ namespace Graphical.Geometry
         /// <param name="centre"></param>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        internal static double RadAngle(Vertex centre, Vertex vertex)
+        public static double RadAngle(Vertex centre, Vertex vertex)
         {
             //Rad angles http://math.rice.edu/~pcmi/sphere/drg_txt.html
             double dx = vertex.X - centre.X;
@@ -381,7 +381,7 @@ namespace Graphical.Geometry
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <returns></returns>
-        internal static double ArcRadAngle (Vertex centre, Vertex start, Vertex end)
+        public static double ArcRadAngle (Vertex centre, Vertex start, Vertex end)
         {
             double a = Math.Pow((end.X - centre.X), 2) + Math.Pow((end.Y - centre.Y), 2);
             double b = Math.Pow((end.X - start.X), 2) + Math.Pow((end.Y - start.Y), 2);

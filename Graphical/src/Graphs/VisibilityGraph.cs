@@ -28,7 +28,7 @@ namespace Graphical.Graphs
             baseGraph = new Graph();
         }
 
-        private VisibilityGraph(Graph _baseGraph, bool reducedGraph, bool halfScan = true) : base()
+        private VisibilityGraph(Graph _baseGraph, bool reducedGraph, bool halfScan) : base()
         {
             baseGraph = _baseGraph;
 
@@ -42,6 +42,17 @@ namespace Graphical.Graphs
         #endregion
 
         #region Public Constructors
+        /// <summary>
+        /// Computes the VisibilityGraph from a Graph context.
+        /// </summary>
+        /// <param name="graph">The Base Graph context</param>
+        /// <param name="reducedGraph"></param>
+        /// <param name="halfScan"></param>
+        /// <returns></returns>
+        public static VisibilityGraph ByBaseGraph(Graph graph, bool reducedGraph = true, bool halfScan = true)
+        {
+            return new VisibilityGraph(graph, reducedGraph, halfScan);
+        }
 
         public static List<Vertex> VertexVisibility(Vertex origin, Graph baseGraph)
         {
