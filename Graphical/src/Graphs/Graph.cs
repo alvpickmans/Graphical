@@ -243,26 +243,6 @@ namespace Graphical.Graphs
         #endregion
 
         #region Override Methods
-        //TODO: Improve overriding equality methods as per http://www.loganfranken.com/blog/687/overriding-equals-in-c-part-1/
-
-        /// <summary>
-        /// Customizing the render of gVertex
-        /// </summary>
-        /// <param name="package"></param>
-        /// <param name="parameters"></param>
-        //[IsVisibleInDynamoLibrary(false)]
-        //public void Tessellate(IRenderPackage package, TessellationParameters parameters)
-        //{
-        //    foreach(Vertex v in Vertices)
-        //    {
-        //        v.Tessellate(package, parameters);
-        //    }
-        //    foreach(Edge e in Edges)
-        //    {
-        //        e.Tessellate(package, parameters);
-        //    }
-        //}
-
         /// <summary>
         /// Implementation of IClonable interface
         /// </summary>
