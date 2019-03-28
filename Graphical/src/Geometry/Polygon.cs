@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Graphical.Core;
+//using Graphical.Core;
 
 namespace Graphical.Geometry
 {
@@ -160,21 +160,6 @@ namespace Graphical.Geometry
             return newPolygon;
         }
 
-
-        /// <summary>
-        /// R
-        /// </summary>
-        /// <param name="edge"></param>
-        /// <param name="vertex"></param>
-        /// <returns> 
-        ///     greater than 0 for vertex left of the edge
-        ///     equal 0 for vertex on the edge
-        ///     less than 0 for vertex right of the edege
-        /// </returns>
-        internal double IsLeft(Edge edge, Vertex vertex)
-        {
-            return (edge.EndVertex.X - edge.StartVertex.X) * (vertex.Y - edge.StartVertex.Y) - (edge.EndVertex.Y - edge.StartVertex.Y) * (vertex.X - edge.StartVertex.X);
-        }
         #endregion
 
         #region Public Methods
@@ -202,7 +187,7 @@ namespace Graphical.Geometry
                     {
                         if (edge.EndVertex.Y > vertex.Y)
                         {
-                            if(IsLeft(edge, vertex) > 0) {
+                            if(vertex.IsLeftFrom(edge) > 0) {
                                 ++windNumber;
                             }
                         }
@@ -211,7 +196,7 @@ namespace Graphical.Geometry
                     {
                         if (edge.EndVertex.Y < vertex.Y)
                         {
-                            if(IsLeft(edge, vertex) < 0)
+                            if(vertex.IsLeftFrom(edge) < 0)
                             {
                                 --windNumber;
                             }
@@ -241,26 +226,25 @@ namespace Graphical.Geometry
         /// <summary>
         /// Checks if a polygon is planar
         /// </summary>
-        /// <param name="polygon">Polygon</param>
         /// <returns>boolean</returns>
-        public static bool IsPlanar(Polygon polygon)
+        public bool IsPlanar()
         {
-            return Vertex.Coplanar(polygon.Vertices);
+            return Vertex.Coplanar(this.Vertices);
         }
 
         /// <summary>
-        /// Checks if two gPolygons are coplanar.
+        /// Checks if two Polygons are coplanar.
         /// </summary>
-        /// <param name="polygon">Polygon</param>
-        /// <param name="otherPolygon">Other Polygon</param>
+        /// <param name="polygon">Other Polygon</param>
         /// <returns></returns>
-        public static bool Coplanar(Polygon polygon, Polygon otherPolygon)
+        public bool AreCoplanar(Polygon polygon)
         {
-            List<Vertex> joinedVertices = new List<Vertex>(polygon.Vertices);
-            joinedVertices.AddRange(otherPolygon.Vertices);
+            List<Vertex> joinedVertices = new List<Vertex>(this.Vertices);
+            joinedVertices.AddRange(polygon.Vertices);
 
             return Vertex.Coplanar(joinedVertices);
         }
+
 
         ///// <summary>
         ///// Determines if two _polygonsDict are intersecting
