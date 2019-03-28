@@ -110,6 +110,7 @@
     <Compile Include="src\Geometry\Polygon.cs" />
     <Compile Include="src\Geometry\Ray.cs" />
     <Compile Include="src\Geometry\Vector.cs" />
+    <Compile Include="src\Graphs\ConvexGraph.cs" />
     <Compile Include="src\Graphs\EdgeKey.cs" />
     <Compile Include="src\Graphs\Graph.cs" />
     <Compile Include="src\Geometry\Vertex.cs" />
