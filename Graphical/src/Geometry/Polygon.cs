@@ -262,99 +262,99 @@ namespace Graphical.Geometry
             return Vertex.Coplanar(joinedVertices);
         }
 
-        /// <summary>
-        /// Determines if two _polygonsDict are intersecting
-        /// </summary>
-        /// <param name="polygon"></param>
-        /// <returns></returns>
-        public bool Intersects(Polygon polygon)
-        {
-            if (!this.BoundingBox.Intersects(polygon.BoundingBox)) { return false; }
-            var sw = new SweepLine(this, polygon, SweepLineType.Intersects);
-            return sw.HasIntersection();
-        }
+        ///// <summary>
+        ///// Determines if two _polygonsDict are intersecting
+        ///// </summary>
+        ///// <param name="polygon"></param>
+        ///// <returns></returns>
+        //public bool Intersects(Polygon polygon)
+        //{
+        //    if (!this.BoundingBox.Intersects(polygon.BoundingBox)) { return false; }
+        //    var sw = new SweepLine(this, polygon, SweepLineType.Intersects);
+        //    return sw.HasIntersection();
+        //}
         
-        /// <summary>
-        /// Performes a Union boolean operation between this polygon and a clipping one.
-        /// </summary>
-        /// <param name="clip"></param>
-        /// <returns></returns>
-        public List<Polygon> Union(Polygon clip)
-        {
+        ///// <summary>
+        ///// Performes a Union boolean operation between this polygon and a clipping one.
+        ///// </summary>
+        ///// <param name="clip"></param>
+        ///// <returns></returns>
+        //public List<Polygon> Union(Polygon clip)
+        //{
             
-            var swLine = new SweepLine(this, clip, SweepLineType.Boolean);
+        //    var swLine = new SweepLine(this, clip, SweepLineType.Boolean);
 
-            return swLine.ComputeBooleanOperation(BooleanType.Union);
-        }
+        //    return swLine.ComputeBooleanOperation(BooleanType.Union);
+        //}
 
-        public static List<Polygon> Union(List<Polygon> subjects, List<Polygon> clips)
-        {
-            List<Polygon> result = new List<Polygon>(subjects);
-            int count = 0;
-            foreach (Polygon clip in clips)
-            {
-                for (var i = count; i < result.Count; i++)
-                {
-                    result.AddRange(result[i].Union(clip));
-                    count++;
-                }
-            }
-            return result;
-        }
+        //public static List<Polygon> Union(List<Polygon> subjects, List<Polygon> clips)
+        //{
+        //    List<Polygon> result = new List<Polygon>(subjects);
+        //    int count = 0;
+        //    foreach (Polygon clip in clips)
+        //    {
+        //        for (var i = count; i < result.Count; i++)
+        //        {
+        //            result.AddRange(result[i].Union(clip));
+        //            count++;
+        //        }
+        //    }
+        //    return result;
+        //}
 
-        /// <summary>
-        /// Performes a Difference boolean operation between this polygon and a clipping one.
-        /// </summary>
-        /// <param name="clip"></param>
-        /// <returns></returns>
-        public List<Polygon> Difference(Polygon clip)
-        {
-            var swLine = new SweepLine(this, clip, SweepLineType.Boolean);
+        ///// <summary>
+        ///// Performes a Difference boolean operation between this polygon and a clipping one.
+        ///// </summary>
+        ///// <param name="clip"></param>
+        ///// <returns></returns>
+        //public List<Polygon> Difference(Polygon clip)
+        //{
+        //    var swLine = new SweepLine(this, clip, SweepLineType.Boolean);
 
-            return swLine.ComputeBooleanOperation(BooleanType.Differenece);
-        }
+        //    return swLine.ComputeBooleanOperation(BooleanType.Differenece);
+        //}
 
-        public static List<Polygon> Difference(List<Polygon> subjects, List<Polygon> clips)
-        {
-            List<Polygon> result = new List<Polygon>(subjects);
-            int count = 0;
-            foreach (Polygon clip in clips)
-            {
-                for(var i = count; i < result.Count; i++)
-                {
-                    result.AddRange(result[i].Difference(clip));
-                    count++;
-                }
-            }
-            return result;
-        }
+        //public static List<Polygon> Difference(List<Polygon> subjects, List<Polygon> clips)
+        //{
+        //    List<Polygon> result = new List<Polygon>(subjects);
+        //    int count = 0;
+        //    foreach (Polygon clip in clips)
+        //    {
+        //        for(var i = count; i < result.Count; i++)
+        //        {
+        //            result.AddRange(result[i].Difference(clip));
+        //            count++;
+        //        }
+        //    }
+        //    return result;
+        //}
 
-        /// <summary>
-        /// Performes a Intersection boolean operation between this polygon and a clipping one.
-        /// </summary>
-        /// <param name="clip"></param>
-        /// <returns></returns>
-        public List<Polygon> Intersection(Polygon clip)
-        {
-            var swLine = new SweepLine(this, clip, SweepLineType.Boolean);
+        ///// <summary>
+        ///// Performes a Intersection boolean operation between this polygon and a clipping one.
+        ///// </summary>
+        ///// <param name="clip"></param>
+        ///// <returns></returns>
+        //public List<Polygon> Intersection(Polygon clip)
+        //{
+        //    var swLine = new SweepLine(this, clip, SweepLineType.Boolean);
 
-            return swLine.ComputeBooleanOperation(BooleanType.Intersection);
-        }
+        //    return swLine.ComputeBooleanOperation(BooleanType.Intersection);
+        //}
 
-        public static List<Polygon> Intersection(List<Polygon> subjects, List<Polygon> clips)
-        {
-            List<Polygon> result = new List<Polygon>(subjects);
-            int count = 0;
-            foreach (Polygon clip in clips)
-            {
-                for (var i = count; i < result.Count; i++)
-                {
-                    result.AddRange(result[i].Intersection(clip));
-                    count++;
-                }
-            }
-            return result;
-        }
+        //public static List<Polygon> Intersection(List<Polygon> subjects, List<Polygon> clips)
+        //{
+        //    List<Polygon> result = new List<Polygon>(subjects);
+        //    int count = 0;
+        //    foreach (Polygon clip in clips)
+        //    {
+        //        for (var i = count; i < result.Count; i++)
+        //        {
+        //            result.AddRange(result[i].Intersection(clip));
+        //            count++;
+        //        }
+        //    }
+        //    return result;
+        //}
 
         #endregion
 
