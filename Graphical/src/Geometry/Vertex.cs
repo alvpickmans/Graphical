@@ -176,6 +176,27 @@ namespace Graphical.Geometry
             return this.OnEdge(edge.StartVertex, edge.EndVertex);
         }
 
+
+        /// <summary>
+        /// Determins if a Vertex lies on the left-hand side of an edge on the XY plane.
+        /// 1 => for vertex left of the edge
+        /// 0 => for vertex on the edge
+        /// -1 => for vertex right of the edege
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <param name="vertex"></param>
+        /// <returns> 
+        ///     
+        /// </returns>
+        public int IsLeftFrom(Edge edge)
+        {
+            double value =  (edge.EndVertex.X - edge.StartVertex.X) * (this.Y - edge.StartVertex.Y) - (edge.EndVertex.Y - edge.StartVertex.Y) * (this.X - edge.StartVertex.X);
+
+            if (value.AlmostEqualTo(0)) { return 0; }
+
+            return value > 0 ? 1 : -1;
+        }
+
         /// <summary>
         /// Determines if the Vertex is contained on an
         /// Edge defined by a start and end vertices

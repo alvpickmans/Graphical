@@ -481,7 +481,6 @@ namespace Graphical.Graphs
         /// <returns></returns>
         public static VisibilityGraph AddEdges(VisibilityGraph visibilityGraph, List<Edge> edges)
         {
-            //TODO: implement Dynamo' Trace 
             if (edges == null) { throw new NullReferenceException("Edges"); }
             List<Vertex> singleVertices = new List<Vertex>();
 
@@ -510,7 +509,6 @@ namespace Graphical.Graphs
         /// <returns></returns>
         public static VisibilityGraph AddVertices(VisibilityGraph visibilityGraph, List<Vertex> vertices, bool reducedGraph = true)
         {
-            //TODO: Seems that original graph gets updated as well
             if (vertices == null) { throw new NullReferenceException("Vertices"); }
 
             VisibilityGraph newVisGraph = (VisibilityGraph)visibilityGraph.Clone();

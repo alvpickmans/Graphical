@@ -27,9 +27,9 @@ namespace Graphical.Geometry.Tests
             Polygon pol2 = Polygon.ByVertices(new List<Vertex>() { a, e, f });
             Polygon triangleXZPlane = Polygon.ByVertices(new List<Vertex>() { a, g, h });
 
-            Assert.IsTrue(Polygon.IsPlanar(pol1));
-            Assert.IsTrue(Polygon.IsPlanar(pol2));
-            Assert.IsTrue(Polygon.IsPlanar(triangleXZPlane));
+            Assert.IsTrue(pol1.IsPlanar());
+            Assert.IsTrue(pol2.IsPlanar());
+            Assert.IsTrue(triangleXZPlane.IsPlanar());
         }
 
         [Test]

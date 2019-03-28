@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Graphical.Core;
+//using Graphical.Core;
 using Graphical.Geometry;
 
 namespace Graphical.DataStructures.Tests
@@ -21,43 +21,43 @@ namespace Graphical.DataStructures.Tests
             Assert.AreEqual(16, minQueueCustom.Capacity);
         }
 
-        [Test]
-        public void AddTest()
-        {
-            var minQ = TestMinQ();
-            //Assert.AreEqual(10, minQ.Size);
-            //Assert.AreEqual(10, minQ.HeapIndices.Count);
+        //[Test]
+        //public void AddTest()
+        //{
+        //    var minQ = TestMinQ();
+        //    //Assert.AreEqual(10, minQ.Size);
+        //    //Assert.AreEqual(10, minQ.HeapIndices.Count);
 
-            var a1 = Vertex.ByCoordinates(0, 0);
-            var a2 = Vertex.ByCoordinates(10, 10);
-            var b1 = Vertex.ByCoordinates(0, 10);
-            var b2 = Vertex.ByCoordinates(10, 0);
+        //    var a1 = Vertex.ByCoordinates(0, 0);
+        //    var a2 = Vertex.ByCoordinates(10, 10);
+        //    var b1 = Vertex.ByCoordinates(0, 10);
+        //    var b2 = Vertex.ByCoordinates(10, 0);
 
-            List<Edge> edges = new List<Edge>()
-            {
-                Edge.ByStartVertexEndVertex(a1, a2),
-                Edge.ByStartVertexEndVertex(b1,b2)
-            };
+        //    List<Edge> edges = new List<Edge>()
+        //    {
+        //        Edge.ByStartVertexEndVertex(a1, a2),
+        //        Edge.ByStartVertexEndVertex(b1,b2)
+        //    };
 
-            var EventsQ = new MinPriorityQ<SweepEvent>(edges.Count * 2);
+        //    var EventsQ = new MinPriorityQ<SweepEvent>(edges.Count * 2);
 
-            foreach (Edge e in edges)
-            {
-                var sw1 = new SweepEvent(e.StartVertex, e);
-                var sw2 = new SweepEvent(e.EndVertex, e);
-                sw1.Pair = sw2;
-                sw2.Pair = sw1;
-                sw1.IsLeft = sw1 < sw1.Pair;
-                sw2.IsLeft = !sw1.IsLeft;
-                EventsQ.Add(sw2);
-                EventsQ.Add(sw1);
-            }
+        //    foreach (Edge e in edges)
+        //    {
+        //        var sw1 = new SweepEvent(e.StartVertex, e);
+        //        var sw2 = new SweepEvent(e.EndVertex, e);
+        //        sw1.Pair = sw2;
+        //        sw2.Pair = sw1;
+        //        sw1.IsLeft = sw1 < sw1.Pair;
+        //        sw2.IsLeft = !sw1.IsLeft;
+        //        EventsQ.Add(sw2);
+        //        EventsQ.Add(sw1);
+        //    }
 
-            Assert.AreEqual(a1, EventsQ.Take().Vertex);
-            Assert.AreEqual(b1, EventsQ.Take().Vertex);
-            Assert.AreEqual(b2, EventsQ.Take().Vertex);
-            Assert.AreEqual(a2, EventsQ.Take().Vertex);
-        }
+        //    Assert.AreEqual(a1, EventsQ.Take().Vertex);
+        //    Assert.AreEqual(b1, EventsQ.Take().Vertex);
+        //    Assert.AreEqual(b2, EventsQ.Take().Vertex);
+        //    Assert.AreEqual(a2, EventsQ.Take().Vertex);
+        //}
 
         [Test]
         public void TakeTest()
