@@ -386,7 +386,7 @@ namespace Graphical.Geometry
             return true;
         }
 
-        public List<Geometry> IntersectionNaive(Edge edge)
+        private List<Geometry> IntersectionNaive(Edge edge)
         {
             List<Geometry> intersections = new List<Geometry>();
 
@@ -412,6 +412,12 @@ namespace Graphical.Geometry
 
         public List<Geometry> Intersection(Edge edge)
         {
+            // No fast algorithm yet to calculate intersection on concave polygons
+            if (!this.IsConvex())
+            {
+                return this.IntersectionNaive(edge);
+            }
+
             //https://stackoverflow.com/questions/4497841/asymptotically-optimal-algorithm-to-compute-if-a-line-intersects-a-convex-polygo
 
             List<Geometry> intersections = new List<Geometry>();
