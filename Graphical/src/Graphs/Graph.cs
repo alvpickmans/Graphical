@@ -67,7 +67,7 @@ namespace Graphical.Graphs
                 var polygon = polygonList[i];
                 this._polygonsDict.Add(polygon.Id, polygon);
 
-                polygon.Edges.ForEach(edge => this.AddEdge(edge));
+                polygon.Vertices.ForEach(v => this._vertexEdgesDict.Add(v, new List<Edge>()));
             }
         }
 
@@ -126,10 +126,10 @@ namespace Graphical.Graphs
             }
         }
 
-        public List<Vertex> GetAdjecentVertices(Vertex v)
-        {
-            return _vertexEdgesDict[v].Select(edge => edge.GetVertexPair(v)).ToList();
-        }
+        //public List<Vertex> GetAdjecentVertices(Vertex v)
+        //{
+        //    return _vertexEdgesDict[v].Select(edge => edge.GetVertexPair(v)).ToList();
+        //}
 
         /// <summary>
         /// Add edge to the analisys graph

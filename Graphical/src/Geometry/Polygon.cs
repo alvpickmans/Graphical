@@ -161,7 +161,7 @@ namespace Graphical.Geometry
             return newPolygon;
         }
 
-        private Edge DiagonalByVertexIndex(int start, int end)
+        internal Edge DiagonalByVertexIndex(int start, int end)
         {
             var vertexCount = this.Vertices.Count;
             if(start < 0 || start > vertexCount - 1)
@@ -176,6 +176,25 @@ namespace Graphical.Geometry
             return Edge.ByStartVertexEndVertex(this.Vertices[start], this.Vertices[end]);
         }
 
+
+        /// <summary>
+        /// Returns the previous and next vertices of the given vertex.
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <returns></returns>
+        internal Vertex[] GetAdjacentVertices(Vertex vertex)
+        {
+            int index = this.vertices.IndexOf(vertex);
+            if (index == -1)
+            {
+                throw new ArgumentException("Vertex does not belong to polygon", "vertex");
+            }
+
+            int nextIndex = (index + 1) % vertices.Count();
+            int prevIndex = index == 0 ? vertices.Count() - 1 : index - 1;
+
+            return new Vertex[2] { this.vertices[prevIndex], this.vertices[nextIndex] };
+        }
         #endregion
 
         #region Public Methods
@@ -239,6 +258,7 @@ namespace Graphical.Geometry
                 && this.ContainsVertex(edge.EndVertex)
                 && this.ContainsVertex(Vertex.MidVertex(edge.StartVertex, edge.EndVertex));
         }
+
         /// <summary>
         /// Checks if a polygon is planar
         /// </summary>

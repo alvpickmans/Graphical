@@ -156,11 +156,14 @@ namespace Graphical.Graphs
             #endregion
 
             List<Vertex> visibleVertices = new List<Vertex>();
+            Polygon centrePolygon = centre.Parent as Polygon;
             Vertex prev = null;
             bool prevVisible = false;
             for (var i = 0; i < vertices.Count; i++)
             {
                 Vertex vertex = vertices[i];
+                Polygon vertexPolygon = vertex.Parent as Polygon;
+
                 if (vertex.Equals(centre) || vertex.Equals(prev)) { continue; }// v == to centre or to previous when updating graph
                 //Check only half of Vertices as eventually they will become 'v'
                 if (halfScan && Vertex.RadAngle(centre, vertex) > Math.PI) { break; }
@@ -190,11 +193,7 @@ namespace Graphical.Graphs
 
                 //Checking if p is visible from p.
                 bool isVisible = false;
-                Polygon vertexPolygon = null;
 
-                if (vertex.Parent is Polygon) {
-                    baseGraph._polygonsDict.TryGetValue(vertex.Parent.Id, out vertexPolygon);
-                }
                 // If centre is on an edge of a inner polygon vertex belongs, check if the centre-vertex edge lies inside
                 // or if on one of vertex's Edges.
                 if (vertexPolygon != null && !vertexPolygon.isBoundary && vertexPolygon.ContainsVertex(centre))
@@ -266,7 +265,7 @@ namespace Graphical.Graphs
 
                 //If vertex is visible and centre belongs to any polygon, checks
                 //if the visible edge is interior to its polygon
-                if (isVisible && centre.Parent is Polygon && !baseGraph.GetAdjecentVertices(centre).Contains(vertex))
+                if (isVisible && centrePolygon != null && centrePolygon.GetAdjacentVertices(centre).Contains(vertex))
                 {
                     if (IsBoundaryVertex(centre, baseGraph) && IsBoundaryVertex(vertex, baseGraph))
                     {
@@ -296,15 +295,15 @@ namespace Graphical.Graphs
                         // will have the same orientation (both clock or counter-clock wise)
                         
                         // Vertex belongs to a polygon
-                        if (centre.Parent is Polygon && !IsBoundaryVertex(centre, baseGraph))
+                        if (centrePolygon != null && !IsBoundaryVertex(centre, baseGraph))
                         {
-                            var orientationsOrigin = baseGraph.GetAdjecentVertices(centre).Select(otherVertex => Vertex.Orientation(vertex, centre, otherVertex)).ToList();
+                            var orientationsOrigin = centrePolygon.GetAdjacentVertices(centre).Select(otherVertex => Vertex.Orientation(vertex, centre, otherVertex)).ToList();
                             isOriginExtreme = orientationsOrigin.All(o => o == orientationsOrigin.First());
                         }
 
                         if(centre.Parent is Polygon && !IsBoundaryVertex(vertex, baseGraph))
                         {
-                            var orientationsTarget = baseGraph.GetAdjecentVertices(vertex).Select(otherVertex => Vertex.Orientation(centre, vertex, otherVertex)).ToList();
+                            var orientationsTarget = centrePolygon.GetAdjacentVertices(vertex).Select(otherVertex => Vertex.Orientation(centre, vertex, otherVertex)).ToList();
                             isTargetExtreme = orientationsTarget.All(o => o == orientationsTarget.First());
                         }
 
@@ -328,14 +327,15 @@ namespace Graphical.Graphs
                     }
                 }
 
-                if(isVisible && maxVisibility && vertex.Parent is Polygon)
+                if(isVisible && maxVisibility && vertexPolygon != null)
                 {
-                    List<Vertex> vertexPairs = baseGraph.GetAdjecentVertices(vertex);
+                    Vertex[] vertexPairs = vertexPolygon.GetAdjacentVertices(vertex);
                     int firstOrientation = Vertex.Orientation(centre, vertex, vertexPairs[0]);
                     int secondOrientation = Vertex.Orientation(centre, vertex, vertexPairs[1]);
                     bool isColinear = false;
 
-                    //if both Edges lie on the same side of the centre-vertex edge or one of them is colinear or centre is contained on any of the Edges
+                    //if both Edges lie on the same side of the centre-vertex edge 
+                    //or one of them is colinear or centre is contained on any of the Edges
                     if(firstOrientation == secondOrientation || firstOrientation == 0 || secondOrientation == 0)
                     {
                         Vertex projectionVertex = null;
@@ -346,21 +346,18 @@ namespace Graphical.Graphs
                         foreach(EdgeKey ek in openEdges)
                         {
                             Vertex intersection = sweepRay.Intersection(ek.Edge) as Vertex;
-                            if(intersection != null &&!intersection.Equals(vertex))
+                            if(intersection != null && !intersection.Equals(vertex))
                             {
                                 projectionVertex = intersection;
-                                Polygon polygon;
-                                
-                                if(baseGraph._polygonsDict.TryGetValue(vertex.Parent.Id, out polygon))
+
+                                // If polygon is internal, don't compute intersection if mid point lies inside the polygon but not on its Edges
+                                Vertex mid = Vertex.MidVertex(vertex, intersection);
+                                bool containsEdge = Vertex.Orientation(centre, vertex, mid) != 0 && vertexPolygon.ContainsVertex(mid);
+                                if (!vertexPolygon.isBoundary && containsEdge)
                                 {
-                                    // If polygon is internal, don't compute intersection if mid point lies inside the polygon but not on its Edges
-                                    Vertex mid = Vertex.MidVertex(vertex, intersection);
-                                    bool containsEdge = Vertex.Orientation(centre, vertex, mid) != 0  && polygon.ContainsVertex(mid);
-                                    if (!polygon.isBoundary && containsEdge)
-                                    {
-                                        projectionVertex = null;
-                                    }
+                                    projectionVertex = null;
                                 }
+
                                 break;
                             }
                         }
