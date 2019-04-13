@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-//using Graphical.Core;
+using Graphical.Extensions;
 
 namespace Graphical.Geometry
 {
@@ -118,12 +118,13 @@ namespace Graphical.Geometry
             for(var i = 0; i < sides; i++)
             {
                 var vertex = Vertex.ByCoordinates(
-                        (Math.Sin(i * angle) * radius) + center.X,
-                        (Math.Cos(i * angle) * radius) + center.Y,
+                        (Math.Cos(i * angle) * radius) + center.X,
+                        (Math.Sin(i * angle) * radius) + center.Y,
                         center.Z
                         );
                 vertices.Add(vertex);
             }
+
             return new Polygon(vertices);
         }
         #endregion
@@ -158,6 +159,21 @@ namespace Graphical.Geometry
             }
 
             return newPolygon;
+        }
+
+        private Edge DiagonalByVertexIndex(int start, int end)
+        {
+            var vertexCount = this.Vertices.Count;
+            if(start < 0 || start > vertexCount - 1)
+            {
+                throw new ArgumentOutOfRangeException("start", start, "Out of range");
+            }
+            if (end < 0 || end > vertexCount - 1)
+            {
+                throw new ArgumentOutOfRangeException("end", end, "Out of range");
+            }
+
+            return Edge.ByStartVertexEndVertex(this.Vertices[start], this.Vertices[end]);
         }
 
         #endregion
@@ -245,6 +261,268 @@ namespace Graphical.Geometry
             return Vertex.Coplanar(joinedVertices);
         }
 
+        /// <summary>
+        /// Checks if the polygon is convex
+        /// </summary>
+        /// <returns></returns>
+        public bool IsConvex()
+        {
+            //https://math.stackexchange.com/questions/1743995/determine-whether-a-polygon-is-convex-based-on-its-vertices/1745427#1745427
+
+            double wSign = 0; // First  non-zero orientation
+
+            int xSign = 0;
+            int xFirstSign = 0;
+            int xFlips = 0; 
+
+            int ySign = 0;
+            int yFirstSign = 0;
+            int yFlips = 0;
+
+            int vertexCount = this.Vertices.Count();
+            Vertex current = this.Vertices[vertexCount - 2];
+            Vertex next = this.Vertices[vertexCount - 1];
+
+            for (int i = 0; i < vertexCount; i++)
+            {
+                var prev = current;
+                current = next;
+                next = this.Vertices[i];
+
+                // Previous edge vector
+                double prevX = current.X - prev.X;
+                double prevY = current.Y - prev.Y;
+
+                // Next edge vector
+                double nextX = next.X - current.X;
+                double nextY = next.Y - current.Y;
+
+                if (!nextX.AlmostEqualTo(0))
+                {
+                    if(nextX > 0)
+                    {
+                        if(xSign == 0)
+                        {
+                            xFirstSign = 1;
+                        }
+                        else if(xSign < 0)
+                        {
+                            xFlips += 1;
+                        }
+
+                        xSign = 1;
+                    }
+                    else // nextX < 0
+                    {
+                        if(xSign == 0)
+                        {
+                            xFirstSign = -1;
+                        }
+                        else if(xSign > 0)
+                        {
+                            xFlips += 1;
+                        }
+                        xSign = -1;
+                    }
+                }
+
+                if(xFlips > 2) { return false; }
+
+                if (!nextY.AlmostEqualTo(0))
+                {
+                    if(nextY > 0)
+                    {
+                        if(ySign == 0) { yFirstSign = 1; }
+                        else if(ySign < 0) { yFlips += 1; }
+
+                        ySign = 1;
+                    }
+                    else // nextY < 0
+                    {
+                        if (ySign == 0) { yFirstSign = -1; }
+                        else if (ySign > 0) { yFlips += 1; }
+
+                        ySign = -1;
+                    }
+                }
+
+                if(yFlips > 2) { return false; }
+
+                // Find out the orientation of this pair of edges
+                // and ensure ir does not differ from previous ones
+
+                double w = prevX * nextY - nextX * prevY;
+                bool wIsZero = w.AlmostEqualTo(0);
+                bool wSignIsZero = wSign.AlmostEqualTo(0);
+
+                if(wSignIsZero && !wIsZero)
+                {
+                    wSign = w;
+                }
+                else if(!wSignIsZero && !wIsZero)
+                {
+                    if((wSign > 0 && w < 0) || (wSign > 0 && w < 0))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            // Final/wraparound sign flips
+            if(xSign != 0 && xFirstSign != 0 && xSign != xFirstSign)
+            {
+                xFlips += 1;
+            }
+
+            if(ySign != 0 && yFirstSign != 0 && ySign != yFirstSign)
+            {
+                yFlips += 1;
+            }
+
+            // Concave polygons have two sign flips along each axis
+            if( xFlips != 2 || yFlips != 2) { return false; }
+
+            // This is a convex polygon
+            return true;
+        }
+
+        private List<Geometry> IntersectionNaive(Edge edge)
+        {
+            List<Geometry> intersections = new List<Geometry>();
+
+            if (this.BoundingBox.Intersects(edge.BoundingBox))
+            {
+                for (int i = 0; i < this.Edges.Count; i++)
+                {
+                    var side = this.Edges[i];
+                    var intersection = edge.Intersection(side);
+                    if (intersection != null)
+                    {
+                        if(!intersections.Any() && !intersections.Last().Equals(intersection))
+                        {
+                            intersections.Add(intersection);
+                        }
+
+                    }
+                }
+            }
+
+            return intersections;
+        }
+
+        public List<Geometry> Intersection(Edge edge)
+        {
+            // No fast algorithm yet to calculate intersection on concave polygons
+            if (!this.IsConvex())
+            {
+                return this.IntersectionNaive(edge);
+            }
+
+            //https://stackoverflow.com/questions/4497841/asymptotically-optimal-algorithm-to-compute-if-a-line-intersects-a-convex-polygo
+
+            List<Geometry> intersections = new List<Geometry>();
+            if (!this.BoundingBox.Intersects(edge.BoundingBox)) { return intersections; }
+
+            var vertexCount = this.Vertices.Count;
+            int midIndex = (int)(vertexCount / 2);
+            Edge diagonal = this.DiagonalByVertexIndex(0, midIndex);
+            int polygonDirection = this.Vertices[1].IsLeftFrom(diagonal);
+
+            Geometry intersection = diagonal.Intersection(edge);
+
+            while(intersection == null)
+            {
+                // If midIndex is any neighbour from the start vertex
+                // means the whole line is to one side or the other and doesn't intersect.
+                if(midIndex == 1 || midIndex == vertexCount - 1) { return intersections; }
+
+                int startSide = edge.StartVertex.IsLeftFrom(diagonal);
+                int endSide = edge.EndVertex.IsLeftFrom(diagonal);
+
+                // If same side, don't intersect
+                if(startSide == polygonDirection && endSide == polygonDirection)
+                {
+                    return intersections;
+                }
+                // Is on other side from the polygonDirection (Vertices[1])
+                else if(startSide != polygonDirection)
+                {
+                    midIndex += (int)((vertexCount - midIndex) / 2);
+                }
+                else
+                {
+                    midIndex = (int)(midIndex / 2);
+                }
+
+                diagonal = this.DiagonalByVertexIndex(0, midIndex);
+                intersection = edge.Intersection(diagonal);
+            }
+
+            // If intersection is an Edge
+            if(intersection is Edge edgeIntersection)
+            {
+                // If diagonal other edge is any neighbour, intersection is on one of the sides
+                if(midIndex == 1 || midIndex == vertexCount - 1)
+                {
+                    intersections.Add(edgeIntersection);
+                    return intersections;
+                }
+
+                // If not, the intersection can pass through both diagonal extremes, so its external.
+                // Through just on, so only one intersection, or non and endge is inside polygon.
+
+                if (this.Vertices.First().OnEdge(edgeIntersection)) { intersections.Add(this.Vertices.First()); }
+                if(this.Vertices[midIndex].OnEdge(edgeIntersection)) { intersections.Add(this.Vertices[midIndex]); }
+
+                return intersections;
+            }
+
+            // If intersection is a Vertex
+            if(intersection is Vertex vertexIntersection)
+            {
+
+                if (vertexIntersection.Equals(this.Vertices.First()))
+                {
+                    throw new NotImplementedException();
+                }
+
+                if (vertexIntersection.Equals(this.Vertices[midIndex]))
+                {
+                    throw new NotImplementedException();
+                }
+
+                // Else the intersection is between the diagonal's extremes
+                // find intersection at each side of the mid vertex
+
+                // Going from midVertex to 0
+                for (int i = midIndex; i > 0; i--)
+                {
+                    var side = DiagonalByVertexIndex(i, i - 1);
+                    Vertex sideIntersection = edge.Intersection(side) as Vertex;
+                    if (sideIntersection != null)
+                    {
+                        intersections.Add(sideIntersection);
+                        break;
+                    }
+                }
+
+                for (int j = midIndex; j < vertexCount; j++)
+                {
+                    int next = (j + 1) % vertexCount;
+                    var side = DiagonalByVertexIndex(j, next);
+                    Vertex sideIntersection = edge.Intersection(side) as Vertex;
+                    if (sideIntersection != null)
+                    {
+                        intersections.Add(sideIntersection);
+                        break;
+                    }
+                }
+
+                return intersections;
+            }
+
+            return intersections;
+        }
 
         ///// <summary>
         ///// Determines if two _polygonsDict are intersecting
@@ -257,7 +535,7 @@ namespace Graphical.Geometry
         //    var sw = new SweepLine(this, polygon, SweepLineType.Intersects);
         //    return sw.HasIntersection();
         //}
-        
+
         ///// <summary>
         ///// Performes a Union boolean operation between this polygon and a clipping one.
         ///// </summary>
@@ -265,7 +543,7 @@ namespace Graphical.Geometry
         ///// <returns></returns>
         //public List<Polygon> Union(Polygon clip)
         //{
-            
+
         //    var swLine = new SweepLine(this, clip, SweepLineType.Boolean);
 
         //    return swLine.ComputeBooleanOperation(BooleanType.Union);
@@ -304,7 +582,7 @@ namespace Graphical.Geometry
         //    int count = 0;
         //    foreach (Polygon clip in clips)
         //    {
-        //        for(var i = count; i < result.Count; i++)
+        //        for (var i = count; i < result.Count; i++)
         //        {
         //            result.AddRange(result[i].Difference(clip));
         //            count++;

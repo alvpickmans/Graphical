@@ -75,11 +75,24 @@ namespace Graphical.Geometry.Tests
         public void RegularPolygon()
         {
             var square = Polygon.ByCenterRadiusAndSides(Vertex.Origin(), 10, 4);
-            var vertex1 = Vertex.ByCoordinates(0, 10, 0);
-            var vertex2 = Vertex.ByCoordinates(10, 0, 0);
+            var vertex1 = Vertex.ByCoordinates(10, 0, 0);
+            var vertex2 = Vertex.ByCoordinates(0, 10, 0);
 
             Assert.IsTrue(vertex1.Equals(square.Vertices[0]));
             Assert.IsTrue(vertex2.Equals(square.Vertices[1]));
+        }
+
+        [Test]
+        public void IntersectionTest()
+        {
+            var square = Polygon.ByCenterRadiusAndSides(Vertex.Origin(), 5, 7);
+
+            var edge1 = Edge.ByCoordinatesArray(new double[] { -8.25, -5, 0, 6, -2, 0 });
+            var edge2 = Edge.ByCoordinatesArray(new double[] { -5, 5, 0, 5, 5, 0 });
+
+            var intersections1 = square.Intersection(edge1);
+
+            Assert.AreEqual(2, intersections1.Count);
         }
     }
 }
