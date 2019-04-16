@@ -67,7 +67,7 @@ namespace Graphical.Graphs
                 var polygon = polygonList[i];
                 this._polygonsDict.Add(polygon.Id, polygon);
 
-                polygon.Vertices.ForEach(v => this._vertexEdgesDict.Add(v, new List<Edge>()));
+                polygon.Edges.ForEach(edge => this.AddEdge(edge));
             }
         }
 
@@ -132,8 +132,8 @@ namespace Graphical.Graphs
         /// <param name="edge">New edge</param>
         public void AddEdge(Edge edge)
         {
-            List<Edge> startEdgesList = new List<Edge>();
-            List<Edge> endEdgesList = new List<Edge>();
+            List<Edge> startEdgesList;
+            List<Edge> endEdgesList;
             if (_vertexEdgesDict.TryGetValue(edge.StartVertex, out startEdgesList))
             {
                 if (!startEdgesList.Contains(edge)) { startEdgesList.Add(edge); }
