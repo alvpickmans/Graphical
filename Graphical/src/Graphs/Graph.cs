@@ -115,13 +115,12 @@ namespace Graphical.Graphs
 
         public List<Edge> GetVertexEdges(Vertex vertex)
         {
-            List<Edge> edgesList = new List<Edge>();
+            List<Edge> edgesList;
             if(_vertexEdgesDict.TryGetValue(vertex, out edgesList))
             {
                 return edgesList;
             }else
             {
-                //graph.Add(vertex, new List<Edge>());
                 return new List<Edge>();
             }
         }
