@@ -489,7 +489,7 @@ namespace Graphical.Geometry
                 }
 
                 // If not, the intersection can pass through both diagonal extremes, so its external.
-                // Through just on, so only one intersection, or non and endge is inside polygon.
+                // Through just one, so only one intersection, or non and endge is inside polygon.
 
                 if (this.Vertices.First().OnEdge(edgeIntersection)) { intersections.Add(this.Vertices.First()); }
                 if(this.Vertices[midIndex].OnEdge(edgeIntersection)) { intersections.Add(this.Vertices[midIndex]); }
@@ -503,38 +503,41 @@ namespace Graphical.Geometry
 
                 if (vertexIntersection.Equals(this.Vertices.First()))
                 {
-                    throw new NotImplementedException();
+                    intersections.Add(this.Vertices.First());
                 }
 
-                if (vertexIntersection.Equals(this.Vertices[midIndex]))
+                else if (vertexIntersection.Equals(this.Vertices[midIndex]))
                 {
-                    throw new NotImplementedException();
+                    intersections.Add(this.Vertices[midIndex]);
                 }
 
-                // Else the intersection is between the diagonal's extremes
-                // find intersection at each side of the mid vertex
-
-                // Going from midVertex to 0
-                for (int i = midIndex; i > 0; i--)
+                else
                 {
-                    var side = DiagonalByVertexIndex(i, i - 1);
-                    Vertex sideIntersection = edge.Intersection(side) as Vertex;
-                    if (sideIntersection != null)
+                    // Else the intersection is between the diagonal's extremes
+                    // find intersection at each side of the mid vertex
+
+                    // Going from midVertex to 0
+                    for (int i = midIndex; i > 0; i--)
                     {
-                        intersections.Add(sideIntersection);
-                        break;
+                        var side = DiagonalByVertexIndex(i, i - 1);
+                        Vertex sideIntersection = edge.Intersection(side) as Vertex;
+                        if (sideIntersection != null)
+                        {
+                            intersections.Add(sideIntersection);
+                            break;
+                        }
                     }
-                }
 
-                for (int j = midIndex; j < vertexCount; j++)
-                {
-                    int next = (j + 1) % vertexCount;
-                    var side = DiagonalByVertexIndex(j, next);
-                    Vertex sideIntersection = edge.Intersection(side) as Vertex;
-                    if (sideIntersection != null)
+                    for (int j = midIndex; j < vertexCount; j++)
                     {
-                        intersections.Add(sideIntersection);
-                        break;
+                        int next = (j + 1) % vertexCount;
+                        var side = DiagonalByVertexIndex(j, next);
+                        Vertex sideIntersection = edge.Intersection(side) as Vertex;
+                        if (sideIntersection != null)
+                        {
+                            intersections.Add(sideIntersection);
+                            break;
+                        }
                     }
                 }
 
