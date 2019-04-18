@@ -86,7 +86,7 @@ namespace Graphical.Geometry
         }
         #endregion
 
-        #region Public Constructos
+        #region Public Constructors
         /// <summary>
         /// Creates a new Polygon by a list of ordered Vertices.
         /// </summary>
@@ -545,6 +545,32 @@ namespace Graphical.Geometry
             }
 
             return intersections;
+        }
+
+        /// <summary>
+        /// Determines if an edge belongs to the polygon.
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public bool Belongs(Edge edge)
+        {
+            var startIndex = this.Vertices.IndexOf(edge.StartVertex);
+            var endIndex = this.Vertices.IndexOf(edge.EndVertex);
+
+            if(startIndex == -1 || endIndex == -1)
+            {
+                return false;
+            }
+
+            var startNext = (startIndex + 1) % this.Vertices.Count;
+            var endNext = (endIndex + 1) % this.Vertices.Count;
+
+            if(startNext != endIndex || endNext != startIndex)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         ///// <summary>
