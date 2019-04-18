@@ -563,9 +563,9 @@ namespace Graphical.Geometry
             }
 
             var startNext = (startIndex + 1) % this.Vertices.Count;
-            var endNext = (endIndex + 1) % this.Vertices.Count;
+            var startPrev = startIndex == 0 ? this.Vertices.Count - 1 : startIndex - 1;
 
-            if(startNext != endIndex || endNext != startIndex)
+            if(startNext != endIndex && startPrev != endIndex)
             {
                 return false;
             }

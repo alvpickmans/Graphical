@@ -94,5 +94,25 @@ namespace Graphical.Geometry.Tests
 
             Assert.AreEqual(2, intersections1.Count);
         }
+
+        [Test]
+        public void BelongsTest()
+        {
+            var a = Vertex.ByCoordinates(0, 0);
+            var b = Vertex.ByCoordinates(10, 0);
+            var c = Vertex.ByCoordinates(8, 5);
+            var d = Vertex.ByCoordinates(10, 10);
+            var e = Vertex.ByCoordinates(0, 10);
+
+            var polygon = Polygon.ByVertices(new List<Vertex>() { a, b, c, d, e });
+
+            var polygonEdge = Edge.ByStartVertexEndVertex(a, e);
+            var edgeFromPolygonVertices = Edge.ByStartVertexEndVertex(d, b);
+            var externalEdge = Edge.ByCoordinatesArray(new double[] { 0, 15, 0, 10, 20, 0 });
+
+            Assert.IsTrue(polygon.Belongs(polygonEdge));
+            Assert.IsFalse(polygon.Belongs(edgeFromPolygonVertices));
+            Assert.IsFalse(polygon.Belongs(externalEdge));
+        }
     }
 }
