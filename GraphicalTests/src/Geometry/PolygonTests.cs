@@ -93,6 +93,22 @@ namespace Graphical.Geometry.Tests
             var intersections1 = square.Intersection(edge1);
 
             Assert.AreEqual(2, intersections1.Count);
+
+            var polygon = Polygon.ByVertices(new List<Vertex>()
+            {
+                Vertex.ByCoordinates(26.671, 20.669),
+                Vertex.ByCoordinates(24.836, 21.161),
+                Vertex.ByCoordinates(23.492, 19.818),
+                Vertex.ByCoordinates(23.984, 17.982),
+                Vertex.ByCoordinates(25.819, 17.491),
+                Vertex.ByCoordinates(27.163, 18.834)
+            });
+
+            var edge = Edge.ByCoordinatesArray(new double[] { 13.104, 5.930, 0, 28.756, 27.385, 0 });
+
+            var intersections = polygon.Intersection(edge);
+
+            Assert.IsEmpty(intersections);
         }
 
         [Test]

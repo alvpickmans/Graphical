@@ -343,7 +343,7 @@ namespace Graphical.Geometry
                             xFlips += 1;
                         }
                         xSign = -1;
-                    }
+                   }
                 }
 
                 if(xFlips > 2) { return false; }
@@ -416,13 +416,14 @@ namespace Graphical.Geometry
                 {
                     var side = this.Edges[i];
                     var intersection = edge.Intersection(side);
-                    if (intersection != null)
-                    {
-                        if(!intersections.Any() && !intersections.Last().Equals(intersection))
-                        {
-                            intersections.Add(intersection);
-                        }
 
+                    if(intersection is Edge interEdge)
+                    {
+                        return new List<Geometry>() { interEdge };
+                    }
+                    if (intersection is Vertex && !intersections.Contains(intersection))
+                    {
+                        intersections.Add(intersection);
                     }
                 }
             }
@@ -447,6 +448,14 @@ namespace Graphical.Geometry
             int midIndex = (int)(vertexCount / 2);
             Edge diagonal = this.DiagonalByVertexIndex(0, midIndex);
             int polygonDirection = this.Vertices[1].IsLeftFrom(diagonal);
+            int startFirstSide = edge.StartVertex.IsLeftFrom(diagonal);
+            int endFirstSide = edge.EndVertex.IsLeftFrom(diagonal);
+
+            // Depending on which vertex is considered as start, 
+            // the method can enter on a infinite loop if the edge
+            // does not intersect but start and end point lie on 
+            // different sides from the first diagonal.
+            Vertex edgeVertex = edge.StartVertex;
 
             Geometry intersection = diagonal.Intersection(edge);
 
@@ -456,16 +465,15 @@ namespace Graphical.Geometry
                 // means the whole line is to one side or the other and doesn't intersect.
                 if(midIndex == 1 || midIndex == vertexCount - 1) { return intersections; }
 
-                int startSide = edge.StartVertex.IsLeftFrom(diagonal);
-                int endSide = edge.EndVertex.IsLeftFrom(diagonal);
+                int vertexSide = edgeVertex.IsLeftFrom(diagonal);
 
                 // If same side, don't intersect
-                if(startSide == polygonDirection && endSide == polygonDirection)
+                if(vertexSide == polygonDirection && vertexSide == startFirstSide && vertexSide == endFirstSide)
                 {
                     return intersections;
                 }
                 // Is on other side from the polygonDirection (Vertices[1])
-                else if(startSide != polygonDirection)
+                else if(vertexSide != polygonDirection)
                 {
                     midIndex += (int)((vertexCount - midIndex) / 2);
                 }
@@ -474,8 +482,25 @@ namespace Graphical.Geometry
                     midIndex = (int)(midIndex / 2);
                 }
 
+                // If the vertes is the start and the side has changed from the initial side,
+                // swap the edgeVertex to be the end and start from the mid diagonal
+                if(edgeVertex.Equals(edge.StartVertex) && startFirstSide != vertexSide)
+                {
+                    edgeVertex = edge.EndVertex;
+                    midIndex = (int)(vertexCount / 2);
+                    intersection = null;
+                }
+                // If same but with end vertex, does not intersect.
+                else if(edgeVertex.Equals(edge.EndVertex) && endFirstSide != vertexSide)
+                {
+                    return intersections;
+                }
+                else
+                {
+                    intersection = edge.Intersection(diagonal);
+                }
+
                 diagonal = this.DiagonalByVertexIndex(0, midIndex);
-                intersection = edge.Intersection(diagonal);
             }
 
             // If intersection is an Edge
