@@ -83,6 +83,50 @@ namespace Graphical.Geometry.Tests
         }
 
         [Test]
+        public void Intersection_Pass_EdgeThroughMiddle()
+        {
+            Vertex[] vertices = new Vertex[4]
+            {
+                Vertex.ByCoordinates(0,0,0),
+                Vertex.ByCoordinates(20,0,0),
+                Vertex.ByCoordinates(20,20,0),
+                Vertex.ByCoordinates(0,20,0),
+            };
+
+            Polygon polygon = Polygon.ByVertices(vertices.ToList());
+            Edge edge = Edge.ByCoordinatesArray(new double[6] { -5, 5, 0, 25, 5, 0 });
+
+            List<Geometry> intersection = polygon.Intersection(edge);
+
+            var intersection1 = Vertex.ByCoordinates(0, 5, 0);
+            var intersection2 = Vertex.ByCoordinates(20, 5, 0);
+
+            Assert.AreEqual(2, intersection.Count);
+            CollectionAssert.Contains(intersection, intersection1);
+            CollectionAssert.Contains(intersection, intersection2);
+        }
+
+        [Test]
+        public void Intersection_Pass_NoIntersectionEvenWhenBboxIntersects()
+        {
+            Vertex[] vertices = new Vertex[4]
+            {
+                Vertex.ByCoordinates(0,0,0),
+                Vertex.ByCoordinates(20,0,0),
+                Vertex.ByCoordinates(20,20,0),
+                Vertex.ByCoordinates(0,20,0),
+            };
+
+            Polygon polygon = Polygon.ByVertices(vertices.ToList());
+            Edge edge = Edge.ByCoordinatesArray(new double[6] { -5, 15, 0, 5, 30, 0 });
+
+            List<Geometry> intersection = polygon.Intersection(edge);
+
+            CollectionAssert.IsEmpty(intersection);
+
+        }
+
+        [Test]
         public void IntersectionTest()
         {
             var square = Polygon.ByCenterRadiusAndSides(Vertex.Origin(), 5, 7);
