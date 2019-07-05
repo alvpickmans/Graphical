@@ -92,6 +92,7 @@
     <Compile Include="src\DataStructures\HeapItemTests.cs" />
     <Compile Include="src\DataStructures\MinPriorityQTests.cs" />
     <Compile Include="src\Geometry\GeometryTests.cs" />
+    <Compile Include="src\Graphs\ConvexGraphTests.cs" />
     <Compile Include="src\Graphs\VisibilityGraphTests.cs" />
   </ItemGroup>
   <ItemGroup>

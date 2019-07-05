@@ -278,6 +278,9 @@ namespace Graphical.Geometry
                 double vertexAngle = Vertex.RadAngle(minVertex, vertex);
                 double nextVertexAngle = Vertex.RadAngle(minVertex, nextVertex);
 
+                // If for some reason, vertex and nextVertex are the same, skip it
+                if (vertex.Equals(nextVertex)) { continue; }
+
                 // If the angle is same as next, skip as we'll only use the fartest 
                 // vertex with same angle.
                 if (vertexAngle.AlmostEqualTo(nextVertexAngle)) { continue; }

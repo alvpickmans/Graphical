@@ -88,7 +88,6 @@ namespace Graphical.Geometry.Tests
             var square = Polygon.ByCenterRadiusAndSides(Vertex.Origin(), 5, 7);
 
             var edge1 = Edge.ByCoordinatesArray(new double[] { -8.25, -5, 0, 6, -2, 0 });
-            var edge2 = Edge.ByCoordinatesArray(new double[] { -5, 5, 0, 5, 5, 0 });
 
             var intersections1 = square.Intersection(edge1);
 
@@ -109,6 +108,18 @@ namespace Graphical.Geometry.Tests
             var intersections = polygon.Intersection(edge);
 
             Assert.IsEmpty(intersections);
+
+            var polygon2 = Polygon.ByVertices(new List<Vertex>()
+            {
+                Vertex.ByCoordinates(5, -2),
+                Vertex.ByCoordinates(10, -4),
+                Vertex.ByCoordinates(15, -2),
+                Vertex.ByCoordinates(10, 10)
+            });
+
+            var edge2 = Edge.ByCoordinatesArray(new double[] { 0, 2, 0, 20, 2, 0 });
+
+            Assert.IsNotEmpty(polygon2.Intersection(edge2));
         }
 
         [Test]

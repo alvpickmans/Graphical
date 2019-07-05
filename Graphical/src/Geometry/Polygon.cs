@@ -412,25 +412,39 @@ namespace Graphical.Geometry
 
             if (this.BoundingBox.Intersects(edge.BoundingBox))
             {
+                var vertexIntersections = new List<Vertex>();
+                var edgeIntersections = new List<Edge>();
+
                 for (int i = 0; i < this.Edges.Count; i++)
                 {
                     var side = this.Edges[i];
                     var intersection = edge.Intersection(side);
 
-                    if(intersection is Edge interEdge)
+                    if(intersection is Edge edgeInt && !edgeIntersections.Contains(edgeInt))
                     {
-                        return new List<Geometry>() { interEdge };
+                        edgeIntersections.Add(edgeInt);
                     }
-                    if (intersection is Vertex && !intersections.Contains(intersection))
+                    if (intersection is Vertex vertexInt && !vertexIntersections.Contains(intersection) )
                     {
-                        intersections.Add(intersection);
+                        vertexIntersections.Add(vertexInt);
                     }
                 }
+
+                intersections.AddRange(edgeIntersections);
+                // These clean vertices are those that aren't included in any intersecting edge.
+                var cleanVertices = vertexIntersections.Where(v => !edgeIntersections.Any(e => e.Contains(v)));
+                intersections.AddRange(cleanVertices);
             }
 
             return intersections;
         }
 
+        /// <summary>
+        /// Returns a list of geometries representing the intersection of the edge with the polygon.
+        /// If polygon is concave, the returned list can be a mixture of several edges and vertices
+        /// </summary>
+        /// <param name="edge">Edge to intersect with polygon</param>
+        /// <returns>List of vertices and/or edges, or emtpy if not intersecting.</returns>
         public List<Geometry> Intersection(Edge edge)
         {
             // No fast algorithm yet to calculate intersection on concave polygons
@@ -463,7 +477,9 @@ namespace Graphical.Geometry
             {
                 // If midIndex is any neighbour from the start vertex
                 // means the whole line is to one side or the other and doesn't intersect.
-                if(midIndex == 1 || midIndex == vertexCount - 1) { return intersections; }
+                if(midIndex == 1 || midIndex == vertexCount - 1) {
+                    return intersections;
+                }
 
                 int vertexSide = edgeVertex.IsLeftFrom(diagonal);
 
@@ -490,11 +506,11 @@ namespace Graphical.Geometry
                     midIndex = (int)(vertexCount / 2);
                     intersection = null;
                 }
-                // If same but with end vertex, does not intersect.
-                else if(edgeVertex.Equals(edge.EndVertex) && endFirstSide != vertexSide)
-                {
-                    return intersections;
-                }
+                //// If same but with end vertex, does not intersect.
+                //else if(edgeVertex.Equals(edge.EndVertex) && endFirstSide != vertexSide)
+                //{
+                //    return intersections;
+                //}
                 else
                 {
                     intersection = edge.Intersection(diagonal);

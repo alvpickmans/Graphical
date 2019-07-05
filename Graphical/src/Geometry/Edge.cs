@@ -75,7 +75,7 @@ namespace Graphical.Geometry
         #endregion
 
         /// <summary>
-        /// Method to check if vertex belongs to edge
+        /// Method to check if vertex is either the start or end vertex
         /// </summary>
         /// <param name="vertex"></param>
         /// <returns></returns>
