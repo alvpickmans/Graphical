@@ -468,11 +468,26 @@ namespace Graphical.Geometry
                 int startSide = edge.StartVertex.IsLeftFrom(diagonal);
                 int endSide = edge.EndVertex.IsLeftFrom(diagonal);
 
-                if(startSide != endSide || startSide == 0)
+                if(startSide != endSide)
                 {
-                    throw new NotImplementedException();
+                    midIndex = 1;
+                    diagonal = this.DiagonalByVertexIndex(0, midIndex);
+                    intersection = diagonal.Intersection(edge);
+
+                    if (intersection != null)
+                        break;
+
+                    midIndex = vertexCount - 1;
+                    diagonal = this.DiagonalByVertexIndex(0, midIndex);
+                    intersection = diagonal.Intersection(edge);
+
+                    if (intersection != null)
+                        break;
+
+                    return intersections;
                 }
-                else if(startSide == direction)
+
+                if (startSide == direction)
                 {
                     midIndex = (int)(midIndex / 2);
                 }
@@ -498,8 +513,11 @@ namespace Graphical.Geometry
                 // If not, the intersection can pass through both diagonal extremes, so its external.
                 // Through just one, so only one intersection, or non and endge is inside polygon.
 
-                if (this.Vertices.First().OnEdge(edgeIntersection)) { intersections.Add(this.Vertices.First()); }
-                if(this.Vertices[midIndex].OnEdge(edgeIntersection)) { intersections.Add(this.Vertices[midIndex]); }
+                if(this.Vertices.First().OnEdge(edgeIntersection))
+                    intersections.Add(this.Vertices.First());
+
+                if(this.Vertices[midIndex].OnEdge(edgeIntersection))
+                    intersections.Add(this.Vertices[midIndex]);
 
                 return intersections;
             }
@@ -509,15 +527,9 @@ namespace Graphical.Geometry
             {
 
                 if (vertexIntersection.Equals(this.Vertices.First()))
-                {
                     intersections.Add(this.Vertices.First());
-                }
-
                 else if (vertexIntersection.Equals(this.Vertices[midIndex]))
-                {
                     intersections.Add(this.Vertices[midIndex]);
-                }
-
                 else
                 {
                     // Else the intersection is between the diagonal's extremes

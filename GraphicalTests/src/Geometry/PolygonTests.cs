@@ -176,6 +176,22 @@ namespace Graphical.Geometry.Tests
         }
 
         [Test]
+        public void Intersection_Pass_WhenStartAndEndAreOnDifferentSides([Values(true, false)] bool ccw)
+        {
+            Polygon polygon = GetIrregularPentagon(ccw);
+            Edge edge = Edge.ByCoordinatesArray(new double[6] { 10, -5, 0, 5, 30, 0 });
+            Edge edgeInverse = Edge.ByStartVertexEndVertex(edge.EndVertex, edge.StartVertex);
+
+            var intersection = polygon.Intersection(edge);
+            var intersectionInverse = polygon.Intersection(edgeInverse);
+
+            CollectionAssert.AllItemsAreInstancesOfType(intersection, typeof(Vertex));
+            CollectionAssert.AllItemsAreInstancesOfType(intersectionInverse, typeof(Vertex));
+            Assert.AreEqual(2, intersection.Count);
+            Assert.AreEqual(2, intersectionInverse.Count);
+        }
+
+        [Test]
         public void IntersectionTest()
         {
             var square = Polygon.ByCenterRadiusAndSides(Vertex.Origin(), 5, 7);
