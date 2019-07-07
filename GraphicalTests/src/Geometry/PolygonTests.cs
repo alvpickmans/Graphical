@@ -127,6 +127,55 @@ namespace Graphical.Geometry.Tests
         }
 
         [Test]
+        public void Intersection_Pass_WhenEdgeIntersectsFirstDiagonal([Values(true, false)] bool ccw)
+        {
+            Polygon polygon = GetIrregularPentagon(ccw);
+            Edge edge = Edge.ByCoordinatesArray(new double[6] { 18, -5, 0, 10, 25, 0 });
+            Edge edgeInverse = Edge.ByStartVertexEndVertex(edge.EndVertex, edge.StartVertex);
+
+            var intersection = polygon.Intersection(edge);
+            var intersectionInverse = polygon.Intersection(edgeInverse);
+
+            CollectionAssert.AllItemsAreInstancesOfType(intersection, typeof(Vertex));
+            CollectionAssert.AllItemsAreInstancesOfType(intersectionInverse, typeof(Vertex));
+
+            Assert.AreEqual(2, intersection.Count);
+            Assert.AreEqual(2, intersectionInverse.Count);
+        }
+
+        [Test]
+        public void Intersection_Pass_WhenEdgeIsOnRight([Values(true, false)] bool ccw)
+        {
+            Polygon polygon = GetIrregularPentagon(ccw);
+            Edge edge = Edge.ByCoordinatesArray(new double[6] { 15, 0, 0, 25, 10, 0 });
+            Edge edgeInverse = Edge.ByStartVertexEndVertex(edge.EndVertex, edge.StartVertex);
+
+            var intersection = polygon.Intersection(edge);
+            var intersectionInverse = polygon.Intersection(edgeInverse);
+
+            CollectionAssert.AllItemsAreInstancesOfType(intersection, typeof(Vertex));
+            CollectionAssert.AllItemsAreInstancesOfType(intersectionInverse, typeof(Vertex));
+            Assert.AreEqual(2, intersection.Count);
+            Assert.AreEqual(2, intersectionInverse.Count);
+        }
+
+        [Test]
+        public void Intersection_Pass_WhenEdgeIsOnLeft([Values(true, false)] bool ccw)
+        {
+            Polygon polygon = GetIrregularPentagon(ccw);
+            Edge edge = Edge.ByCoordinatesArray(new double[6] { 5, 0, 0, 10, 30, 0 });
+            Edge edgeInverse = Edge.ByStartVertexEndVertex(edge.EndVertex, edge.StartVertex);
+
+            var intersection = polygon.Intersection(edge);
+            var intersectionInverse = polygon.Intersection(edgeInverse);
+
+            CollectionAssert.AllItemsAreInstancesOfType(intersection, typeof(Vertex));
+            CollectionAssert.AllItemsAreInstancesOfType(intersectionInverse, typeof(Vertex));
+            Assert.AreEqual(2, intersection.Count);
+            Assert.AreEqual(2, intersectionInverse.Count);
+        }
+
+        [Test]
         public void IntersectionTest()
         {
             var square = Polygon.ByCenterRadiusAndSides(Vertex.Origin(), 5, 7);
@@ -184,6 +233,38 @@ namespace Graphical.Geometry.Tests
             Assert.IsTrue(polygon.Belongs(polygonEdge));
             Assert.IsFalse(polygon.Belongs(edgeFromPolygonVertices));
             Assert.IsFalse(polygon.Belongs(externalEdge));
+        }
+
+        private Polygon GetIrregularPentagon(bool counterClockwise = true, bool randomShift = false)
+        {
+            Vertex[] vertices = new Vertex[5]
+            {
+                Vertex.ByCoordinates(10,0,0),
+                Vertex.ByCoordinates(20,0,0),
+                Vertex.ByCoordinates(25,20,0),
+                Vertex.ByCoordinates(15,30,0),
+                Vertex.ByCoordinates(5,20,0),
+            };
+
+            if (randomShift)
+            {
+                int shift = new Random().Next(1, vertices.Length);
+
+                Vertex[] temp = new Vertex[vertices.Length];
+
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    int index = (shift + i) % vertices.Length;
+                    temp[i] = vertices[index];
+                }
+
+                vertices = temp;
+            }
+
+            if (counterClockwise)
+                return Polygon.ByVertices(vertices.ToList());
+            else
+                return Polygon.ByVertices(vertices.Reverse().ToList());
         }
     }
 }

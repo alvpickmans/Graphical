@@ -164,14 +164,8 @@ namespace Graphical.Geometry
         internal Edge DiagonalByVertexIndex(int start, int end)
         {
             var vertexCount = this.Vertices.Count;
-            if(start < 0 || start > vertexCount - 1)
-            {
-                throw new ArgumentOutOfRangeException("start", start, "Out of range");
-            }
-            if (end < 0 || end > vertexCount - 1)
-            {
-                throw new ArgumentOutOfRangeException("end", end, "Out of range");
-            }
+            if(start < 0 || start > vertexCount - 1) throw new ArgumentOutOfRangeException("start", start, "Out of range");
+            if (end < 0 || end > vertexCount - 1) throw new ArgumentOutOfRangeException("end", end, "Out of range");
 
             return Edge.ByStartVertexEndVertex(this.Vertices[start], this.Vertices[end]);
         }
@@ -449,74 +443,46 @@ namespace Graphical.Geometry
         {
             // No fast algorithm yet to calculate intersection on concave polygons
             if (!this.IsConvex())
-            {
                 return this.IntersectionNaive(edge);
-            }
 
             //https://stackoverflow.com/questions/4497841/asymptotically-optimal-algorithm-to-compute-if-a-line-intersects-a-convex-polygo
-
             List<Geometry> intersections = new List<Geometry>();
-            if (!this.BoundingBox.Intersects(edge.BoundingBox)) { return intersections; }
+
+            if (!this.BoundingBox.Intersects(edge.BoundingBox))
+                return intersections;
 
             var vertexCount = this.Vertices.Count;
             int midIndex = (int)(vertexCount / 2);
             Edge diagonal = this.DiagonalByVertexIndex(0, midIndex);
-            int polygonDirection = this.Vertices[1].IsLeftFrom(diagonal);
-            int startFirstSide = edge.StartVertex.IsLeftFrom(diagonal);
-            int endFirstSide = edge.EndVertex.IsLeftFrom(diagonal);
 
-            // Depending on which vertex is considered as start, 
-            // the method can enter on a infinite loop if the edge
-            // does not intersect but start and end point lie on 
-            // different sides from the first diagonal.
-            Vertex edgeVertex = edge.StartVertex;
+            int direction = this.Vertices[1].IsLeftFrom(diagonal);
 
             Geometry intersection = diagonal.Intersection(edge);
-
             while(intersection == null)
             {
                 // If midIndex is any neighbour from the start vertex
                 // means the whole line is to one side or the other and doesn't intersect.
-                if(midIndex == 1 || midIndex == vertexCount - 1) {
+                if(midIndex == 1 || midIndex == vertexCount - 1)
                     return intersections;
-                }
 
-                int vertexSide = edgeVertex.IsLeftFrom(diagonal);
+                int startSide = edge.StartVertex.IsLeftFrom(diagonal);
+                int endSide = edge.EndVertex.IsLeftFrom(diagonal);
 
-                // If same side, don't intersect
-                if(vertexSide == polygonDirection && vertexSide == startFirstSide && vertexSide == endFirstSide)
+                if(startSide != endSide || startSide == 0)
                 {
-                    return intersections;
+                    throw new NotImplementedException();
                 }
-                // Is on other side from the polygonDirection (Vertices[1])
-                else if(vertexSide != polygonDirection)
-                {
-                    midIndex += (int)((vertexCount - midIndex) / 2);
-                }
-                else
+                else if(startSide == direction)
                 {
                     midIndex = (int)(midIndex / 2);
                 }
-
-                // If the vertes is the start and the side has changed from the initial side,
-                // swap the edgeVertex to be the end and start from the mid diagonal
-                if(edgeVertex.Equals(edge.StartVertex) && startFirstSide != vertexSide)
-                {
-                    edgeVertex = edge.EndVertex;
-                    midIndex = (int)(vertexCount / 2);
-                    intersection = null;
-                }
-                //// If same but with end vertex, does not intersect.
-                //else if(edgeVertex.Equals(edge.EndVertex) && endFirstSide != vertexSide)
-                //{
-                //    return intersections;
-                //}
                 else
                 {
-                    intersection = edge.Intersection(diagonal);
+                    midIndex += (int)(vertexCount - midIndex) / 2;
                 }
 
                 diagonal = this.DiagonalByVertexIndex(0, midIndex);
+                intersection = diagonal.Intersection(edge);
             }
 
             // If intersection is an Edge
@@ -614,99 +580,6 @@ namespace Graphical.Geometry
             return true;
         }
 
-        ///// <summary>
-        ///// Determines if two _polygonsDict are intersecting
-        ///// </summary>
-        ///// <param name="polygon"></param>
-        ///// <returns></returns>
-        //public bool Intersects(Polygon polygon)
-        //{
-        //    if (!this.BoundingBox.Intersects(polygon.BoundingBox)) { return false; }
-        //    var sw = new SweepLine(this, polygon, SweepLineType.Intersects);
-        //    return sw.HasIntersection();
-        //}
-
-        ///// <summary>
-        ///// Performes a Union boolean operation between this polygon and a clipping one.
-        ///// </summary>
-        ///// <param name="clip"></param>
-        ///// <returns></returns>
-        //public List<Polygon> Union(Polygon clip)
-        //{
-
-        //    var swLine = new SweepLine(this, clip, SweepLineType.Boolean);
-
-        //    return swLine.ComputeBooleanOperation(BooleanType.Union);
-        //}
-
-        //public static List<Polygon> Union(List<Polygon> subjects, List<Polygon> clips)
-        //{
-        //    List<Polygon> result = new List<Polygon>(subjects);
-        //    int count = 0;
-        //    foreach (Polygon clip in clips)
-        //    {
-        //        for (var i = count; i < result.Count; i++)
-        //        {
-        //            result.AddRange(result[i].Union(clip));
-        //            count++;
-        //        }
-        //    }
-        //    return result;
-        //}
-
-        ///// <summary>
-        ///// Performes a Difference boolean operation between this polygon and a clipping one.
-        ///// </summary>
-        ///// <param name="clip"></param>
-        ///// <returns></returns>
-        //public List<Polygon> Difference(Polygon clip)
-        //{
-        //    var swLine = new SweepLine(this, clip, SweepLineType.Boolean);
-
-        //    return swLine.ComputeBooleanOperation(BooleanType.Differenece);
-        //}
-
-        //public static List<Polygon> Difference(List<Polygon> subjects, List<Polygon> clips)
-        //{
-        //    List<Polygon> result = new List<Polygon>(subjects);
-        //    int count = 0;
-        //    foreach (Polygon clip in clips)
-        //    {
-        //        for (var i = count; i < result.Count; i++)
-        //        {
-        //            result.AddRange(result[i].Difference(clip));
-        //            count++;
-        //        }
-        //    }
-        //    return result;
-        //}
-
-        ///// <summary>
-        ///// Performes a Intersection boolean operation between this polygon and a clipping one.
-        ///// </summary>
-        ///// <param name="clip"></param>
-        ///// <returns></returns>
-        //public List<Polygon> Intersection(Polygon clip)
-        //{
-        //    var swLine = new SweepLine(this, clip, SweepLineType.Boolean);
-
-        //    return swLine.ComputeBooleanOperation(BooleanType.Intersection);
-        //}
-
-        //public static List<Polygon> Intersection(List<Polygon> subjects, List<Polygon> clips)
-        //{
-        //    List<Polygon> result = new List<Polygon>(subjects);
-        //    int count = 0;
-        //    foreach (Polygon clip in clips)
-        //    {
-        //        for (var i = count; i < result.Count; i++)
-        //        {
-        //            result.AddRange(result[i].Intersection(clip));
-        //            count++;
-        //        }
-        //    }
-        //    return result;
-        //}
 
         #endregion
 
