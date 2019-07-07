@@ -161,13 +161,18 @@ namespace Graphical.Geometry
             // It might also mean they don't intersect but the would if extending the projections
             double s = (dot) / Math.Pow(axb.Length, 2);
 
-            if (s.AlmostEqualTo(0))
+            if (s.AlmostEqualTo(0) || s.AlmostEqualTo(1))
             {
-                if (this.StartVertex.OnEdge(other)) { return this.StartVertex; }
-                else if(this.EndVertex.OnEdge(other)) { return this.EndVertex; }
-                else if(other.StartVertex.OnEdge(this)) { return other.StartVertex; }
-                else if(other.EndVertex.OnEdge(this)) { return other.EndVertex; }
-                else { return null; }
+                if (this.StartVertex.OnEdge(other))
+                    return this.StartVertex;
+                else if(this.EndVertex.OnEdge(other))
+                    return this.EndVertex;
+                else if(other.StartVertex.OnEdge(this))
+                    return other.StartVertex;
+                else if(other.EndVertex.OnEdge(this))
+                    return other.EndVertex;
+                else
+                    return null;
             }
 
             
