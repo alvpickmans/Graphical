@@ -11,17 +11,16 @@ namespace Graphical.Graphs
     {
         #region Private Properties
 
-        private Graph _basegraph { get; set; }
-
-        private Vertex _origin { get; set; }
-        private Vertex _destination { get; set; }
+        private Graph baseGraph { get; set; }
+        private Vertex origin { get; set; }
+        private Vertex destination { get; set; }
 
         #endregion
 
         #region Private Constructors
         private ConvexGraph(Graph basegraph)
         {
-            this._basegraph = basegraph;
+            this.baseGraph = basegraph;
         }
         #endregion
 
@@ -30,8 +29,8 @@ namespace Graphical.Graphs
         {
             var convexgraph = new ConvexGraph(basegraph)
             {
-                _origin = origin,
-                _destination = destination
+                origin = origin,
+                destination = destination
             };
 
             convexgraph.ComputeConvexGraph();
@@ -44,16 +43,17 @@ namespace Graphical.Graphs
         {
             Stack<Edge> edgeQ = new Stack<Edge>();
 
-            edgeQ.Push(Edge.ByStartVertexEndVertex(this._origin, this._destination));
+            edgeQ.Push(Edge.ByStartVertexEndVertex(this.origin, this.destination));
+            int polygonCount = this.baseGraph.Polygons.Count();
 
             while (edgeQ.Any())
             {
                 var edge = edgeQ.Pop();
                 bool doesIntersect = false;
 
-                for (int i = 0; i < this._basegraph.Polygons.Count(); i++)
+                for (int i = 0; i < polygonCount; i++)
                 {
-                    var polygon = this._basegraph.Polygons[i];
+                    var polygon = this.baseGraph.Polygons[i];
                     // On some cases, particulary with concave polygons, the intersections
                     // can be a mixture of edges and vertices
                     var intersections = polygon.Intersection(edge);
