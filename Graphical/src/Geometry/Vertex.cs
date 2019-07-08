@@ -178,7 +178,7 @@ namespace Graphical.Geometry
 
 
         /// <summary>
-        /// DeterminEs if a Vertex lies on the left-hand side of an edge on the XY plane.
+        /// Determines if a Vertex lies on the left-hand side of an edge on the XY plane.
         /// 1 => for vertex left of the edge.
         /// 0 => for vertex on the edge.
         /// -1 => for vertex right of the edge.

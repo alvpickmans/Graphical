@@ -441,7 +441,7 @@ namespace Graphical.Geometry
         /// <returns>List of vertices and/or edges, or emtpy if not intersecting.</returns>
         public List<Geometry> Intersection(Edge edge)
         {
-            // No fast algorithm yet to calculate intersection on concave polygons
+            // No fast algorithm to calculate intersection on concave polygons
             if (!this.IsConvex())
                 return this.IntersectionNaive(edge);
 
@@ -488,13 +488,9 @@ namespace Graphical.Geometry
                 }
 
                 if (startSide == direction)
-                {
                     midIndex = (int)(midIndex / 2);
-                }
                 else
-                {
                     midIndex += (int)(vertexCount - midIndex) / 2;
-                }
 
                 diagonal = this.DiagonalByVertexIndex(0, midIndex);
                 intersection = diagonal.Intersection(edge);
