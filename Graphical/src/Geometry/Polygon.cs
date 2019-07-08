@@ -188,16 +188,13 @@ namespace Graphical.Geometry
         public bool ContainsVertex(Vertex vertex)
         {
             // http://geomalgorithms.com/a03-_inclusion.html
-            Vertex maxVertex = vertices.OrderByDescending(v => v.DistanceTo(vertex)).First();
-            double maxDistance = vertex.DistanceTo(maxVertex) * 1.5;
-            Vertex v2 = Vertex.ByCoordinates(vertex.X + maxDistance, vertex.Y, vertex.Z);
-            Edge ray = Edge.ByStartVertexEndVertex(vertex, v2);
+            Ray ray = Ray.XAxis(vertex);
             int windNumber = 0;
             foreach (Edge edge in edges)
             {
                 if(vertex.OnEdge(edge)) { return true; }
                 Vertex intersection = ray.Intersection(edge) as Vertex;
-                if (intersection is Vertex)
+                if (intersection != null)
                 {
                     if (edge.StartVertex.Y <= vertex.Y)
                     {
