@@ -457,6 +457,7 @@ namespace Graphical.Geometry
             Geometry intersection = diagonal.Intersection(edge);
             while(intersection == null)
             {
+                //throw new Exception();
                 // If midIndex is any neighbour from the start vertex
                 // means the whole line is to one side or the other and doesn't intersect.
                 if(midIndex == 1 || midIndex == vertexCount - 1)
@@ -465,24 +466,9 @@ namespace Graphical.Geometry
                 int startSide = edge.StartVertex.IsLeftFrom(diagonal);
                 int endSide = edge.EndVertex.IsLeftFrom(diagonal);
 
+                //TODO: This case requires more thought
                 if(startSide != endSide)
-                {
-                    midIndex = 1;
-                    diagonal = this.DiagonalByVertexIndex(0, midIndex);
-                    intersection = diagonal.Intersection(edge);
-
-                    if (intersection != null)
-                        break;
-
-                    midIndex = vertexCount - 1;
-                    diagonal = this.DiagonalByVertexIndex(0, midIndex);
-                    intersection = diagonal.Intersection(edge);
-
-                    if (intersection != null)
-                        break;
-
-                    return intersections;
-                }
+                    return this.IntersectionNaive(edge);
 
                 if (startSide == direction)
                     midIndex = (int)Math.Ceiling(midIndex / 2.0);
