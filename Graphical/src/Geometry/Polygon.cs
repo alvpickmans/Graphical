@@ -485,7 +485,7 @@ namespace Graphical.Geometry
                 }
 
                 if (startSide == direction)
-                    midIndex = (int)(midIndex / 2);
+                    midIndex = (int)Math.Ceiling(midIndex / 2.0);
                 else
                     midIndex += (int)(vertexCount - midIndex) / 2;
 
@@ -570,17 +570,13 @@ namespace Graphical.Geometry
             var endIndex = this.Vertices.IndexOf(edge.EndVertex);
 
             if(startIndex == -1 || endIndex == -1)
-            {
                 return false;
-            }
 
             var startNext = (startIndex + 1) % this.Vertices.Count;
             var startPrev = startIndex == 0 ? this.Vertices.Count - 1 : startIndex - 1;
 
             if(startNext != endIndex && startPrev != endIndex)
-            {
                 return false;
-            }
 
             return true;
         }
