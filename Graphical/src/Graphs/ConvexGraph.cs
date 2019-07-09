@@ -65,9 +65,9 @@ namespace Graphical.Graphs
                         // If it is pair, it means that the edge fully intersects the polygon
                         if(count % 2 == 0)
                         {
-                            var edges = this.GetConvexEdges(edge.StartVertex, edge.EndVertex, polygon);
-                            edges["clean"].ForEach(e => this.AddEdge(e));
-                            edges["check"].ForEach(e => edgeQ.Push(e));
+                            this.GetConvexEdges(edge.StartVertex, edge.EndVertex, polygon, out List<Edge> clean, out List<Edge> check);
+                            clean.ForEach(e => this.AddEdge(e));
+                            check.ForEach(e => edgeQ.Push(e));
                         }
                         else
                         {
@@ -93,40 +93,30 @@ namespace Graphical.Graphs
         /// <param name="origin"></param>
         /// <param name="destination"></param>
         /// <param name="polygon"></param>
+        /// <param name="clean"></param>
+        /// <param name="check"></param>
         /// <returns></returns>
-        private Dictionary<string, List<Edge>> GetConvexEdges(Vertex origin, Vertex destination, Polygon polygon)
+        private void GetConvexEdges(Vertex origin, Vertex destination, Polygon polygon, out List<Edge> clean, out List<Edge> check)
         {
             var vertices = new List<Vertex>(polygon.Vertices);
             if (!vertices.Contains(origin)) { vertices.Add(origin); }
             if (!vertices.Contains(destination)) { vertices.Add(destination); }
 
-            var cleanEdges = new List<Edge>();
-            var toCheckEdges = new List<Edge>();
-
+            clean = new List<Edge>();
+            check = new List<Edge>();
             var convexVertices = Vertex.ConvexHull(vertices);
 
             for (int i = 0; i < convexVertices.Count; i++)
             {
                 int nextIndex = (i + 1) % convexVertices.Count;
-
                 var edge = Edge.ByStartVertexEndVertex(convexVertices[i], convexVertices[nextIndex]);
 
                 if(!polygon.Belongs(edge) || edge.Contains(origin) || edge.Contains(destination))
-                {
-                    toCheckEdges.Add(edge);
-                }
+                    check.Add(edge);
                 else
-                {
-                    cleanEdges.Add(edge);
-                }
+                    clean.Add(edge);
 
             }
-
-            return new Dictionary<string, List<Edge>>()
-            {
-                {"clean", cleanEdges },
-                {"check", toCheckEdges }
-            };
         }
     }
 }
