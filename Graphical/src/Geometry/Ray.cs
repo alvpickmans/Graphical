@@ -46,8 +46,8 @@ namespace Graphical.Geometry
         {
             return new Ray(
                     origin,
-                    Vector.ByTwoVertices(origin, vertex).Normalized()
-                ) ;
+                    Vector.ByTwoVertices(origin, vertex)
+                );
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Graphical.Geometry
         /// <returns></returns>
         public static Ray ByOriginAndVector(Vertex origin, Vector vector)
         {
-            return new Ray(origin, vector.Normalized());
+            return new Ray(origin, vector);
         }
 
         /// <summary>
