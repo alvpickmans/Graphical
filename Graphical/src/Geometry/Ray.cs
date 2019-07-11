@@ -8,18 +8,18 @@ using Graphical.Extensions;
 namespace Graphical.Geometry
 {
     /// <summary>
-    /// Ray object
+    /// Ray defined by an Origin Vertex and a Normalized Direction
     /// </summary>
     public class Ray
     {
         #region Public Properties
         /// <summary>
-        /// Ray's origin coordinates
+        /// Origin Vertex
         /// </summary>
         public Vertex Origin { get; private set; }
 
         /// <summary>
-        /// Ray's coordinates defining the direction
+        /// Direction Vector
         /// </summary>
         public Vector Direction { get; private set; }
         #endregion
@@ -27,8 +27,11 @@ namespace Graphical.Geometry
         #region Private Constructors
         internal Ray(Vertex origin, Vector direction)
         {
-            this.Origin = origin;
-            this.Direction = direction;
+            this.Origin = origin ?? throw new ArgumentNullException(nameof(origin));
+            this.Direction = direction ?? throw new ArgumentNullException(nameof(direction));
+
+            if (direction.Length.AlmostEqualTo(0))
+                throw new ArgumentException($"Cannot create a {nameof(Ray)} with a {nameof(Vector)} of size 0.", nameof(direction));
         }
         #endregion
 
@@ -43,8 +46,19 @@ namespace Graphical.Geometry
         {
             return new Ray(
                     origin,
-                    Vector.ByTwoVertices(origin, vertex)
-                );
+                    Vector.ByTwoVertices(origin, vertex).Normalized()
+                ) ;
+        }
+
+        /// <summary>
+        /// Creates a Ray by its origin point and direction vector.
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="vector"></param>
+        /// <returns></returns>
+        public static Ray ByOriginAndVector(Vertex origin, Vector vector)
+        {
+            return new Ray(origin, vector.Normalized());
         }
 
         /// <summary>
@@ -96,24 +110,10 @@ namespace Graphical.Geometry
         /// <returns></returns>
         public bool Contains(Vertex vertex)
         {
-            // If the Vector from Ray's origin to the given
-            // vertex is parallel to Ray's Direction, return true.
-            var vector = Vector.ByTwoVertices(this.Origin, vertex);
+            if (this.Origin.Equals(vertex))
+                return true;
 
-            if (!this.Direction.IsParallelTo(vector)) { return false; }
-
-            // Need to check if point falls on the visible path of Ray.
-            // Vertex = Origin + t * Direction; t = (V-O)/D
-            // If t < 0, it doesn't
-
-            double t = Double.PositiveInfinity;
-            if(this.Direction.X != 0) { t = (vertex.X - this.Origin.X) / this.Direction.X; }
-            else if (this.Direction.Y != 0) { t = (vertex.Y - this.Origin.Y) / this.Direction.Y; }
-            else if (this.Direction.Z != 0) { t = (vertex.Z - this.Origin.Z) / this.Direction.Z; }
-            else
-            {
-                throw new Exception("Something when wrong, contact Author");
-            }
+            double t = this.IntersectionOffset(vertex);
 
             return t > 0 && !t.AlmostEqualTo(0);
         }
@@ -121,50 +121,141 @@ namespace Graphical.Geometry
 
         public Geometry Intersection(Edge edge)
         {
-            // If no coplanar, cannot intersect
-            if(!edge.IsCoplanarTo(this.Origin, this.Direction)) { return null; }
+            if (!this.TryIntersectionOffset(edge, out double offset))
+                return null;
 
-            // Intersection can be an Edge or null
-            if(this.Direction.IsParallelTo(edge.Direction)){
-
+            if (Double.IsInfinity(offset))
+            {
                 bool containsStart = this.Contains(edge.StartVertex);
                 bool containsEnd = this.Contains(edge.EndVertex);
 
-                if(!containsStart && !containsEnd)
-                {
-                    return null;
-                }
-                else if (containsStart) {
-                    return Edge.ByStartVertexEndVertex(edge.StartVertex, this.Origin);
-                }
-                else
-                {
+                if (containsStart && containsEnd)
+                    return edge;
+
+                if (containsStart)
+                    return Edge.ByStartVertexEndVertex(this.Origin, edge.StartVertex);
+
+                if (containsEnd)
                     return Edge.ByStartVertexEndVertex(this.Origin, edge.EndVertex);
-                }
+
+                return null;
 
             }
 
-            // No coincident nor same extremes
-            var b = this.Direction;
-            var a = edge.Direction;
-            var c = Vector.ByTwoVertices(edge.StartVertex, this.Origin);
-            var cxb = c.Cross(b);
-            var axb = a.Cross(b);
-            var dot = cxb.Dot(axb);
-
-            double t = (dot) / Math.Pow(axb.Length, 2);
-
-            if (t < 0 && !t.AlmostEqualTo(0)) { return null; }
-            if (t > 1 && !t.AlmostEqualTo(1)) { return null; }
-
-            var intersection = edge.StartVertex.Translate(edge.Direction.Scale(t));
-            return this.Contains(intersection) ? intersection : null;
+            var intersection = this.Origin.Translate(this.Direction.Scale(offset));
+            return intersection.OnEdge(edge) ? intersection : null;
 
         }
 
         public bool Intersects(Edge edge)
         {
-            return this.Intersection(edge) is Geometry;
+            return this.TryIntersectionOffset(edge, out double offset);
+        }
+
+        /// <summary>
+        /// Returns the offset from the <see cref="Origin"/> to a <see cref="Vertex"/>
+        /// or <see cref="Double.NaN"/> if no intersection exists.
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <returns></returns>
+        public double IntersectionOffset(Vertex vertex)
+        {
+            if (this.Direction.Length.AlmostEqualTo(0))
+                return Double.NaN;
+
+            // If Ray and vector from Origin-Vertex are not parallel,
+            // Cannot intersect and offset is NaN
+            var vector = Vector.ByTwoVertices(this.Origin, vertex);
+            if (!this.Direction.IsParallelTo(vector))
+                return Double.NaN;
+
+            // Need to check if point falls on the visible path of Ray.
+            // Vertex = Origin + offset * Direction; offset = (V-O)/D
+            if (!this.Direction.X.AlmostEqualTo(0))
+                return (vertex.X - this.Origin.X) / this.Direction.X;
+
+            if (!this.Direction.Y.AlmostEqualTo(0))
+                return (vertex.Y - this.Origin.Y) / this.Direction.Y;
+
+            if (!this.Direction.Z.AlmostEqualTo(0))
+                return (vertex.Z - this.Origin.Z) / this.Direction.Z;
+
+            throw new Exception($"Could not calculate intersection between {vertex} and {this}");
+        }
+
+        /// <summary>
+        /// Returns the offset from the <see cref="Origin"/> to the intersection
+        /// point with an <see cref="Edge"/>, <see cref="Double.PositiveInfinity"/> if they are parallel
+        /// or <see cref="Double.NaN"/> if not intersecting (no coplanar).
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns>Offset from Ray's Origin point, <see cref="Double.PositiveInfinity"/> if they are parallel or <see cref="Double.NaN"/> if not intersecting</returns>
+        public double IntersectionOffset(Edge edge)
+        {
+            if (!edge.IsCoplanarTo(this.Origin, this.Direction))
+                return Double.NaN;
+
+            if (this.Direction.IsParallelTo(edge.Direction))
+                return Double.PositiveInfinity;
+
+            var a = this.Direction;
+            var b = edge.Direction;
+            var c = Vector.ByTwoVertices(this.Origin, edge.StartVertex);
+            var cxb = c.Cross(b);
+            var axb = a.Cross(b);
+            var dot = cxb.Dot(axb);
+
+            return (dot) / Math.Pow(axb.Length, 2);
+        }
+
+        /// <summary>
+        /// Determines if a Ray intersects a <see cref="Vertex"/>. See <see cref="Ray.IntersectionOffset(Vertex)"/>
+        /// for more details on possible outputs.
+        /// </summary>
+        /// <param name="vertex">Vertex to test intersection against</param>
+        /// <param name="offset">Offset from Origin along Ray's direction to the Vertex</param>
+        /// <param name="bothSides">Considers as intersecting when it happens on either side of Origin (direction or its inverse)</param>
+        /// <returns>True if Ray intersects the edge.</returns>
+        public bool TryIntersectionOffset(Vertex vertex, out double offset, bool bothSides = false)
+        {
+            offset = this.IntersectionOffset(vertex);
+
+            if (Double.IsNaN(offset))
+                return false;
+
+            // If negative, is on the opposite direction
+            if (offset < 0 && !offset.AlmostEqualTo(0))
+                return bothSides;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Determines if a Ray intersects an <see cref="Edge"/>. See <see cref="Ray.IntersectionOffset(Edge)"/>
+        /// for more details on possible outputs.
+        /// </summary>
+        /// <param name="edge">Edge to test intersection against</param>
+        /// <param name="offset">Offset from Origin along Ray's direction to the intersection</param>
+        /// <param name="bothSides">Considers as intersecting when it happens on either side of Origin (direction or its inverse)</param>
+        /// <returns>True if Ray intersects the edge.</returns>
+        public bool TryIntersectionOffset(Edge edge, out double offset, bool bothSides = false)
+        {
+            offset = this.IntersectionOffset(edge);
+
+            // Ray and Edge are not coplanar
+            if (Double.IsNaN(offset))
+                return false;
+
+            // If infinity, can be only parallel or colinear.
+            if (Double.IsInfinity(offset))
+                return this.TryIntersectionOffset(edge.StartVertex, out double startOffset, bothSides)
+                    || this.TryIntersectionOffset(edge.EndVertex, out double endOffset, bothSides);
+
+            // If negative, is on the opposite direction
+            if (offset < 0 && !offset.AlmostEqualTo(0))
+                return bothSides;
+
+            return true;
         }
         #endregion
 
@@ -180,7 +271,7 @@ namespace Graphical.Geometry
 
         public override string ToString()
         {
-            return String.Format("Ray(Origin: {0}, Direction: {1})", Origin.ToString(), Direction.ToString());
+            return String.Format($"{nameof(Ray)}({nameof(this.Origin)}: {this.Origin}, {nameof(this.Direction)}: {this.Direction})");
         }
         #endregion
     }

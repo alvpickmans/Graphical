@@ -40,6 +40,9 @@ namespace Graphical.Geometry
 
         public static Vector ByTwoVertices(Vertex start, Vertex end)
         {
+            if (start == null) throw new ArgumentNullException(nameof(start));
+            if (end == null) throw new ArgumentNullException(nameof(end));
+
             var x = end.X - start.X;
             var y = end.Y - start.Y;
             var z = end.Z - start.Z;
@@ -104,6 +107,9 @@ namespace Graphical.Geometry
 
         public Vector Normalized()
         {
+            if (this.Length.AlmostEqualTo(0))
+                throw new Exception($"Cannot normalize a {nameof(Vector)} with zero {nameof(Vector.Length)}");
+
             return new Vector(this.X / this.Length, this.Y / this.Length, this.Z / this.Length, this.Length / this.Length);
         }
 
