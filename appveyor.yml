@@ -1,8 +1,12 @@
-version: 1.0.{build}
+version: 2.0.0.{build}
 image: Visual Studio 2017
 configuration: Debug
+branches:
+    only:
+        - master
+        - production
 before_build:
-  - nuget restore
+    - nuget restore
 build:
-  project: Graphical.sln
-  verbosity: minimal
+    project: Graphical.sln
+    verbosity: minimal
