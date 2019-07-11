@@ -279,7 +279,6 @@ namespace Graphical.Geometry
         public bool IsConvex()
         {
             //https://math.stackexchange.com/questions/1743995/determine-whether-a-polygon-is-convex-based-on-its-vertices/1745427#1745427
-
             double wSign = 0; // First  non-zero orientation
 
             int xSign = 0;
@@ -313,26 +312,21 @@ namespace Graphical.Geometry
                     if(nextX > 0)
                     {
                         if(xSign == 0)
-                        {
-                            xFirstSign = 1;
-                        }
+                             xFirstSign = 1;
+
                         else if(xSign < 0)
-                        {
                             xFlips += 1;
-                        }
 
                         xSign = 1;
                     }
                     else // nextX < 0
                     {
                         if(xSign == 0)
-                        {
                             xFirstSign = -1;
-                        }
+
                         else if(xSign > 0)
-                        {
                             xFlips += 1;
-                        }
+
                         xSign = -1;
                    }
                 }
@@ -343,21 +337,28 @@ namespace Graphical.Geometry
                 {
                     if(nextY > 0)
                     {
-                        if(ySign == 0) { yFirstSign = 1; }
-                        else if(ySign < 0) { yFlips += 1; }
+                        if(ySign == 0)
+                            yFirstSign = 1;
+
+                        else if(ySign < 0)
+                            yFlips += 1;
 
                         ySign = 1;
                     }
                     else // nextY < 0
                     {
-                        if (ySign == 0) { yFirstSign = -1; }
-                        else if (ySign > 0) { yFlips += 1; }
+                        if (ySign == 0)
+                            yFirstSign = -1;
+
+                        else if (ySign > 0)
+                            yFlips += 1;
 
                         ySign = -1;
                     }
                 }
 
-                if(yFlips > 2) { return false; }
+                if(yFlips > 2)
+                    return false;
 
                 // Find out the orientation of this pair of edges
                 // and ensure ir does not differ from previous ones
@@ -373,25 +374,20 @@ namespace Graphical.Geometry
                 else if(!wSignIsZero && !wIsZero)
                 {
                     if((wSign > 0 && w < 0) || (wSign > 0 && w < 0))
-                    {
                         return false;
-                    }
                 }
             }
 
             // Final/wraparound sign flips
             if(xSign != 0 && xFirstSign != 0 && xSign != xFirstSign)
-            {
                 xFlips += 1;
-            }
 
             if(ySign != 0 && yFirstSign != 0 && ySign != yFirstSign)
-            {
                 yFlips += 1;
-            }
 
             // Concave polygons have two sign flips along each axis
-            if( xFlips != 2 || yFlips != 2) { return false; }
+            if( xFlips != 2 || yFlips != 2)
+                return false;
 
             // This is a convex polygon
             return true;
@@ -412,13 +408,10 @@ namespace Graphical.Geometry
                     var intersection = edge.Intersection(side);
 
                     if(intersection is Edge edgeInt && !edgeIntersections.Contains(edgeInt))
-                    {
                         edgeIntersections.Add(edgeInt);
-                    }
+                    
                     if (intersection is Vertex vertexInt && !vertexIntersections.Contains(intersection) )
-                    {
                         vertexIntersections.Add(vertexInt);
-                    }
                 }
 
                 intersections.AddRange(edgeIntersections);
