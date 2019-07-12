@@ -8,7 +8,7 @@ using Graphical.Extensions;
 namespace Graphical.Geometry
 {
     /// <summary>
-    /// Ray defined by an Origin Vertex and a Normalized Direction
+    /// Ray defined by an Origin Vertex and a Direction
     /// </summary>
     public class Ray
     {

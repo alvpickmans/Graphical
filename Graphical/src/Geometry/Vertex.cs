@@ -178,22 +178,33 @@ namespace Graphical.Geometry
 
 
         /// <summary>
-        /// Determines if a Vertex lies on the left-hand side of an edge on the XY plane.
-        /// 1 => for vertex left of the edge.
-        /// 0 => for vertex on the edge.
-        /// -1 => for vertex right of the edge.
+        /// Determines if a Vertex lies on the left-hand side (is clockwise oriented) of a ray on the XY plane.
         /// </summary>
-        /// <param name="edge"></param>
-        /// <returns> 
-        ///     
-        /// </returns>
-        public int IsLeftFrom(Edge edge)
+        /// <param name="origin"></param>
+        /// <param name="direction"></param>
+        public bool IsClockwise(Vertex origin, Vector direction)
         {
-            double value =  (edge.EndVertex.X - edge.StartVertex.X) * (this.Y - edge.StartVertex.Y) - (edge.EndVertex.Y - edge.StartVertex.Y) * (this.X - edge.StartVertex.X);
+            double cross =  direction.X * (this.Y - origin.Y) - direction.Y * (this.X - origin.X);
 
-            if (value.AlmostEqualTo(0)) { return 0; }
+            if (cross.AlmostEqualTo(0))
+                return false;
 
-            return value > 0 ? 1 : -1;
+            return cross < 0;
+        }
+
+        /// <summary>
+        /// Determines if a Vertex lies on the right-hand side (is counter-clockwise oriented) of a ray on the XY plane.
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="direction"></param>
+        public bool IsCounterClockwise(Vertex origin, Vector direction)
+        {
+            double cross = direction.X * (this.Y - origin.Y) - direction.Y * (this.X - origin.X);
+
+            if (cross.AlmostEqualTo(0))
+                return false;
+
+            return cross > 0;
         }
 
         /// <summary>

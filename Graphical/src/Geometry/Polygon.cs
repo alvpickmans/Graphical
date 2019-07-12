@@ -161,13 +161,14 @@ namespace Graphical.Geometry
             return newPolygon;
         }
 
-        internal Edge DiagonalByVertexIndex(int start, int end)
+        internal Ray RayByVertexIndex(int start, int end)
         {
             var vertexCount = this.Vertices.Count;
-            if(start < 0 || start > vertexCount - 1) throw new ArgumentOutOfRangeException("start", start, "Out of range");
-            if (end < 0 || end > vertexCount - 1) throw new ArgumentOutOfRangeException("end", end, "Out of range");
+            if(start < 0 || start > vertexCount - 1) throw new ArgumentOutOfRangeException(nameof(start));
+            if (end < 0 || end > vertexCount - 1) throw new ArgumentOutOfRangeException(nameof(end));
+            if (start == end) throw new ArgumentException("Cannot create a Ray out of the same vertex");
 
-            return Edge.ByStartVertexEndVertex(this.Vertices[start], this.Vertices[end]);
+            return Ray.ByTwoVertices(this.Vertices[start], this.Vertices[end]);
         }
 
 
@@ -212,20 +213,17 @@ namespace Graphical.Geometry
                     if (edge.StartVertex.Y <= vertex.Y)
                     {
                         if (edge.EndVertex.Y > vertex.Y)
-                        {
-                            if(vertex.IsLeftFrom(edge) > 0) {
+                        { 
+                            if(vertex.IsCounterClockwise(edge.StartVertex, edge.Direction)) 
                                 ++windNumber;
-                            }
                         }
                     }
                     else
                     {
                         if (edge.EndVertex.Y < vertex.Y)
                         {
-                            if(vertex.IsLeftFrom(edge) < 0)
-                            {
+                            if(vertex.IsClockwise(edge.StartVertex, edge.Direction))
                                 --windNumber;
-                            }
                         }
                     }
                 }
@@ -443,12 +441,14 @@ namespace Graphical.Geometry
 
             var vertexCount = this.Vertices.Count;
             int midIndex = (int)(vertexCount / 2);
-            Edge diagonal = this.DiagonalByVertexIndex(0, midIndex);
+            Ray diagonal = this.RayByVertexIndex(0, midIndex);
 
-            int direction = this.Vertices[1].IsLeftFrom(diagonal);
+            bool PolygonCW = this.Vertices[1].IsClockwise(diagonal.Origin, diagonal.Direction);
 
-            Geometry intersection = diagonal.Intersection(edge);
-            while(intersection == null)
+            double offset = Double.NaN;
+            bool doesIntersect = diagonal.TryIntersectionOffset(edge, out offset) && offset.InRange(0, 1);
+
+            while(!doesIntersect)
             {
                 //throw new Exception();
                 // If midIndex is any neighbour from the start vertex
@@ -456,51 +456,45 @@ namespace Graphical.Geometry
                 if(midIndex == 1 || midIndex == vertexCount - 1)
                     return intersections;
 
-                int startSide = edge.StartVertex.IsLeftFrom(diagonal);
-                int endSide = edge.EndVertex.IsLeftFrom(diagonal);
+                bool startCW = edge.StartVertex.IsClockwise(diagonal.Origin, diagonal.Direction);
+                bool endCW = edge.EndVertex.IsClockwise(diagonal.Origin, diagonal.Direction);
 
                 //TODO: This case requires more thought
-                if(startSide != endSide)
+                if(startCW != endCW)
                     return this.IntersectionNaive(edge);
 
-                if (startSide == direction)
+                if (startCW == PolygonCW)
                     midIndex = (int)Math.Ceiling(midIndex / 2.0);
                 else
                     midIndex += (int)(vertexCount - midIndex) / 2;
 
-                diagonal = this.DiagonalByVertexIndex(0, midIndex);
-                intersection = diagonal.Intersection(edge);
+                diagonal = this.RayByVertexIndex(0, midIndex);
+                doesIntersect = diagonal.TryIntersectionOffset(edge, out offset) && offset.InRange(0, 1);
             }
 
-            // If intersection is an Edge
-            if(intersection is Edge edgeIntersection)
+            // If offset is Infinity, means intersection is parallel
+            if(Double.IsInfinity(offset))
             {
                 // If diagonal other edge is any neighbour, intersection is on one of the sides
                 if(midIndex == 1 || midIndex == vertexCount - 1)
-                {
-                    intersections.Add(edgeIntersection);
-                    return intersections;
-                }
+                    intersections.Add(Edge.ByStartVertexEndVertex(this.Vertices.First(), this.Vertices[midIndex]));
 
                 // If not, the intersection can pass through both diagonal extremes, so its external.
                 // Through just one, so only one intersection, or non and endge is inside polygon.
-
-                if(this.Vertices.First().OnEdge(edgeIntersection))
+                else if(this.Vertices.First().OnEdge(edge))
                     intersections.Add(this.Vertices.First());
 
-                if(this.Vertices[midIndex].OnEdge(edgeIntersection))
+                else if(this.Vertices[midIndex].OnEdge(edge))
                     intersections.Add(this.Vertices[midIndex]);
-
-                return intersections;
             }
 
             // If intersection is a Vertex
-            if(intersection is Vertex vertexIntersection)
+            if(!Double.IsNaN(offset))
             {
 
-                if (vertexIntersection.Equals(this.Vertices.First()))
+                if (offset.AlmostEqualTo(0))
                     intersections.Add(this.Vertices.First());
-                else if (vertexIntersection.Equals(this.Vertices[midIndex]))
+                else if (offset.AlmostEqualTo(1))
                     intersections.Add(this.Vertices[midIndex]);
                 else
                 {
@@ -510,8 +504,8 @@ namespace Graphical.Geometry
                     // Going from midVertex to 0
                     for (int i = midIndex; i > 0; i--)
                     {
-                        var side = DiagonalByVertexIndex(i, i - 1);
-                        Vertex sideIntersection = edge.Intersection(side) as Vertex;
+                        var side = RayByVertexIndex(i, i - 1);
+                        Vertex sideIntersection = side.Intersection(edge) as Vertex;
                         if (sideIntersection != null)
                         {
                             intersections.Add(sideIntersection);
@@ -522,8 +516,8 @@ namespace Graphical.Geometry
                     for (int j = midIndex; j < vertexCount; j++)
                     {
                         int next = (j + 1) % vertexCount;
-                        var side = DiagonalByVertexIndex(j, next);
-                        Vertex sideIntersection = edge.Intersection(side) as Vertex;
+                        var side = RayByVertexIndex(j, next);
+                        Vertex sideIntersection = side.Intersection(edge) as Vertex;
                         if (sideIntersection != null)
                         {
                             intersections.Add(sideIntersection);
@@ -532,7 +526,6 @@ namespace Graphical.Geometry
                     }
                 }
 
-                return intersections;
             }
 
             return intersections;
