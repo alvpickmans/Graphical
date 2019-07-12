@@ -446,7 +446,8 @@ namespace Graphical.Geometry
             bool PolygonCW = this.Vertices[1].IsClockwise(diagonal.Origin, diagonal.Direction);
 
             double offset = Double.NaN;
-            bool doesIntersect = diagonal.TryIntersectionOffset(edge, out offset) && offset.InRange(0, 1);
+            bool doesIntersect = diagonal.TryIntersectionOffset(edge, out offset) 
+                && (Double.IsInfinity(offset) ||offset.InRange(0, 1));
 
             while(!doesIntersect)
             {
@@ -469,7 +470,8 @@ namespace Graphical.Geometry
                     midIndex += (int)(vertexCount - midIndex) / 2;
 
                 diagonal = this.RayByVertexIndex(0, midIndex);
-                doesIntersect = diagonal.TryIntersectionOffset(edge, out offset) && offset.InRange(0, 1);
+                doesIntersect = diagonal.TryIntersectionOffset(edge, out offset)
+                    && (Double.IsInfinity(offset) || offset.InRange(0, 1));
             }
 
             // If offset is Infinity, means intersection is parallel
@@ -489,7 +491,7 @@ namespace Graphical.Geometry
             }
 
             // If intersection is a Vertex
-            if(!Double.IsNaN(offset))
+            else if(!Double.IsNaN(offset))
             {
 
                 if (offset.AlmostEqualTo(0))
@@ -505,10 +507,12 @@ namespace Graphical.Geometry
                     for (int i = midIndex; i > 0; i--)
                     {
                         var side = RayByVertexIndex(i, i - 1);
-                        Vertex sideIntersection = side.Intersection(edge) as Vertex;
-                        if (sideIntersection != null)
+                        if (side.TryIntersectionOffset(edge, out double t) && t.InRange(0,1))
                         {
-                            intersections.Add(sideIntersection);
+                            Vertex intersection = side.Origin.Translate(side.Direction.Scale(t));
+                            if (intersection.OnEdge(edge)) { }
+                                intersections.Add(intersection);
+
                             break;
                         }
                     }
@@ -517,10 +521,12 @@ namespace Graphical.Geometry
                     {
                         int next = (j + 1) % vertexCount;
                         var side = RayByVertexIndex(j, next);
-                        Vertex sideIntersection = side.Intersection(edge) as Vertex;
-                        if (sideIntersection != null)
+                        if (side.TryIntersectionOffset(edge, out double t) && t.InRange(0, 1))
                         {
-                            intersections.Add(sideIntersection);
+                            Vertex intersection = side.Origin.Translate(side.Direction.Scale(t));
+                            if (intersection.OnEdge(edge)) { }
+                                intersections.Add(intersection);
+
                             break;
                         }
                     }

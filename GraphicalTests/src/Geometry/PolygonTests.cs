@@ -212,6 +212,30 @@ namespace Graphical.Geometry.Tests
         }
 
         [Test]
+        public void Intersection_Pass_WhenEdgeColinearWithFirstDiagonal([Values(true, false)] bool ccw)
+        {
+            Vertex[] vertices = new Vertex[7]
+            {
+                Vertex.ByCoordinates(194.300, 143.250, 0.000),
+                Vertex.ByCoordinates(187.109, 158.183, 0.000),
+                Vertex.ByCoordinates(170.950, 161.871, 0.000),
+                Vertex.ByCoordinates(157.991, 151.537, 0.000),
+                Vertex.ByCoordinates(157.991, 134.963, 0.000),
+                Vertex.ByCoordinates(170.950, 124.629, 0.000),
+                Vertex.ByCoordinates(187.109, 128.317, 0.000)
+            };
+
+            Polygon polygon = Polygon.ByVertices(vertices.ToList());
+            Edge edge = Edge.ByCoordinatesArray(new double[6] { 157.991, 151.537, 0.000, 112.550, 161.871, 0.000 });
+
+            var intersections = polygon.Intersection(edge);
+
+            Assert.AreEqual(1, intersections.Count);
+            Assert.AreEqual(edge.StartVertex, intersections.First());
+
+        }
+
+        [Test]
         public void IntersectionTest()
         {
             var square = Polygon.ByCenterRadiusAndSides(Vertex.Origin(), 5, 7);
