@@ -47,6 +47,24 @@ namespace Graphical.Extensions
         }
 
         /// <summary>
+        /// Determines if a value is within a min-max range, including these values.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public static bool InRange(this double value, double min, double max)
+        {
+            if (value.AlmostEqualTo(min))
+                return true;
+
+            if (value.AlmostEqualTo(max))
+                return true;
+
+            return value > min && value < max;
+        }
+
+        /// <summary>
         /// Rounds a value to a given number of decimals.
         /// </summary>
         /// <param name="value"></param>
