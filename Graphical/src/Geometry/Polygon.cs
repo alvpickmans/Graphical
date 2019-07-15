@@ -395,28 +395,28 @@ namespace Graphical.Geometry
         {
             List<Geometry> intersections = new List<Geometry>();
 
-            if (this.BoundingBox.Intersects(edge.BoundingBox))
+            if (!this.BoundingBox.Intersects(edge.BoundingBox))
+                return intersections;
+
+            var vertexIntersections = new List<Vertex>();
+            var edgeIntersections = new List<Edge>();
+
+            for (int i = 0; i < this.Edges.Count; i++)
             {
-                var vertexIntersections = new List<Vertex>();
-                var edgeIntersections = new List<Edge>();
+                var side = this.Edges[i];
+                var intersection = edge.Intersection(side);
 
-                for (int i = 0; i < this.Edges.Count; i++)
-                {
-                    var side = this.Edges[i];
-                    var intersection = edge.Intersection(side);
+                if (intersection is Edge edgeInt && !edgeIntersections.Contains(edgeInt))
+                    edgeIntersections.Add(edgeInt);
 
-                    if(intersection is Edge edgeInt && !edgeIntersections.Contains(edgeInt))
-                        edgeIntersections.Add(edgeInt);
-                    
-                    if (intersection is Vertex vertexInt && !vertexIntersections.Contains(intersection) )
-                        vertexIntersections.Add(vertexInt);
-                }
-
-                intersections.AddRange(edgeIntersections);
-                // These clean vertices are those that aren't included in any intersecting edge.
-                var cleanVertices = vertexIntersections.Where(v => !edgeIntersections.Any(e => e.Contains(v)));
-                intersections.AddRange(cleanVertices);
+                if (intersection is Vertex vertexInt && !vertexIntersections.Contains(intersection))
+                    vertexIntersections.Add(vertexInt);
             }
+
+            intersections.AddRange(edgeIntersections);
+            // These clean vertices are those that aren't included in any intersecting edge.
+            var cleanVertices = vertexIntersections.Where(v => !edgeIntersections.Any(e => e.Contains(v)));
+            intersections.AddRange(cleanVertices);
 
             return intersections;
         }
@@ -510,7 +510,7 @@ namespace Graphical.Geometry
                         if (side.TryIntersectionOffset(edge, out double t) && t.InRange(0,1))
                         {
                             Vertex intersection = side.Origin.Translate(side.Direction.Scale(t));
-                            if (intersection.OnEdge(edge)) { }
+                            if (intersection.OnEdge(edge)) 
                                 intersections.Add(intersection);
 
                             break;
@@ -524,7 +524,7 @@ namespace Graphical.Geometry
                         if (side.TryIntersectionOffset(edge, out double t) && t.InRange(0, 1))
                         {
                             Vertex intersection = side.Origin.Translate(side.Direction.Scale(t));
-                            if (intersection.OnEdge(edge)) { }
+                            if (intersection.OnEdge(edge)) 
                                 intersections.Add(intersection);
 
                             break;
@@ -545,20 +545,18 @@ namespace Graphical.Geometry
         public bool Belongs(Edge edge)
         {
             var startIndex = this.Vertices.IndexOf(edge.StartVertex);
-            var endIndex = this.Vertices.IndexOf(edge.EndVertex);
 
-            if(startIndex == -1 || endIndex == -1)
+            if (startIndex == -1)
                 return false;
 
-            var startNext = (startIndex + 1) % this.Vertices.Count;
-            var startPrev = startIndex == 0 ? this.Vertices.Count - 1 : startIndex - 1;
+            var next = (startIndex + 1) % this.Vertices.Count;
+            var prev = startIndex == 0 ? this.Vertices.Count - 1 : startIndex - 1;
 
-            if(startNext != endIndex && startPrev != endIndex)
-                return false;
+            if (this.Vertices[next].Equals(edge.EndVertex) || this.Vertices[prev].Equals(edge.EndVertex))
+                return true;
 
-            return true;
+            return false;
         }
-
 
         #endregion
 

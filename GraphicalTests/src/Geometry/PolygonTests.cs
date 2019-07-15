@@ -236,6 +236,18 @@ namespace Graphical.Geometry.Tests
         }
 
         [Test]
+        public void Intersection_Pass_OnePointWhenVertexInsidePolygon([Values(true, false)] bool ccw)
+        {
+            Polygon polygon = GetIrregularPentagon(ccw);
+            Edge edge = Edge.ByCoordinatesArray(new double[6] { 0, 10, 0, 15, 10, 0});
+
+            var intersections = polygon.Intersection(edge);
+
+            Assert.AreEqual(1, intersections.Count);
+
+        }
+
+        [Test]
         public void IntersectionTest()
         {
             var square = Polygon.ByCenterRadiusAndSides(Vertex.Origin(), 5, 7);
