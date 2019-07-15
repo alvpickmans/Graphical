@@ -66,5 +66,35 @@ namespace Graphical.Geometry.Tests
             Assert.AreEqual(6, convexHull.Count);
         }
 
+        [Test]
+        public void ConvexHull_Pass_DuplicateVertices()
+        {
+            Vertex[] vertices = new Vertex[6]
+            {
+                Vertex.ByCoordinates(0, 0),
+                Vertex.ByCoordinates(20, 0),
+                Vertex.ByCoordinates(20, 20),
+                Vertex.ByCoordinates(0, 0),
+                Vertex.ByCoordinates(0, 20),
+                Vertex.ByCoordinates(20, 20)
+            };
+
+            Vertex[] expected = new Vertex[4]
+            {
+                Vertex.ByCoordinates(0, 0),
+                Vertex.ByCoordinates(20, 0),
+                Vertex.ByCoordinates(20, 20),
+                Vertex.ByCoordinates(0, 20)
+            };
+
+            var convexHull = Vertex.ConvexHull(vertices.ToList());
+
+            Assert.AreEqual(4, convexHull.Count());
+            CollectionAssert.AllItemsAreInstancesOfType(convexHull, typeof(Vertex));
+            CollectionAssert.AllItemsAreUnique(convexHull);
+            CollectionAssert.AreEquivalent(expected, convexHull);
+
+        }
+
     }
 }
