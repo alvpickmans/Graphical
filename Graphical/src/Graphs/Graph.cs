@@ -131,27 +131,21 @@ namespace Graphical.Graphs
         /// <param name="edge">New edge</param>
         public void AddEdge(Edge edge)
         {
-            List<Edge> startEdgesList;
-            List<Edge> endEdgesList;
-            if (_vertexEdgesDict.TryGetValue(edge.StartVertex, out startEdgesList))
-            {
-                if (!startEdgesList.Contains(edge)) { startEdgesList.Add(edge); }
-            }
-            else
-            {
-                _vertexEdgesDict.Add(edge.StartVertex, new List<Edge>() { edge });
-            }
+            if (this.Edges.Contains(edge))
+                return;
 
-            if (_vertexEdgesDict.TryGetValue(edge.EndVertex, out endEdgesList))
-            {
-                if (!endEdgesList.Contains(edge)) { endEdgesList.Add(edge); }
-            }
+            this.Edges.Add(edge);
+
+            if (_vertexEdgesDict.TryGetValue(edge.StartVertex, out List<Edge> startEdgesList))
+                startEdgesList.Add(edge); 
             else
-            {
-                _vertexEdgesDict.Add(edge.EndVertex, new List<Edge>() { edge });
-            }
+                _vertexEdgesDict.Add(edge.StartVertex, new List<Edge>() { edge });
             
-            if (!Edges.Contains(edge)) { Edges.Add(edge); }
+
+            if (_vertexEdgesDict.TryGetValue(edge.EndVertex, out List<Edge> endEdgesList))
+                endEdgesList.Add(edge);
+            else
+                _vertexEdgesDict.Add(edge.EndVertex, new List<Edge>() { edge });
         }
 
         /// <summary>

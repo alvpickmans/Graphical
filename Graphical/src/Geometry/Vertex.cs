@@ -285,6 +285,9 @@ namespace Graphical.Geometry
                 var vertex = sorted[i];
                 var nextVertex = sorted[nextIndex];
 
+                if (i == 1 && vertex.Equals(stack.Peek()))
+                    continue;
+
                 double vertexAngle = Vertex.RadAngle(minVertex, vertex);
                 double nextVertexAngle = Vertex.RadAngle(minVertex, nextVertex);
 

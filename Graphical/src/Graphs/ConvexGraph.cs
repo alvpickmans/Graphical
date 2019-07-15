@@ -185,7 +185,7 @@ namespace Graphical.Graphs
                     var intersections = polygon.Intersection(edgeCheck);
 
 
-                    if (intersections.Count % 2 != 0 && intersections.First() is Vertex)
+                    if (intersections.Count > 1 && intersections.Count % 2 != 0 && intersections.First() is Vertex)
                         throw new Exception("Start or End Point might be inside a polygon");
 
                     if (intersections.Count >= 2)
