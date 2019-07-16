@@ -31,14 +31,5 @@ namespace Graphical.Geometry.Tests
             Assert.AreEqual(vertex.Id, id + 100);
         }
 
-        [Test]
-        public void GeometryEqualityTest()
-        {
-            var edge1 = Edge.ByStartVertexEndVertex(Vertex.Origin(), Vertex.ByCoordinates(5, 5, 5));
-            var edge2 = Edge.ByStartVertexEndVertex(Vertex.Origin(), Vertex.ByCoordinates(5, 5, 5));
-
-            Assert.IsFalse(edge1.Equals(edge2));
-
-        }
     }
 }
