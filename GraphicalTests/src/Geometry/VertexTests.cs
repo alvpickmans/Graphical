@@ -10,7 +10,24 @@ namespace Graphical.Geometry.Tests
 {
     [TestFixture]
     public class VertexTests
-    {
+    { 
+        [Test]
+        public void Vertex_Pass_ListContainsEqualVertices()
+        {
+            List<Geometry> vertices = new List<Geometry>()
+            {
+                Vertex.ByCoordinates(10,0,15),
+                Vertex.ByCoordinates(0, 12, 3.456464),
+                Vertex.ByCoordinates(0.999999999999992, 0, 3.141592666669)
+            };
+
+            Vertex vertex1 = Vertex.ByCoordinates(0, 12, 3.456464);
+            Vertex vertex2 = Vertex.ByCoordinates(0.999999999999999, 0, 3.141592666661);
+
+            Assert.IsTrue(vertices.Contains(vertex1), "Vertex with same coordinates");
+            Assert.IsTrue(vertices.Contains(vertex2), "Vertex with 'almost' same coordinates");
+        }
+
         [Test]
         public void OnEdgeTest()
         {

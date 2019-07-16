@@ -457,9 +457,20 @@ namespace Graphical.Geometry
         /// <returns>Boolean</returns>
         public bool Equals(Vertex obj)
         {
-            if (obj == null) { return false; }
-            bool eq = this.X.AlmostEqualTo(obj.X) && this.Y.AlmostEqualTo(obj.Y) && this.Z.AlmostEqualTo(obj.Z);
-            return eq;
+            if (obj == null)
+                return false;
+
+            return this.X.AlmostEqualTo(obj.X) && this.Y.AlmostEqualTo(obj.Y) && this.Z.AlmostEqualTo(obj.Z);
+        }
+
+        /// <summary>
+        /// Override of Geometry Equals method
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object other)
+        {
+            return this.Equals(other as Vertex);
         }
 
         /// <summary>
