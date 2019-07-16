@@ -248,6 +248,18 @@ namespace Graphical.Geometry.Tests
         }
 
         [Test]
+        public void Intersection_Pass_WhenEdgeIntersectsOnVertexAndSide()
+        {
+            Polygon polygon = GetIrregularPentagon();
+            Edge edge = Edge.ByCoordinatesArray(new double[6] { 15, 30, 0, 0, 0, 0 });
+
+            var intersections = polygon.Intersection(edge);
+
+            Assert.AreEqual(2, intersections.Count);
+
+        }
+
+        [Test]
         public void IntersectionTest()
         {
             var square = Polygon.ByCenterRadiusAndSides(Vertex.Origin(), 5, 7);
