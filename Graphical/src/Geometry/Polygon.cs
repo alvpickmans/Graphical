@@ -161,12 +161,18 @@ namespace Graphical.Geometry
             return newPolygon;
         }
 
-        internal Ray RayByVertexIndex(int start, int end)
+        internal Ray RayByVertexIndex(int start, int end, bool shiftVertices = false)
         {
             var vertexCount = this.Vertices.Count;
             if(start < 0 || start > vertexCount - 1) throw new ArgumentOutOfRangeException(nameof(start));
             if (end < 0 || end > vertexCount - 1) throw new ArgumentOutOfRangeException(nameof(end));
             if (start == end) throw new ArgumentException("Cannot create a Ray out of the same vertex");
+
+            if (shiftVertices)
+            {
+                start = (start + 1) % this.Vertices.Count();
+                end = (end + 1) % this.vertices.Count();
+            }
 
             return Ray.ByTwoVertices(this.Vertices[start], this.Vertices[end]);
         }
@@ -430,7 +436,7 @@ namespace Graphical.Geometry
         public List<Geometry> Intersection(Edge edge)
         {
             // No fast algorithm to calculate intersection on concave polygons
-            if (!this.IsConvex())
+            if (!this.IsConvex() || this.Vertices.Count < 4)
                 return this.IntersectionNaive(edge);
 
             //https://stackoverflow.com/questions/4497841/asymptotically-optimal-algorithm-to-compute-if-a-line-intersects-a-convex-polygo
@@ -441,17 +447,17 @@ namespace Graphical.Geometry
 
             var vertexCount = this.Vertices.Count;
             int midIndex = (int)(vertexCount / 2);
-            Ray diagonal = this.RayByVertexIndex(0, midIndex);
+            bool isFirstVertexInEdge = edge.Contains(this.Vertices[0]);
+            Ray diagonal = this.RayByVertexIndex(0, midIndex, isFirstVertexInEdge);
 
             bool PolygonCW = this.Vertices[1].IsClockwise(diagonal.Origin, diagonal.Direction);
 
             double offset = Double.NaN;
             bool doesIntersect = diagonal.TryIntersectionOffset(edge, out offset) 
-                && (Double.IsInfinity(offset) ||offset.InRange(0, 1));
+                && (Double.IsInfinity(offset) || offset.InRange(0, 1));
 
             while(!doesIntersect)
             {
-                //throw new Exception();
                 // If midIndex is any neighbour from the start vertex
                 // means the whole line is to one side or the other and doesn't intersect.
                 if(midIndex == 1 || midIndex == vertexCount - 1)
@@ -469,7 +475,7 @@ namespace Graphical.Geometry
                 else
                     midIndex += (int)(vertexCount - midIndex) / 2;
 
-                diagonal = this.RayByVertexIndex(0, midIndex);
+                diagonal = this.RayByVertexIndex(0, midIndex, isFirstVertexInEdge);
                 doesIntersect = diagonal.TryIntersectionOffset(edge, out offset)
                     && (Double.IsInfinity(offset) || offset.InRange(0, 1));
             }
@@ -506,7 +512,7 @@ namespace Graphical.Geometry
                     // Going from midVertex to 0
                     for (int i = midIndex; i > 0; i--)
                     {
-                        var side = RayByVertexIndex(i, i - 1);
+                        var side = RayByVertexIndex(i, i - 1, isFirstVertexInEdge);
                         if (side.TryIntersectionOffset(edge, out double t) && t.InRange(0,1))
                         {
                             Vertex intersection = side.Origin.Translate(side.Direction.Scale(t));
@@ -520,7 +526,7 @@ namespace Graphical.Geometry
                     for (int j = midIndex; j < vertexCount; j++)
                     {
                         int next = (j + 1) % vertexCount;
-                        var side = RayByVertexIndex(j, next);
+                        var side = RayByVertexIndex(j, next, isFirstVertexInEdge);
                         if (side.TryIntersectionOffset(edge, out double t) && t.InRange(0, 1))
                         {
                             Vertex intersection = side.Origin.Translate(side.Direction.Scale(t));
