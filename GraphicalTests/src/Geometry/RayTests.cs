@@ -12,6 +12,15 @@ namespace Graphical.Geometry.Tests
     [TestFixture]
     public class RayTests
     {
+        [Test]
+        public void IntersectionOffset_Pass_WhenVertexIsCoincidentInOrigin()
+        {
+            Ray ray = Ray.XAxis(Vertex.Origin());
+
+            double offset = ray.IntersectionOffset(Vertex.Origin());
+
+            Assert.AreEqual(0, offset);
+        }
 
         [Test]
         public void IntersectionOffset_Pass_WhenCoincidentInOrigin()

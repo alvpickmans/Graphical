@@ -163,6 +163,9 @@ namespace Graphical.Geometry
             if (this.Direction.Length.AlmostEqualTo(0))
                 return Double.NaN;
 
+            if (this.Origin.Equals(vertex))
+                return 0;
+
             // If Ray and vector from Origin-Vertex are not parallel,
             // Cannot intersect and offset is NaN
             var vector = Vector.ByTwoVertices(this.Origin, vertex);

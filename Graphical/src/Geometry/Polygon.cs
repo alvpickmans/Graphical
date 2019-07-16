@@ -510,7 +510,7 @@ namespace Graphical.Geometry
                 // Going from midVertex to 0
                 for (int i = midIndex; i > 0; i--)
                 {
-                    var side = RayByVertexIndex(i, i - 1, isFirstVertexInEdge);
+                    var side = RayByVertexIndex(i, i - 1);
                     if (side.TryIntersectionOffset(edge, out double t) && t.InRange(0, 1))
                     {
                         Vertex intersection = side.Origin.Translate(side.Direction.Scale(t));
@@ -525,7 +525,7 @@ namespace Graphical.Geometry
                 for (int j = midIndex; j < vertexCount; j++)
                 {
                     int next = (j + 1) % vertexCount;
-                    var side = RayByVertexIndex(j, next, isFirstVertexInEdge);
+                    var side = RayByVertexIndex(j, next);
                     if (side.TryIntersectionOffset(edge, out double t) && t.InRange(0, 1))
                     {
                         Vertex intersection = side.Origin.Translate(side.Direction.Scale(t));
