@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace Graphical.Geometry
     /// <summary>
     /// Base abstract class for all spatial geometries
     /// </summary>
-    public abstract class Geometry : IEquatable<Geometry>
+    public abstract class Geometry
     {
         #region Static Properties
         private static int _nextId = 1;
@@ -72,10 +73,10 @@ namespace Graphical.Geometry
 
         internal abstract BoundingBox ComputeBoundingBox();
 
-        public bool Equals(Geometry other)
-        {
-            return this.GetType() == other.GetType()
-                && this.Id == other.Id;
-        }
+        //public override bool Equals(object other)
+        //{
+        //    return this.GetType() == other.GetType()
+        //        && this.Id == other.Id;
+        //}
     }
 }
