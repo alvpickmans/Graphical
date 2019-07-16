@@ -504,9 +504,6 @@ namespace Graphical.Geometry
                 else if (offset.AlmostEqualTo(1))
                     intersections.Add(this.Vertices[midIndex]);
 
-                // Else the intersection is between the diagonal's extremes
-                // find intersection at each side of the mid vertex
-
                 // Going from midVertex to 0
                 for (int i = midIndex; i > 0; i--)
                 {

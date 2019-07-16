@@ -14,6 +14,8 @@ namespace Graphical.Graphs
         private Edge path { get; set; }
 
         private Dictionary<int, Polygon> directObstacles { get; set; }
+        private Dictionary<Edge, List<int>> computedEdgePolygons { get; set; }
+
         #endregion
 
         #region Private Constructors
@@ -21,6 +23,7 @@ namespace Graphical.Graphs
         {
             this.baseGraph = basegraph;
             this.directObstacles = new Dictionary<int, Polygon>();
+            this.computedEdgePolygons = new Dictionary<Edge, List<int>>();
         }
         #endregion
 
@@ -66,7 +69,8 @@ namespace Graphical.Graphs
         /// </summary>
         private ConvexGraph EvaluateDIO()
         {
-            var edges = GetConvexEdges(this.path, this.directObstacles.Values);
+            List<Edge> edges = new List<Edge>();
+            GetConvexEdges(this.path, ref edges);
 
             foreach (Edge edge in edges)
             {
@@ -143,9 +147,11 @@ namespace Graphical.Graphs
         /// <param name="destination"></param>
         /// <param name="polygon"></param>
         /// <returns></returns>
-        private static List<Edge> GetConvexEdges(Edge edge, IEnumerable<Polygon> dios, Polygon obstacle = null)
+        private void GetConvexEdges(Edge edge, ref List<Edge> edges, Polygon obstacle = null)
         {
-            List<Edge> cleanEdges = new List<Edge>();
+            if (edges == null)
+                edges = new List<Edge>();
+
             List<Edge> possibleintersections = new List<Edge>();
 
             // Getting ConvexHull Edges if any obstacle
@@ -155,6 +161,12 @@ namespace Graphical.Graphs
             }
             else
             {
+                if (IntersectionAlreadyComputed(edge, obstacle.Id))
+                    return;
+                else
+                    this.computedEdgePolygons[edge].Add(obstacle.Id);
+                
+
                 var vertices = new List<Vertex>(obstacle.Vertices);
                 vertices.Add(edge.StartVertex);
                 vertices.Add(edge.EndVertex);
@@ -167,7 +179,7 @@ namespace Graphical.Graphs
                     var convexEdge = Edge.ByStartVertexEndVertex(convexVertices[i], convexVertices[nextIndex]);
 
                     if (obstacle.Belongs(edge))
-                        cleanEdges.Add(edge);
+                        edges.Add(edge);
                     else
                         possibleintersections.Add(convexEdge);
                 }
@@ -176,14 +188,16 @@ namespace Graphical.Graphs
             // Checking possible intersections with existing DIOs
             foreach (Edge edgeCheck in possibleintersections)
             {
+                if (edges.Contains(edgeCheck))
+                    continue;
+
                 bool intersectsAny = false;
-                foreach (Polygon polygon in dios)
+                foreach (Polygon polygon in this.directObstacles.Values)
                 {
                     if (obstacle != null && polygon.Id == obstacle.Id)
                         continue;
 
                     var intersections = polygon.Intersection(edgeCheck);
-
 
                     if (intersections.Count > 1 && intersections.Count % 2 != 0 && intersections.First() is Vertex)
                         throw new Exception("Start or End Point might be inside a polygon");
@@ -191,15 +205,30 @@ namespace Graphical.Graphs
                     if (intersections.Count >= 2)
                     {
                         intersectsAny = true;
-                        cleanEdges.AddRange(GetConvexEdges(edgeCheck, dios, polygon));
+                        GetConvexEdges(edgeCheck, ref edges, polygon);
                     }
                 }
 
                 if (!intersectsAny)
-                    cleanEdges.Add(edgeCheck);
+                    edges.Add(edgeCheck);
             }
             
-            return cleanEdges;
+            return;
+        }
+
+        private bool IntersectionAlreadyComputed(Edge edge, int polygonId)
+        {
+            if (this.computedEdgePolygons.TryGetValue(edge, out List<int> ids))
+            {
+                if (ids.Contains(polygonId))
+                    return true;
+            }
+            else
+            {
+                this.computedEdgePolygons.Add(edge, new List<int>());
+            }
+
+            return false;
         }
     }
 }
