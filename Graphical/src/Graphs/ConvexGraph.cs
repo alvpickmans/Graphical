@@ -16,6 +16,8 @@ namespace Graphical.Graphs
         private Dictionary<int, Polygon> directObstacles { get; set; }
         private Dictionary<Edge, List<int>> computedEdgePolygons { get; set; }
 
+        private List<Edge> dioConvexEdges { get; set; }
+
         #endregion
 
         #region Private Constructors
@@ -24,6 +26,7 @@ namespace Graphical.Graphs
             this.baseGraph = basegraph;
             this.directObstacles = new Dictionary<int, Polygon>();
             this.computedEdgePolygons = new Dictionary<Edge, List<int>>();
+            this.dioConvexEdges = new List<Edge>();
         }
         #endregion
 
@@ -46,7 +49,6 @@ namespace Graphical.Graphs
             this
                 .SetDirectImpedingObstacles()
                 .EvaluateDIO();
-
         }
 
         private ConvexGraph SetDirectImpedingObstacles()
@@ -55,10 +57,11 @@ namespace Graphical.Graphs
 
             foreach (Polygon polygon in this.baseGraph.Polygons)
             {
-                var intersections = polygon.Intersection(this.path);
+                if (!FullyIntersects(this.path, polygon))
+                    continue;
 
-                if (intersections.Any())
-                    this.directObstacles.Add(polygon.Id, polygon);
+                this.directObstacles.Add(polygon.Id, polygon);
+                this.dioConvexEdges.AddRange(GetConvexEdges(polygon, this.path.StartVertex, this.path.EndVertex));
             }
 
             return this;
@@ -70,7 +73,10 @@ namespace Graphical.Graphs
         private ConvexGraph EvaluateDIO()
         {
             List<Edge> edges = new List<Edge>();
-            GetConvexEdges(this.path, ref edges);
+            foreach (Edge edge in this.dioConvexEdges)
+            {
+                RecursiveConvexEdges(edge, ref edges);
+            }
 
             foreach (Edge edge in edges)
             {
@@ -80,74 +86,7 @@ namespace Graphical.Graphs
             return this;
         }
 
-        //private void ComputeConvexGraphOld()
-        //{
-        //    Stack<Edge> stack = new Stack<Edge>();
-
-        //    // Generate ConvexHull for each intersecting obstacle
-        //    foreach (Polygon polygon in this.directObstacles.Values)
-        //    {
-        //        var edges = this.GetConvexEdges(this.path, this.directObstacles.Values, polygon);
-        //        foreach (Edge edge in edges)
-        //        {
-        //            if (polygon.Belongs(edge))
-        //                this.AddEdge(edge);
-        //            else
-        //                stack.Push(edge);
-        //        }
-        //    }
-        //    int polygonCount = this.baseGraph.Polygons.Count();
-
-        //    while (stack.Any())
-        //    {
-        //        var edge = stack.Pop();
-
-        //        if (this.Edges.Contains(edge))
-        //            continue;
-
-        //        bool doesIntersect = false;
-
-        //        for (int i = 0; i < polygonCount; i++)
-        //        {
-        //            //Check if this polygon has already been intersected before!!!
-        //            var polygon = this.baseGraph.Polygons[i];
-        //            // On some cases, particulary with concave polygons, the intersections
-        //            // can be a mixture of edges and vertices
-        //            var intersections = polygon.Intersection(edge);
-        //            int count = intersections.Count();
-        //            if (count > 1)
-        //            {
-        //                doesIntersect = true;
-
-        //                // If it is pair, it means that the edge fully intersects the polygon
-        //                if(count % 2 == 0)
-        //                {
-        //                    this.GetConvexEdges(edge.StartVertex, edge.EndVertex, polygon, out List<Edge> clean, out List<Edge> check);
-        //                    clean.ForEach(e => this.AddEdge(e));
-        //                    check.ForEach(e => stack.Push(e));
-        //                }
-        //                else
-        //                {
-        //                    throw new Exception("Part of the edge is inside a polygon.");
-        //                }
-        //            }
-        //        }
-
-        //        if (!doesIntersect)
-        //        {
-        //            this.AddEdge(edge);
-        //        }
-        //    }
-        //}
-
-        /// <summary>
-        /// This method will return a list of the convex hull edges between polygon, origin and destination vertices
-        /// </summary>
-        /// <param name="origin"></param>
-        /// <param name="destination"></param>
-        /// <param name="polygon"></param>
-        /// <returns></returns>
-        private void GetConvexEdges(Edge edge, ref List<Edge> edges, Polygon obstacle = null)
+        private void RecursiveConvexEdges(Edge edge, ref List<Edge> edges, Polygon obstacle = null)
         {
             if (edges == null)
                 edges = new List<Edge>();
@@ -163,26 +102,9 @@ namespace Graphical.Graphs
             {
                 if (IntersectionAlreadyComputed(edge, obstacle.Id))
                     return;
-                else
-                    this.computedEdgePolygons[edge].Add(obstacle.Id);
-                
 
-                var vertices = new List<Vertex>(obstacle.Vertices);
-                vertices.Add(edge.StartVertex);
-                vertices.Add(edge.EndVertex);
-
-                var convexVertices = Vertex.ConvexHull(vertices);
-
-                for (int i = 0; i < convexVertices.Count; i++)
-                {
-                    int nextIndex = (i + 1) % convexVertices.Count;
-                    var convexEdge = Edge.ByStartVertexEndVertex(convexVertices[i], convexVertices[nextIndex]);
-
-                    if (obstacle.Belongs(edge))
-                        edges.Add(edge);
-                    else
-                        possibleintersections.Add(convexEdge);
-                }
+                this.computedEdgePolygons[edge].Add(obstacle.Id);
+                possibleintersections.AddRange(GetConvexEdges(obstacle, edge.StartVertex, edge.EndVertex));
             }
 
             // Checking possible intersections with existing DIOs
@@ -197,16 +119,11 @@ namespace Graphical.Graphs
                     if (obstacle != null && polygon.Id == obstacle.Id)
                         continue;
 
-                    var intersections = polygon.Intersection(edgeCheck);
+                    if (!FullyIntersects(edgeCheck, polygon))
+                        continue;
 
-                    if (intersections.Count > 1 && intersections.Count % 2 != 0 && intersections.First() is Vertex)
-                        throw new Exception("Start or End Point might be inside a polygon");
-
-                    if (intersections.Count >= 2)
-                    {
-                        intersectsAny = true;
-                        GetConvexEdges(edgeCheck, ref edges, polygon);
-                    }
+                    intersectsAny = true;
+                    RecursiveConvexEdges(edgeCheck, ref edges, polygon);
                 }
 
                 if (!intersectsAny)
@@ -214,6 +131,37 @@ namespace Graphical.Graphs
             }
             
             return;
+        }
+
+
+        private static List<Edge> GetConvexEdges(Polygon polygon, params Vertex[] vertices)
+        {
+            var contextVertices = new List<Vertex>(polygon.Vertices);
+            contextVertices.AddRange(vertices);
+
+            var convexVertices = Vertex.ConvexHull(contextVertices);
+
+            List<Edge> convexHull = new List<Edge>();
+
+            for (int i = 0; i < convexVertices.Count; i++)
+            {
+                int nextIndex = (i + 1) % convexVertices.Count;
+                var convexEdge = Edge.ByStartVertexEndVertex(convexVertices[i], convexVertices[nextIndex]);
+
+                convexHull.Add(convexEdge);
+            }
+
+            return convexHull;
+        }
+
+        private bool FullyIntersects(Edge edge, Polygon polygon)
+        {
+            var intersections = polygon.Intersection(edge);
+
+            if (intersections.Count > 1 && intersections.Count % 2 != 0 && intersections.First() is Vertex)
+                throw new Exception("Start or End Point might be inside a polygon");
+
+            return intersections.Count >= 2;
         }
 
         private bool IntersectionAlreadyComputed(Edge edge, int polygonId)
