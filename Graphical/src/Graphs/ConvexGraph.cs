@@ -16,8 +16,6 @@ namespace Graphical.Graphs
         private Dictionary<int, Polygon> directObstacles { get; set; }
         private Dictionary<Edge, List<int>> computedEdgePolygons { get; set; }
 
-        private List<Edge> dioConvexEdges { get; set; }
-
         #endregion
 
         #region Private Constructors
@@ -26,7 +24,6 @@ namespace Graphical.Graphs
             this.baseGraph = basegraph;
             this.directObstacles = new Dictionary<int, Polygon>();
             this.computedEdgePolygons = new Dictionary<Edge, List<int>>();
-            this.dioConvexEdges = new List<Edge>();
         }
         #endregion
 
@@ -46,14 +43,19 @@ namespace Graphical.Graphs
 
         private void ComputeConvexGraph()
         {
-            this
-                .SetDirectImpedingObstacles()
-                .EvaluateDIO();
+            var dioConvexEdges = SetDirectImpedingObstacles();
+            var cleanEdges = EvaluateDIO(dioConvexEdges);
+
+            foreach (Edge edge in cleanEdges)
+            {
+                this.AddEdge(edge);
+            }
         }
 
-        private ConvexGraph SetDirectImpedingObstacles()
+        private List<Edge> SetDirectImpedingObstacles()
         {
             this.directObstacles = new Dictionary<int, Polygon>();
+            List<Edge> edges = new List<Edge>();
 
             foreach (Polygon polygon in this.baseGraph.Polygons)
             {
@@ -61,36 +63,28 @@ namespace Graphical.Graphs
                     continue;
 
                 this.directObstacles.Add(polygon.Id, polygon);
-                this.dioConvexEdges.AddRange(GetConvexEdges(polygon, this.path.StartVertex, this.path.EndVertex));
+                edges.AddRange(GetConvexEdges(polygon, this.path.StartVertex, this.path.EndVertex));
             }
 
-            return this;
+            return edges;
         }
 
         /// <summary>
         /// This method will evaluate Directly Impeding Obstacles.
         /// </summary>
-        private ConvexGraph EvaluateDIO()
+        private List<Edge> EvaluateDIO(List<Edge> convexEdges)
         {
             List<Edge> edges = new List<Edge>();
-            foreach (Edge edge in this.dioConvexEdges)
+            foreach (Edge edge in convexEdges)
             {
                 RecursiveConvexEdges(edge, ref edges);
             }
 
-            foreach (Edge edge in edges)
-            {
-                this.AddEdge(edge);
-            }
-
-            return this;
+            return edges;
         }
 
         private void RecursiveConvexEdges(Edge edge, ref List<Edge> edges, Polygon obstacle = null)
         {
-            if (edges == null)
-                edges = new List<Edge>();
-
             List<Edge> possibleintersections = new List<Edge>();
 
             // Getting ConvexHull Edges if any obstacle
