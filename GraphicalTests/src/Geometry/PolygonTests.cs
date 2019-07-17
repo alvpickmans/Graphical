@@ -256,7 +256,17 @@ namespace Graphical.Geometry.Tests
             var intersections = polygon.Intersection(edge);
 
             Assert.AreEqual(2, intersections.Count);
+        }
 
+        [Test]
+        public void Intersection_Pass_WhenEdgeIsAPolygonSide([Values(true, false)] bool ccw)
+        {
+            Polygon polygon = GetIrregularPentagon(ccw);
+            Edge edge = Edge.ByStartVertexEndVertex(polygon.Vertices.Last(), polygon.Vertices.First());
+
+            var intersections = polygon.Intersection(edge);
+
+            Assert.AreEqual(1, intersections.Count);
         }
 
         [Test]

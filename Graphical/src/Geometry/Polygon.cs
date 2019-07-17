@@ -440,15 +440,21 @@ namespace Graphical.Geometry
                 return this.IntersectionNaive(edge);
 
             //https://stackoverflow.com/questions/4497841/asymptotically-optimal-algorithm-to-compute-if-a-line-intersects-a-convex-polygo
-            List<Geometry> intersections = new List<Geometry>();
 
             if (!this.BoundingBox.Intersects(edge.BoundingBox))
-                return intersections;
+                return new List<Geometry>();
 
+            if (this.Belongs(edge))
+                return new List<Geometry>() { edge };
+
+            if (this.Vertices.Contains(edge.StartVertex) && this.Vertices.Contains(edge.EndVertex))
+                return new List<Geometry>() { edge.StartVertex, edge.EndVertex };
+
+
+            List<Geometry> intersections = new List<Geometry>();
             var vertexCount = this.Vertices.Count;
             int midIndex = (int)(vertexCount / 2);
-            bool isFirstVertexInEdge = edge.Contains(this.Vertices[0]);
-            Ray diagonal = this.RayByVertexIndex(0, midIndex, isFirstVertexInEdge);
+            Ray diagonal = this.RayByVertexIndex(0, midIndex);
 
             bool PolygonCW = this.Vertices[1].IsClockwise(diagonal.Origin, diagonal.Direction);
 
@@ -475,7 +481,7 @@ namespace Graphical.Geometry
                 else
                     midIndex += (int)(vertexCount - midIndex) / 2;
 
-                diagonal = this.RayByVertexIndex(0, midIndex, isFirstVertexInEdge);
+                diagonal = this.RayByVertexIndex(0, midIndex);
                 doesIntersect = diagonal.TryIntersectionOffset(edge, out offset)
                     && (Double.IsInfinity(offset) || offset.InRange(0, 1));
             }
