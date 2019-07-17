@@ -112,85 +112,39 @@ namespace Graphical.Geometry
         public Geometry Intersection(Edge other)
         {
             // http://mathworld.wolfram.com/Line-LineIntersection.html
-            if (!this.BoundingBox.Intersects(other.BoundingBox)) { return null; }
-            if (!this.IsCoplanarTo(other)) { return null; }
-            if (this.Equals(other)) { return this; } // Issues if same polygon id???
-
-            var a = this.Direction;
-            var b = other.Direction;
-            
-            if (a.IsParallelTo(b))
-            {
-                // Fully contains the test edge
-                if (other.StartVertex.OnEdge(this) && other.EndVertex.OnEdge(this)) { return other; }
-                // Is fully contained by test edge
-                else if (this.StartVertex.OnEdge(other) && this.EndVertex.OnEdge(other)) { return this; }
-                // Not fully inclusive but overlapping
-                else if (this.StartVertex.OnEdge(other) || this.EndVertex.OnEdge(other))
-                {
-                    Vertex[] vertices = new Vertex[4]
-                    {
-                        this.StartVertex,
-                        this.EndVertex,
-                        other.StartVertex,
-                        other.EndVertex
-                    };
-                    var sorted = vertices.OrderBy(v => v.Y).ThenBy(v => v.X).ThenBy(v => v.Z).ToList();
-                    return Edge.ByStartVertexEndVertex(sorted[1], sorted[2]);
-                }
-                // Not intersecting
-                else
-                {
-                    return null;
-                }
-            }
-
-            // No parallels but intersecting on one of the extreme Vertices
-            if (other.Contains(this.StartVertex)) { return this.StartVertex; }
-            else if (other.Contains(this.EndVertex)) { return this.EndVertex; }
-
-
-            // No coincident nor same extremes
-            var c = Vector.ByTwoVertices(this.StartVertex, other.StartVertex);
-            var cxb = c.Cross(b);
-            var axb = a.Cross(b);
-            var dot = cxb.Dot(axb);
-
-            // If dot == 0 it means that other edge contains at least a vertex from this edge
-            // and they are parallel or perpendicular. Cannot be parallel as that was tested before.
-            // It might also mean they don't intersect but the would if extending the projections
-            double s = (dot) / Math.Pow(axb.Length, 2);
-
-            if (s.AlmostEqualTo(0) || s.AlmostEqualTo(1))
-            {
-                if (this.StartVertex.OnEdge(other))
-                    return this.StartVertex;
-                else if(this.EndVertex.OnEdge(other))
-                    return this.EndVertex;
-                else if(other.StartVertex.OnEdge(this))
-                    return other.StartVertex;
-                else if(other.EndVertex.OnEdge(this))
-                    return other.EndVertex;
-                else
-                    return null;
-            }
-
-            
-            
-            // s > 1, means that "intersection" vertex is not on either edge
-            // s == NaN means they are parallels so never intersect
-            if (s < 0 || s > 1 || Double.IsNaN(s)) { return null; }
-
-            Vertex intersection = this.StartVertex.Translate(a.Scale(s));
-
-            if (intersection.Equals(other.StartVertex)){ return other.StartVertex; }
-            if (intersection.Equals(other.EndVertex)) { return other.EndVertex; }
-            if (!intersection.OnEdge(other))
-            {
+            if (!this.BoundingBox.Intersects(other.BoundingBox))
                 return null;
+
+            if (this.Equals(other))
+                return this;
+
+            var ray = Ray.ByTwoVertices(this.StartVertex, this.EndVertex);
+
+            if (!ray.TryIntersectionOffset(other, out double offset, true) || !offset.InRange(-1, 1))
+                return null;
+
+            if (Double.IsInfinity(offset))
+            {
+                if (!ray.TryIntersectionOffset(other.StartVertex, out double startOffset, true))
+                    return null;
+
+                if (!ray.TryIntersectionOffset(other.EndVertex, out double endOffset, true))
+                    return null;
+
+                return Edge.ByStartVertexEndVertex(
+                    ray.Origin.Translate(ray.Direction.Scale(startOffset)),
+                    ray.Origin.Translate(ray.Direction.Scale(endOffset))
+                );
             }
 
-            return intersection;
+            if (!Double.IsNaN(offset))
+            {
+                var vertex = ray.Origin.Translate(ray.Direction.Scale(offset));
+
+                return vertex.OnEdge(other) ? vertex : null;
+            }
+
+            return null;
         }
 
         public bool Intersects(Edge edge)
